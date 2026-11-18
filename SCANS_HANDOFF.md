@@ -109,44 +109,32 @@ Every registered foreign worker in Sabah (130,391 on 31 Dec 2025) pays a contrib
 
 ## 5. Design system
 
-**Idea:** the State keeps a file for each party. The **folder tab (trapezoid)** is the one shape in the system: tabs, the landing hero folder stack, the cut corner on cards, receipts and tiles, tabbed buttons on the public page.
+**Updated November 2026:** the product owner asked for SCANS to share the look of the **Sabah GO** platform (repository `EzGIG-Technology/sabah_go`). This replaces the earlier "folder tab" system and its house rules (no gradients, no shadows, 4px radius, Archivo). The content rules in section 4 still apply in full.
 
-**Colours** (taken from the SCANS logo; defined in `src/styles/app.css`):
+**Look:** Poppins, a light blue page ground, white cards with soft blue shadows, 18px corners, a floating white sidebar with a gradient portal badge, a sticky frosted top bar (title, live clock, sample-data tag, search, notifications), and the navy to cyan gradient on hero cards, primary buttons and the active nav item. Photographs of Sabah on the public page and portal cards.
+
+**Colours** (tokens at the top of `src/styles/app.css`, in step with Sabah GO):
 
 | Token | Hex | Use |
 |---|---|---|
-| `--navy` | `#014078` | Primary, sidebar, buttons, key panels |
-| `--navy-deep` | `#012a50` | Landing ground, text on sky fields |
-| `--navy-ink` / `--ink` | `#0d2236` | Body text |
-| `--sky` | `#4a9bd4` | Accent fields, charts (use navy text on sky, not white) |
-| `--sky-soft` | `#dcebf6` | Selected states, callouts |
-| `--red` | `#c9282e` | Critical only (3+ months owing, errors) |
-| `--amber` / `--amber-soft` | `#8a5800` / `#f7ead0` | Warnings |
-| `--green` / `--green-soft` | `#17704a` / `#dcf0e5` | Paid, success |
-| `--ground` | `#eef2f6` | Page background |
-| `--surface` / `--surface-2` / `--surface-3` | `#fff` / `#e4ebf2` / `#d3dee9` | Tone steps between surfaces |
-| `--muted` | `#475b6f` | Secondary text only |
+| `--navy` / `--navy2` | `#0A2463` / `#0B2F7A` | Headings on dark, navy fills |
+| `--blue` / `--blue2` | `#1460E0` / `#1E7BF2` | Primary, links, active states, first chart series |
+| `--cyan` | `#22B5F0` | Gradient end, second chart series |
+| `--sky` / `--sky2` | `#E8F2FF` / `#D6E8FF` | Selected states, icon tiles, soft buttons |
+| `--ground` | `#F3F7FD` | Page background |
+| `--ink` / `--ink2` / `--ink3` | `#0E1B3D` / `#4A5878` / `#6E7B96` | Text, secondary text, labels |
+| `--ok` / `--warn` / `--bad` (+ `Bg`, `Fill`) | green / orange / pink-red | Paid, 1 month owing, 3+ months owing and errors |
+| `--grad` | navy → blue → cyan | Hero cards, portal badge, worker app header |
 
-**Type:** one family, **Archivo** (variable, self-hosted via `@fontsource-variable/archivo/wdth.css`). Big figures use `font-variation-settings: 'wdth' 72–80`, weight 800–850, tabular numbers. Body 16px+, min size 13px.
+**Rules that still hold:** sentence case, plain verbs, errors say what happened and what to do, no emoji, tabular numbers, every figure reconciles across portals, no horizontal scroll at 390px, sidebar becomes an overlay below 960px, tables stack into records below 720px, `prefers-reduced-motion` respected.
 
-**House rules** (from the anti-slop skill used on this build; keep them):
-- No gradients, no glass/backdrop blur, no shadows on things at rest (only drawers, dialogs, toasts, sticky pay bar).
-- Surfaces are separated by tone steps, not borders. Real tables and form fields may have lines.
-- No tiny uppercase letter-spaced labels, no eyebrow labels above headings, no monospace, no 01/02/03 numbering, no emoji, no icon-topped card grids.
-- One radius (`--r: 4px`). Headlines two lines max at every width.
-- Sentence case everywhere. Plain verbs. Errors say what happened and what to do.
-- Responsive: sidebar becomes an overlay below 960px; tables use `.data.stack` to become stacked records below 720px; district map becomes 2 columns on phones. No horizontal scroll at 390px.
-- Respect `prefers-reduced-motion`.
+**Shared components** (`src/components/ui.jsx`): `AppShell` (grouped nav, portal badge, top bar), `PageHead`, `Card`, `Kpi`, `Status`/`Pill`, `Callout`, `Empty`, `Skeleton`, `Seg`, `Tabs`, `SearchInput`, `Select`, `Field`, `Switch`, `Stepper`, `Table` (paging, row click, selection, stacked on phones), `Drawer`, `Modal`, charts (`BarChart`, `HBarChart`, `LineChart`, `Sparkline`, `Donut`, `MeterRows`, `SplitBar`), `SabahMap` (simplified coastline with a bubble per district, coloured by share not yet paid), `Mono` (letter tile for partners until real logos arrive), `useToast`, `useLiveFeed`.
 
-**Shared components** (`src/components/ui.jsx`): `AppShell`, `PageHead`, `Status` (maps status text to ok/warn/bad/info), `Figure`, `Tabs` (folder tabs), `Drawer`, `ToastProvider/useToast`, `Columns` (bar chart), `SplitBar`, `MeterRows`, `DistrictMap` + `DistrictDetail`, `Logo`.
-
-**Logos:** `public/scans-logo.png` (full colour, transparent) and `public/scans-logo-light.png` (white letters for navy backgrounds). The State/agency mark shown in Figma is the **MOF Sabah** logo; confirm whether the Sabah state crest should be used instead.
-
----
+**Images** in `public/img/` are reused from Sabah GO (same owner): hero and portal photographs, the MOF Sabah crest and payment marks (FPX, DuitNow, Visa, Mastercard). Plantation and worker photography is still needed (section 10, item 7).
 
 ## 6. Data model and demo data
 
-All demo data lives in `src/data/demo.js` and is **derived** so totals agree across portals. Keep this principle when wiring real data: every figure on one screen must reconcile with the same figure on another.
+All demo data lives in `src/data/demo.js` (including a generated, deterministic sample of 160 worker records, merchants, offer submissions, announcements, admin users and reports) and is **derived** so totals agree across portals. Keep this principle when wiring real data: every figure on one screen must reconcile with the same figure on another.
 
 Real figures (from the SCANS proposal paper):
 - Registered workers: 130,391 (Plantation 76,726; Agriculture 26,736; Services 7,783; Manufacturing 6,870; Domestic 6,844; Construction 5,345; Mining 87).
