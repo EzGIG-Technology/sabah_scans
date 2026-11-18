@@ -1,221 +1,461 @@
-import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { LayoutGrid, Map, Building2, Megaphone, MessageSquareWarning, FileText, Download, Search } from 'lucide-react'
-import { AppShell, PageHead, Status, Figure, Tabs, Columns, SplitBar, MeterRows, DistrictMap, DistrictDetail, Drawer, useToast } from '../../components/ui.jsx'
+// State Government dashboard (/state/*) for Kerajaan Negeri Sabah.
+// Read-only views of the shared record, the FWECF account, notices the State approves,
+// and complaints routed to agencies. Every lookup and export is written to the audit log.
+import { useMemo, useState } from 'react'
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import {
-  REGISTERED, districts, sectors, channels, nationalities, monthly, ytd, stateYtd, operatorYtd, paidThisMonth, overdue1, overdue3,
-  collectedThisMonth, complianceRate, employers, complaints, announcements, languages, demoWorker, rm, num, pct, STATE_SHARE,
+  LayoutDashboard, Map as MapIcon, Users, Building2, Landmark, Megaphone, MessageSquareWarning, FileBarChart, Wallet, Percent,
+  PiggyBank, UserCheck, Download, Check, X, Eye, Plus, Send, Scale, CalendarCheck, Clock, CheckCircle2, Inbox, Languages, ShieldCheck, Route as RouteIcon,
+} from 'lucide-react'
+import {
+  AppShell, PageHead, Card, Kpi, Status, Pill, Callout, Empty, Tabs, Field, Table, Drawer, Modal, BarChart, HBarChart, Donut,
+  MeterRows, SplitBar, Sparkline, SabahMap, DistrictDetail, Select, useToast,
+} from '../../components/ui.jsx'
+import {
+  REGISTERED, STATE_SHARE, districts, sectors, monthly, monthlySplit, ytd, stateYtd, operatorYtd, paidThisMonth, collectedThisMonth,
+  complianceRate, paymentMetrics, nationalityCounts, rm, num, pct,
 } from '../../data/demo.js'
+import { channelData, settlements, settledJune, arrearsAndAdvance, complaintsAll, AGENCIES } from '../shared/data.js'
+import { useStore, logEvent, setActor, updateNotice, addNotice } from '../shared/store.js'
+import { WorkerList, WorkerProfile } from '../shared/Workers.jsx'
+import { EmployerList, EmployerProfile } from '../shared/Employers.jsx'
+import { ReportsCentre } from '../shared/Reports.jsx'
+import { NoticeComposer, NoticeView, ChannelIcons, AudiencePill } from '../shared/Notices.jsx'
+import '../shared/shared.css'
 
-const nav = [
-  { to: '/state', label: 'Overview', icon: LayoutGrid, end: true },
-  { to: '/state/districts', label: 'Districts', icon: Map },
-  { to: '/state/employers', label: 'Employers and workers', icon: Building2 },
-  { to: '/state/notices', label: 'Official notices', icon: Megaphone },
-  { to: '/state/complaints', label: 'Complaints', icon: MessageSquareWarning },
-  { to: '/state/reports', label: 'Reports', icon: FileText },
+const BASE = '/state'
+const ACTOR = 'Nurul Ain (State, JKN)'
+const axisRm = (v) => (v >= 1e6 ? (v / 1e6).toFixed(1) + 'm' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : String(v))
+const rmM = (v) => 'RM ' + (v / 1e6).toFixed(2) + 'm'
+
+const TITLES = [
+  [/^\/state\/?$/, 'Overview'], [/^\/state\/districts/, 'Districts'], [/^\/state\/workers\/.+/, 'Worker profile'], [/^\/state\/workers/, 'Workers'],
+  [/^\/state\/employers\/.+/, 'Employer profile'], [/^\/state\/employers/, 'Employers'], [/^\/state\/finance/, 'FWECF account'],
+  [/^\/state\/notices/, 'Official notices'], [/^\/state\/complaints/, 'Complaints'], [/^\/state\/reports/, 'Reports'],
 ]
-const org = { name: 'Kerajaan Negeri Sabah', detail: 'Kementerian Kewangan Negeri Sabah' }
-const user = { name: 'Nurul Ain Jaafar', role: 'Jabatan Kewangan Negeri', initials: 'NA' }
-const Shell = ({ children }) => <AppShell nav={nav} org={org} user={user}>{children}</AppShell>
-
-function Overview() {
-  const [sel, setSel] = useState('lahaddatu')
-  const toast = useToast()
-  const d = districts.find((x) => x.id === sel)
-  return (
-    <Shell>
-      <PageHead title="Collection, June 2027" sub={`${num(paidThisMonth)} of ${num(REGISTERED)} registered workers have paid for June. Payment was due on 5 June.`}>
-        <button className="btn" onClick={() => toast('June 2027 report downloaded')}><Download size={16} /> Monthly report</button>
-      </PageHead>
-      <div className="grid g-4">
-        <div className="panel navy span-2">
-          <Figure label="Collected in June 2027" value={rm(collectedThisMonth)} note={`State share ${rm(collectedThisMonth * STATE_SHARE)} · operator ${rm(collectedThisMonth * (1 - STATE_SHARE))}`} />
-        </div>
-        <div className="panel"><Figure label="Paying this month" value={pct(complianceRate)} size="md" note="Proposal target for Year 1: 60%" /></div>
-        <div className="panel"><Figure label="State share since January" value={rm(stateYtd)} size="md" note={`of ${rm(ytd)} collected`} /></div>
-      </div>
-      <div className="grid g-main">
-        <section className="panel">
-          <div className="panel-head"><div><h2>Collected each month</h2><p className="sub">Gross, before the 70:30 split</p></div></div>
-          <Columns data={monthly} format={(v) => 'RM' + (v / 1e6).toFixed(2) + 'm'} />
-        </section>
-        <section className="panel">
-          <div className="panel-head"><div><h2>Where the money goes</h2><p className="sub">Since January 2027</p></div></div>
-          <SplitBar parts={[
-            { label: 'Kerajaan Negeri Sabah', share: 0.7, text: rm(stateYtd), color: 'var(--navy)' },
-            { label: 'Operator fee', share: 0.3, text: rm(operatorYtd), color: 'var(--sky)' },
-          ]} />
-          <h3 style={{ fontSize: 17, margin: '24px 0 4px' }}>Workers this month</h3>
-          <MeterRows items={[
-            { label: 'Paid', share: paidThisMonth / REGISTERED, text: num(paidThisMonth), color: 'var(--green)' },
-            { label: '1 month owing', share: overdue1 / REGISTERED, text: num(overdue1), color: '#d9a43c' },
-            { label: '3 months or more owing', share: overdue3 / REGISTERED, text: num(overdue3), color: 'var(--red)' },
-          ]} />
-        </section>
-      </div>
-      <section className="panel">
-        <div className="panel-head"><div><h2>Paid by district</h2><p className="sub">Share of registered workers who paid for June. Choose a district.</p></div></div>
-        <div className="grid g-main">
-          <DistrictMap districts={districts} selected={sel} onSelect={setSel} />
-          <div className="panel tint"><h3 style={{ fontSize: 20, marginBottom: 14 }}>{d ? d.name : 'No district chosen'}</h3><DistrictDetail d={d} /></div>
-        </div>
-      </section>
-      <div className="grid g-3">
-        <section className="panel"><h2>By sector</h2><p className="sub">Registered workers</p>
-          <MeterRows items={sectors.slice(0, 6).map((s) => ({ label: s.name, share: s.workers / REGISTERED, text: num(s.workers) }))} />
-        </section>
-        <section className="panel"><h2>How workers paid</h2><p className="sub">June 2027</p>
-          <MeterRows items={channels.map((c) => ({ label: c.name, share: c.share, text: pct(c.share), color: 'var(--sky)' }))} />
-        </section>
-        <section className="panel"><h2>Nationality</h2><p className="sub">Registered workers</p>
-          <MeterRows items={nationalities.map((c) => ({ label: c.name, share: c.share, text: pct(c.share) }))} />
-        </section>
-      </div>
-    </Shell>
-  )
-}
-
-function Districts() {
-  return (
-    <Shell>
-      <PageHead title="Districts" sub="June 2027. Sample split of the 130,391 registered workers for this prototype." />
-      <section className="panel">
-        <div className="table-wrap">
-          <table className="data stack">
-            <thead><tr><th>District</th><th className="r">Registered</th><th className="r">Paid</th><th>Paid share</th><th className="r">Owing</th><th className="r">Collected</th><th className="r">State share</th></tr></thead>
-            <tbody>
-              {[...districts].sort((a, b) => b.workers - a.workers).map((d) => (
-                <tr key={d.id}>
-                  <td data-label="District" className="strong">{d.name}</td>
-                  <td data-label="Registered" className="r num">{num(d.workers)}</td>
-                  <td data-label="Paid" className="r num">{num(d.paid)}</td>
-                  <td data-label="Paid share" style={{ minWidth: 140 }}><div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><div className="bar" style={{ flex: 1 }}><span style={{ width: pct(d.rate) }} /></div><span className="num">{pct(d.rate)}</span></div></td>
-                  <td data-label="Owing" className="r num">{num(d.overdue)}</td>
-                  <td data-label="Collected" className="r num">{rm(d.collected)}</td>
-                  <td data-label="State share" className="r num">{rm(d.collected * STATE_SHARE)}</td>
-                </tr>
-              ))}
-              <tr><td className="strong" data-label="District">Sabah</td><td className="r num strong" data-label="Registered">{num(REGISTERED)}</td><td className="r num strong" data-label="Paid">{num(paidThisMonth)}</td><td data-label="Paid share" className="num strong">{pct(complianceRate)}</td><td className="r num strong" data-label="Owing">{num(REGISTERED - paidThisMonth)}</td><td className="r num strong" data-label="Collected">{rm(collectedThisMonth)}</td><td className="r num strong" data-label="State share">{rm(collectedThisMonth * STATE_SHARE)}</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </Shell>
-  )
-}
-
-function Employers() {
-  const [tab, setTab] = useState('Employers')
-  const [q, setQ] = useState('')
-  const [found, setFound] = useState(null)
-  return (
-    <Shell>
-      <PageHead title="Employers and workers" sub="Read only. The State sees status and totals; records are corrected at their source agency." />
-      <div>
-        <Tabs items={['Employers', 'Look up a worker']} value={tab} onChange={setTab} label="View" />
-        <section className="panel">
-          {tab === 'Employers' ? (
-            <div className="table-wrap">
-              <table className="data stack">
-                <thead><tr><th>Employer</th><th>District</th><th>Sector</th><th className="r">Workers</th><th className="r">Paid</th><th>June 2027</th></tr></thead>
-                <tbody>{employers.map((e) => (
-                  <tr key={e.id}><td data-label="Employer"><span className="strong">{e.name}</span><div className="dim num">SSM {e.ssm}</div></td><td data-label="District">{e.district}</td><td data-label="Sector">{e.sector}</td><td data-label="Workers" className="r num">{num(e.workers)}</td><td data-label="Paid" className="r num">{num(e.paid)}</td><td data-label="June 2027"><Status>{e.status}</Status></td></tr>
-                ))}</tbody>
-              </table>
-            </div>
-          ) : (
-            <form onSubmit={(e) => { e.preventDefault(); setFound(q.trim() ? demoWorker : null) }} style={{ maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div className="field"><label htmlFor="q">SCANS ID, passport or PLKS number</label><input id="q" className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="SCN26W0047218" /></div>
-              <button className="btn primary" style={{ alignSelf: 'flex-start' }}><Search size={16} /> Look up</button>
-              {found && <div className="panel tint"><h3 style={{ fontSize: 18, marginBottom: 12 }}>{found.name}</h3><dl className="kv">
-                <dt>SCANS ID</dt><dd className="num">{found.scansId}</dd><dt>Employer</dt><dd>{found.employer}</dd><dt>District</dt><dd>{found.district}</dd><dt>Paid up to</dt><dd>{found.paidThrough}</dd><dt>Permit valid until</dt><dd>{found.permitExpiry}</dd>
-              </dl><p className="sub" style={{ color: 'var(--muted)', marginTop: 12 }}>This lookup has been written to the audit log.</p></div>}
-            </form>
-          )}
-        </section>
-      </div>
-    </Shell>
-  )
-}
-
-function Notices() {
-  const toast = useToast()
-  const [compose, setCompose] = useState(false)
-  return (
-    <Shell>
-      <PageHead title="Official notices" sub="Notices go to workers in their own language by app, SMS and WhatsApp. Microtek prepares translations; the State approves before sending.">
-        <button className="btn primary" onClick={() => setCompose(true)}><Megaphone size={16} /> Write a notice</button>
-      </PageHead>
-      <section className="panel">
-        <div className="table-wrap"><table className="data stack">
-          <thead><tr><th>Notice</th><th>Sent to</th><th>Sent</th><th className="r">Reached</th><th>Status</th></tr></thead>
-          <tbody>{announcements.map((a) => (
-            <tr key={a.id}><td data-label="Notice" className="strong">{a.title}<div className="dim">{a.langs} languages</div></td><td data-label="Sent to">{a.audience}</td><td data-label="Sent">{a.sent}</td><td data-label="Reached" className="r num">{a.reached ? pct(a.reached) : '—'}</td><td data-label="Status"><Status>{a.status}</Status></td></tr>
-          ))}</tbody>
-        </table></div>
-      </section>
-      {compose && (
-        <Drawer title="Write a notice" sub="It will be translated into all six languages before you approve it." onClose={() => setCompose(false)}
-          footer={<><button className="btn" onClick={() => setCompose(false)}>Cancel</button><button className="btn primary" onClick={() => { setCompose(false); toast('Notice sent for translation') }}>Send for translation</button></>}>
-          <div className="field"><label htmlFor="t">Title</label><input id="t" className="input" placeholder="Short and plain, under 60 characters" /></div>
-          <div className="field"><label htmlFor="b">Message</label><textarea id="b" className="input" placeholder="What workers need to know and what they should do" /></div>
-          <div className="field"><label htmlFor="aud">Send to</label><select id="aud" className="input"><option>All workers</option>{districts.map((d) => <option key={d.id}>Workers in {d.name}</option>)}<option>Plantation workers</option><option>Workers with 3 or more months owing</option></select></div>
-          <div className="field"><label>Languages</label><p className="hint">{languages.map((l) => l.label).join(', ')}</p></div>
-        </Drawer>
-      )}
-    </Shell>
-  )
-}
-
-function Complaints() {
-  return (
-    <Shell>
-      <PageHead title="Complaints" sub="Workers write in their own language. SCANS support answers payment questions; everything else goes to the agency that owns it." />
-      <div className="grid g-4">
-        <div className="panel"><Figure label="Opened in June" value="214" size="md" /></div>
-        <div className="panel"><Figure label="With JTK Sabah" value="61" size="md" /></div>
-        <div className="panel"><Figure label="Answered within 2 days" value="93%" size="md" /></div>
-        <div className="panel"><Figure label="Most common" value="Wages" size="md" note="Then payment problems" /></div>
-      </div>
-      <section className="panel"><div className="table-wrap"><table className="data stack">
-        <thead><tr><th>Reference</th><th>Topic</th><th>District</th><th>Language</th><th>Handled by</th><th>Opened</th><th>Status</th></tr></thead>
-        <tbody>{complaints.map((c) => (
-          <tr key={c.id}><td data-label="Reference" className="num strong">{c.id}</td><td data-label="Topic">{c.topic}</td><td data-label="District">{c.district}</td><td data-label="Language">{c.lang}</td><td data-label="Handled by">{c.agency}</td><td data-label="Opened">{c.opened}</td><td data-label="Status"><Status>{c.status}</Status></td></tr>
-        ))}</tbody>
-      </table></div></section>
-    </Shell>
-  )
-}
-
-function Reports() {
-  const toast = useToast()
-  const list = [
-    ['Monthly collection and reconciliation', 'Gross, State share, operator fee, gateway settlements, breaks', 'June 2027'],
-    ['FWECF account statement', 'Every settlement into the State account', 'June 2027'],
-    ['Paid and owing by district and sector', 'For planning and enforcement priorities', 'June 2027'],
-    ['Audit log extract', 'Every record view, export and change', '1 to 17 June 2027'],
-    ['Complaints by agency', 'Volumes, response times, outcomes', 'June 2027'],
-  ]
-  return (
-    <Shell>
-      <PageHead title="Reports" sub="Prepared for Jabatan Kewangan Negeri and the State’s auditors." />
-      <section className="panel"><div className="rows">{list.map(([t, d, p]) => (
-        <div key={t} className="row"><FileText color="var(--navy)" /><div className="grow"><div className="t">{t}</div><div className="d">{d} · {p}</div></div><button className="btn sm" onClick={() => toast(t + ' downloaded')}><Download size={14} /> Download</button></div>
-      ))}</div></section>
-    </Shell>
-  )
-}
 
 export default function StateApp() {
+  setActor(ACTOR)
+  const loc = useLocation()
+  const notices = useStore((s) => s.notices)
+  const waiting = notices.filter((n) => n.status === 'Waiting for State approval').length
+  const title = (TITLES.find(([re]) => re.test(loc.pathname)) || [, 'State dashboard'])[1]
+  const nav = [
+    { group: 'Monitor', items: [
+      { to: BASE, label: 'Overview', icon: LayoutDashboard, end: true },
+      { to: BASE + '/districts', label: 'Districts', icon: MapIcon },
+      { to: BASE + '/finance', label: 'FWECF account', icon: Landmark },
+    ] },
+    { group: 'Records', items: [
+      { to: BASE + '/workers', label: 'Workers', icon: Users },
+      { to: BASE + '/employers', label: 'Employers', icon: Building2 },
+    ] },
+    { group: 'Communicate', items: [
+      { to: BASE + '/notices', label: 'Official notices', icon: Megaphone, count: waiting || null },
+      { to: BASE + '/complaints', label: 'Complaints', icon: MessageSquareWarning },
+    ] },
+    { group: 'Reporting', items: [
+      { to: BASE + '/reports', label: 'Reports', icon: FileBarChart },
+    ] },
+  ]
+  const notifications = [
+    ...(waiting ? [{ title: `${waiting} notice${waiting > 1 ? 's' : ''} from Microtek waiting for your approval`, time: 'Official notices' }] : []),
+    { title: 'Settlement of RM 302,700 credited to the FWECF account', time: '16 Jun 2027, 23:04' },
+    { title: 'New complaint routed to JTK Sabah', time: 'Keningau · 26 May 2027' },
+  ]
   return (
-    <Routes>
-      <Route index element={<Overview />} />
-      <Route path="districts" element={<Districts />} />
-      <Route path="employers" element={<Employers />} />
-      <Route path="notices" element={<Notices />} />
-      <Route path="complaints" element={<Complaints />} />
-      <Route path="reports" element={<Reports />} />
-    </Routes>
+    <AppShell nav={nav} portal={{ name: 'Kerajaan Negeri Sabah', sub: 'Kementerian Kewangan Negeri Sabah', crest: '/img/logos/mof-sabah.png' }}
+      user={{ name: 'Nurul Ain', role: 'Jabatan Kewangan Negeri' }} title={title} kicker="State dashboard" notifications={notifications}>
+      <Routes>
+        <Route index element={<Overview />} />
+        <Route path="districts" element={<Districts />} />
+        <Route path="workers" element={<WorkerList base={BASE} readOnly />} />
+        <Route path="workers/:id" element={<WorkerProfile base={BASE} readOnly />} />
+        <Route path="employers" element={<EmployerList base={BASE} />} />
+        <Route path="employers/:id" element={<EmployerProfile base={BASE} readOnly />} />
+        <Route path="finance" element={<Finance />} />
+        <Route path="notices" element={<Notices />} />
+        <Route path="complaints" element={<Complaints />} />
+        <Route path="reports" element={<ReportsCentre scope="state" />} />
+        <Route path="*" element={<Card><Empty title="This page does not exist">Use the menu to find what you need.</Empty></Card>} />
+      </Routes>
+    </AppShell>
+  )
+}
+
+/* =====================================================================
+   Overview
+   ===================================================================== */
+function Overview() {
+  const toast = useToast()
+  const go = useNavigate()
+  const [sel, setSel] = useState('lahaddatu')
+  const [filter, setFilter] = useState('all')
+  return (
+    <>
+      <PageHead title="Collection, June 2027" sub={`${num(paidThisMonth)} of ${num(REGISTERED)} registered workers have paid for June. Payment was due on 5 June.`}>
+        <button className="btn outline" onClick={() => { logEvent('Downloaded report', 'Monthly collection and reconciliation · June 2027 · PDF'); toast('June 2027 report downloaded. The download is in the audit log.') }}><Download /> Monthly report</button>
+      </PageHead>
+      <div className="grid g-4 keep2">
+        <Kpi hero icon={Wallet} label="Collected this month" value={rm(collectedThisMonth)} note={`State share ${rm(collectedThisMonth * STATE_SHARE)}`}>
+          <div className="gv-hero-spark"><Sparkline values={monthly.map((m) => m.v)} /></div>
+        </Kpi>
+        <Kpi icon={Percent} tone="ok" label="Workers paying" value={pct(complianceRate)} note="Year 1 target in the proposal: 60%" />
+        <Kpi icon={PiggyBank} tone="purple" label="State share this year" value={rmM(stateYtd)} note={`70% of ${rmM(ytd)} collected`} />
+        <Kpi icon={UserCheck} label="Workers registered" value={num(REGISTERED)} note="31 Dec 2025, proposal s.3.1" />
+      </div>
+      <div className="grid g-main">
+        <Card title="Collected each month" sub="2027, split between the State (70%) and the operator (30%)">
+          <BarChart data={monthlySplit} series={['State share (70%)', 'Operator (30%)']} colors={['#1460E0', '#22B5F0']} height={250} format={axisRm} />
+        </Card>
+        <Card title="Where the money goes" sub="January to June 2027">
+          <SplitBar parts={[
+            { label: 'Kerajaan Negeri Sabah', share: STATE_SHARE, text: rm(stateYtd), color: '#1460E0' },
+            { label: 'Operator, Microtek', share: 1 - STATE_SHARE, text: rm(operatorYtd), color: '#22B5F0' },
+          ]} />
+          <div className="gv-sub" style={{ marginTop: 22 }}>Workers this month</div>
+          <MeterRows big items={paymentMetrics.map((m) => ({ label: m.label, share: m.value / REGISTERED, text: num(m.value), color: m.color }))} />
+          <p className="small muted" style={{ marginTop: 12 }}>Arrears lead to reminders only, never to permit action.</p>
+        </Card>
+      </div>
+      <div className="grid g-main">
+        <Card title="Paid by district" sub="Colour shows the share not yet paid for June. Choose a district."
+          action={<div className="chips">{[['all', 'All'], ['high', 'High arrears'], ['low', 'Low arrears']].map(([v, l]) => <button key={v} className="chip" aria-pressed={filter === v} onClick={() => setFilter(v)}>{l}</button>)}</div>}>
+          <SabahMap districts={districts} selected={sel} onSelect={setSel} filter={filter} renderPanel={(d) => (
+            <div className="stack" style={{ gap: 14 }}>
+              <DistrictDetail d={d} />
+              <button className="btn sm outline" onClick={() => go(`${BASE}/workers?district=${encodeURIComponent(d.name)}`)}><Users /> Look up workers</button>
+            </div>
+          )} />
+        </Card>
+        <Card title="By sector" sub="Registered workers, proposal s.3.1">
+          <HBarChart data={sectors.map((s) => ({ label: s.name, value: s.workers }))} />
+        </Card>
+      </div>
+      <div className="grid g-2">
+        <Card title="How workers paid" sub="Payment channel, June 2027">
+          <Donut data={channelData} center={rmM(collectedThisMonth)} centerSub="June" size={170} />
+        </Card>
+        <Card title="Nationality" sub="Registered workers">
+          <Donut data={nationalityCounts} center={num(REGISTERED)} centerSub="workers" size={170} />
+        </Card>
+      </div>
+    </>
+  )
+}
+
+/* =====================================================================
+   Districts
+   ===================================================================== */
+function Districts() {
+  const go = useNavigate()
+  const rows = [...districts].sort((a, b) => b.workers - a.workers)
+  const owing = REGISTERED - paidThisMonth
+  const fcell = (label, v, cls = 'r') => <td data-label={label} className={cls}><b className="num">{v}</b></td>
+  return (
+    <>
+      <PageHead title="Districts" sub="June 2027. Sample split of the 130,391 registered workers for this prototype. Choose a district to look up its workers." />
+      <Card title="Paid and not yet paid" sub="Workers by district, June 2027">
+        <BarChart data={rows.map((d) => ({ label: d.name.replace('Kota Kinabalu', 'KK'), values: [d.paid, d.overdue] }))} series={['Paid', 'Not yet paid']} colors={['#1460E0', '#FF8A1F']} height={240} format={axisRm} />
+      </Card>
+      <Card flush>
+        <div style={{ padding: '6px 14px 14px' }}>
+          <Table rows={rows} pageSize={20} onRowClick={(d) => go(`${BASE}/workers?district=${encodeURIComponent(d.name)}`)} columns={[
+            { key: 'name', label: 'District', render: (d) => <b>{d.name}</b> },
+            { key: 'workers', label: 'Registered', align: 'r', render: (d) => num(d.workers) },
+            { key: 'paid', label: 'Paid', align: 'r', render: (d) => num(d.paid) },
+            { key: 'rate', label: 'Paid share', render: (d) => <div className="row" style={{ gap: 8, minWidth: 130 }}><div className="bar grow" style={{ minWidth: 50 }}><span style={{ width: pct(d.rate) }} /></div><span className="num small">{pct(d.rate)}</span></div> },
+            { key: 'overdue', label: 'Not yet paid', align: 'r', render: (d) => num(d.overdue) },
+            { key: 'collected', label: 'Collected', align: 'r', render: (d) => rm(d.collected) },
+            { key: 'state', label: 'State share', align: 'r', render: (d) => rm(d.collected * STATE_SHARE) },
+          ]} footer={
+            <tfoot><tr>
+              <td data-label="District"><b>Sabah</b></td>
+              {fcell('Registered', num(REGISTERED))}
+              {fcell('Paid', num(paidThisMonth))}
+              {fcell('Paid share', pct(complianceRate), '')}
+              {fcell('Not yet paid', num(owing))}
+              {fcell('Collected', rm(collectedThisMonth))}
+              {fcell('State share', rm(collectedThisMonth * STATE_SHARE))}
+            </tr></tfoot>
+          } />
+        </div>
+      </Card>
+      <Callout>District totals add up to the {num(REGISTERED)} registered workers and to {rm(collectedThisMonth)} collected for June, the same figures as the overview and the FWECF account.</Callout>
+    </>
+  )
+}
+
+/* =====================================================================
+   FWECF account
+   ===================================================================== */
+const MONTHS = ['June 2027', 'May 2027', 'April 2027', 'March 2027', 'February 2027', 'January 2027']
+
+function Finance() {
+  const toast = useToast()
+  const [month, setMonth] = useState('June 2027')
+  const [day, setDay] = useState(null)
+  const reconciled = settlements.filter((s) => s.status !== 'Pending').length
+  const breaks = settlements.reduce((s, x) => s + x.breaks, 0)
+  const totals = settlements.reduce((t, s) => ({ gross: t.gross + s.gross, receipts: t.receipts + s.receipts, state: t.state + s.state, operator: t.operator + s.operator, credited: t.credited + s.credited }), { gross: 0, receipts: 0, state: 0, operator: 0, credited: 0 })
+  const d = settlements.find((s) => s.id === day)
+  const download = (what, fmt) => { logEvent('Downloaded report', `${what} · ${month} · ${fmt}`); toast(`${what}, ${month} (${fmt}) downloaded. The download is in the audit log.`) }
+  const fcell = (label, v) => <td data-label={label} className="r"><b className="num">{v}</b></td>
+  return (
+    <>
+      <PageHead title="FWECF account" sub="Held by Jabatan Kewangan Negeri Sabah. Payments go from the licensed acquirer straight into this account; SCANS never holds funds.">
+        <Select label="Statement month" value={month} onChange={setMonth} options={MONTHS} />
+        <button className="btn primary" onClick={() => download('FWECF account statement', 'PDF')}><Download /> Statement</button>
+      </PageHead>
+      <div className="grid g-4 keep2">
+        <Kpi hero icon={Landmark} label="Settled in June" value={rm(settledJune)} note={`${num(totals.receipts)} receipts, 1 to 17 June`} />
+        <Kpi icon={PiggyBank} tone="ok" label="State share (70%)" value={rm(totals.state)} note="Stays in the FWECF account" />
+        <Kpi icon={Wallet} tone="purple" label="Operator share (30%)" value={rm(totals.operator)} note="Paid to Microtek monthly" />
+        <Kpi icon={Scale} tone={breaks ? 'warn' : 'ok'} label="Days reconciled" value={`${reconciled} of ${settlements.length}`} note={`${breaks} breaks found and resolved. Today settles at 23:00.`} />
+      </div>
+      <Callout icon={CalendarCheck}>
+        June settlements of {rm(settledJune)} = June contributions of {rm(collectedThisMonth)} (the figure on the overview) + {rm(arrearsAndAdvance)} of arrears cleared and months paid in advance.
+      </Callout>
+      <div className="grid g-main">
+        <Card title="Daily settlement" sub="Credited to the FWECF account each night, June 2027">
+          <BarChart data={settlements.map((s, i) => ({ label: String(i + 1), values: [s.state, s.operator] }))} series={['State share (70%)', 'Operator (30%)']} colors={['#1460E0', '#22B5F0']} height={240} format={axisRm} />
+        </Card>
+        <Card title="Statements and extracts" sub={month}>
+          <div className="gv-attn">
+            {[['FWECF account statement', 'PDF'], ['Monthly collection and reconciliation', 'CSV'], ['Settlement file from the acquirer', 'CSV'], ['Operator fee invoice, 30%', 'PDF']].map(([w, f]) => (
+              <button key={w} onClick={() => download(w, f)}>
+                <span className="ic"><Download aria-hidden="true" /></span>
+                <div><b>{w}</b><small>{f} · {month}</small></div>
+              </button>
+            ))}
+          </div>
+          <div className="gv-sub" style={{ marginTop: 18 }}>Since January</div>
+          <SplitBar parts={[
+            { label: 'State', share: STATE_SHARE, text: rmM(stateYtd), color: '#1460E0' },
+            { label: 'Operator', share: 1 - STATE_SHARE, text: rmM(operatorYtd), color: '#22B5F0' },
+          ]} />
+        </Card>
+      </div>
+      <Card title="Daily settlements and reconciliation" sub="Each day’s acquirer credit matched against SCANS receipts. Choose a day for detail.">
+        <Table rows={[...settlements].reverse()} pageSize={17} onRowClick={(s) => setDay(s.id)} columns={[
+          { key: 'date', label: 'Date', render: (s) => <b>{s.date}</b> },
+          { key: 'receipts', label: 'Receipts', align: 'r', render: (s) => num(s.receipts) },
+          { key: 'gross', label: 'Gross', align: 'r', render: (s) => rm(s.gross) },
+          { key: 'state', label: 'State 70%', align: 'r', render: (s) => rm(s.state) },
+          { key: 'operator', label: 'Operator 30%', align: 'r', render: (s) => rm(s.operator) },
+          { key: 'credited', label: 'Credited', align: 'r', render: (s) => (s.credited ? rm(s.credited) : 'Tonight') },
+          { key: 'status', label: 'Reconciliation', render: (s) => <Status tone={s.status === 'Pending' ? 'warn' : 'ok'}>{s.status === 'Resolved' ? 'Reconciled' : s.status}</Status> },
+          { key: 'breaks', label: 'Breaks', align: 'r', render: (s) => (s.breaks ? <Pill tone="warn">{s.breaks} resolved</Pill> : '0') },
+        ]} footer={
+          <tfoot><tr>
+            <td data-label="Date"><b>June to date</b></td>
+            {fcell('Receipts', num(totals.receipts))}
+            {fcell('Gross', rm(totals.gross))}
+            {fcell('State 70%', rm(totals.state))}
+            {fcell('Operator 30%', rm(totals.operator))}
+            {fcell('Credited', rm(totals.credited))}
+            <td data-label="Reconciliation" /><td data-label="Breaks" className="r"><b>{breaks}</b></td>
+          </tr></tfoot>
+        } />
+      </Card>
+      {d && (
+        <Drawer title={`Settlement, ${d.date}`} sub={d.id} onClose={() => setDay(null)} footer={<><button className="btn outline" onClick={() => download(`Settlement file ${d.date}`, 'CSV')}><Download /> Settlement file</button><button className="btn primary" onClick={() => setDay(null)}>Close</button></>}>
+          <div className="row"><Status tone={d.status === 'Pending' ? 'warn' : 'ok'}>{d.status === 'Resolved' ? 'Reconciled' : d.status}</Status>{d.breaks > 0 && <Pill tone="warn">{d.breaks} breaks resolved</Pill>}</div>
+          <dl className="kv">
+            <div><dt>SCANS receipts</dt><dd className="num">{num(d.receipts)}</dd></div>
+            <div><dt>Gross collected</dt><dd className="num">{rm(d.gross)}</dd></div>
+            <div><dt>Credited by acquirer</dt><dd className="num">{d.credited ? rm(d.credited) : 'At 23:00 tonight'}</dd></div>
+            <div><dt>Difference</dt><dd className="num">{d.credited ? rm(d.credited - d.gross) : '—'}</dd></div>
+            <div><dt>State share (70%)</dt><dd className="num">{rm(d.state)}</dd></div>
+            <div><dt>Operator share (30%)</dt><dd className="num">{rm(d.operator)}</dd></div>
+          </dl>
+          <div className="gv-sub">Matching</div>
+          <MeterRows items={[
+            { label: 'Matched to a receipt', share: d.credited ? 1 : 0, text: d.credited ? num(d.receipts) : 'Not yet', color: 'var(--okFill)' },
+            { label: 'Breaks', share: d.breaks / Math.max(1, d.receipts), text: d.breaks ? `${d.breaks}, resolved` : 'None', color: 'var(--warnFill)' },
+          ]} />
+          {d.breaks > 0 && <Callout tone="warn">Breaks on this day were matched after the acquirer resent payment callbacks. No money was missing.</Callout>}
+        </Drawer>
+      )}
+    </>
+  )
+}
+
+/* =====================================================================
+   Official notices
+   ===================================================================== */
+function Notices() {
+  const toast = useToast()
+  const notices = useStore((s) => s.notices)
+  const [tab, setTab] = useState('waiting')
+  const [compose, setCompose] = useState(false)
+  const [view, setView] = useState(null)
+  const [ret, setRet] = useState(null)
+  const [comment, setComment] = useState('')
+  const waiting = notices.filter((n) => n.status === 'Waiting for State approval')
+  const sent = notices.filter((n) => n.status === 'Sent' || n.status === 'Scheduled')
+  const returned = notices.filter((n) => n.status === 'Returned')
+  const list = { waiting, sent, returned }[tab]
+  const v = notices.find((n) => n.id === view)
+  const sentOnly = notices.filter((n) => n.status === 'Sent')
+  const reach = sentOnly.reduce((s, n) => s + n.reached * n.recipients, 0) / Math.max(1, sentOnly.reduce((s, n) => s + n.recipients, 0))
+
+  const approve = (n) => {
+    const later = n.date && n.date !== '—' && n.date !== '17 Jun 2027' && /2027/.test(n.date) && new Date(n.date) > new Date('2027-06-17')
+    updateNotice(n.id, { status: later ? 'Scheduled' : 'Sent', date: later ? n.date : '17 Jun 2027', reached: later ? 0 : 0.04 })
+    logEvent('Approved and sent notice', `${n.id} · ${n.title}`)
+    toast(later ? `Approved. It goes out on ${n.date} in six languages.` : 'Approved and sent in six languages.')
+    setView(null)
+  }
+  const doReturn = () => {
+    updateNotice(ret.id, { status: 'Returned', comment: comment.trim() })
+    logEvent('Returned notice with comment', `${ret.id} · ${ret.title}`)
+    toast('Returned to Microtek with your comment')
+    setRet(null); setComment(''); setView(null)
+  }
+  const submit = (n) => {
+    const id = addNotice(n)
+    logEvent(n.status === 'Sent' ? 'Sent notice' : 'Scheduled notice', `${id} · ${n.title}`)
+    toast(n.status === 'Sent' ? `Notice sent to ${num(n.recipients)} ${n.audience.startsWith('Employers') ? 'employers' : 'workers'} in six languages` : `Notice scheduled for ${n.date}`)
+    setCompose(false); setTab('sent')
+  }
+
+  return (
+    <>
+      <PageHead title="Official notices" sub="Notices go to workers in the language they chose. Notices written by Microtek wait here until the State approves them.">
+        <button className="btn primary" onClick={() => setCompose(true)}><Plus /> Write a notice</button>
+      </PageHead>
+      <div className="grid g-4 keep2">
+        <Kpi icon={Inbox} tone="warn" label="Waiting for you" value={num(waiting.length)} note="From Microtek" />
+        <Kpi icon={Send} tone="ok" label="Sent" value={num(sentOnly.length)} note="Since May 2027" />
+        <Kpi icon={Users} label="Reached" value={pct(reach)} note="Of people each notice was sent to" />
+        <Kpi icon={Languages} tone="purple" label="Languages" value="6" note="BM, English, Indonesian, Filipino, Bengali, Nepali" />
+      </div>
+      <Card>
+        <Tabs items={[{ value: 'waiting', label: 'Waiting for approval', count: waiting.length }, { value: 'sent', label: 'Sent and scheduled', count: sent.length }, { value: 'returned', label: 'Returned', count: returned.length }]} value={tab} onChange={setTab} label="Notices" />
+        <div style={{ paddingTop: 4 }}>
+          {list.length === 0 && <Empty title={tab === 'waiting' ? 'Nothing waiting for approval' : 'Nothing here'} icon={CheckCircle2}>{tab === 'waiting' ? 'Notices Microtek writes for workers will appear here for you to approve.' : 'Notices appear here after they are sent or returned.'}</Empty>}
+          {list.map((n) => (
+            <div className="gv-ap" key={n.id}>
+              <span className="ic"><Megaphone aria-hidden="true" /></span>
+              <div className="txt">
+                <small>{n.id} · from {n.origin === 'State' ? 'the State' : 'Microtek'} · {n.date}</small>
+                <b>{n.title}</b>
+                <div className="row wrap" style={{ gap: 8, marginTop: 4 }}><AudiencePill a={n.audience} /><ChannelIcons list={n.channels} /><span className="small muted num">{num(n.recipients)} recipients</span></div>
+                {n.comment && <small style={{ color: 'var(--bad)', marginTop: 4 }}>Your comment: {n.comment}</small>}
+              </div>
+              <div className="acts">
+                <button className="btn sm ghost" onClick={() => setView(n.id)}><Eye /> View</button>
+                {tab === 'waiting' ? (
+                  <>
+                    <button className="btn sm outline" onClick={() => setRet(n)}><X /> Return with comment</button>
+                    <button className="btn sm success" onClick={() => approve(n)}><Check /> Approve and send</button>
+                  </>
+                ) : <Status tone={n.status === 'Returned' ? 'bad' : undefined}>{n.status}</Status>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+      {compose && <NoticeComposer mode="state" onClose={() => setCompose(false)} onSubmit={submit} />}
+      {v && <NoticeView n={v} onClose={() => setView(null)} footer={v.status === 'Waiting for State approval'
+        ? <><button className="btn outline" onClick={() => setRet(v)}><X /> Return with comment</button><button className="btn success" onClick={() => approve(v)}><Check /> Approve and send</button></>
+        : null} />}
+      {ret && (
+        <Modal title="Return to Microtek" onClose={() => setRet(null)} actions={<><button className="btn outline" onClick={() => setRet(null)}>Cancel</button><button className="btn primary" disabled={comment.trim().length < 5} onClick={doReturn}>Return with comment</button></>}>
+          <div className="stack" style={{ gap: 12 }}>
+            <p className="ink2">“{ret.title}” goes back to Microtek with your comment. It is not sent to anyone.</p>
+            <Field label="Comment" hint="Microtek sees this."><textarea className="input" autoFocus value={comment} onChange={(e) => setComment(e.target.value)} placeholder="For example: please add the help desk phone number" /></Field>
+          </div>
+        </Modal>
+      )}
+    </>
+  )
+}
+
+/* =====================================================================
+   Complaints
+   ===================================================================== */
+function Complaints() {
+  const toast = useToast()
+  const [rows, setRows] = useState(complaintsAll)
+  const [open, setOpen] = useState(null)
+  const [agency, setAgency] = useState('All')
+  const [status, setStatus] = useState('All')
+  const [route, setRoute] = useState('JTK Sabah')
+  const c = rows.find((x) => x.id === open)
+  const list = rows.filter((x) => (agency === 'All' || x.agency === agency) && (status === 'All' || x.status === status))
+  const byAgency = useMemo(() => {
+    const m = {}
+    rows.forEach((x) => { m[x.agency] = (m[x.agency] || 0) + 1 })
+    return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }))
+  }, [rows])
+  const resolvedDays = rows.filter((x) => x.days).map((x) => x.days).sort((a, b) => a - b)
+  const median = resolvedDays.length ? resolvedDays[Math.floor(resolvedDays.length / 2)] : 0
+  const doRoute = () => {
+    setRows(rows.map((x) => (x.id === c.id ? { ...x, agency: route, status: 'With agency' } : x)))
+    logEvent('Routed complaint to agency', `${c.id} · ${route}`)
+    toast(`${c.id} routed to ${route}. The worker is told in ${c.lang}.`)
+    setOpen(null)
+  }
+  const openRow = (x) => { setOpen(x.id); setRoute(x.agency === 'SCANS support' ? 'JTK Sabah' : x.agency); logEvent('Viewed complaint', x.id) }
+  return (
+    <>
+      <PageHead title="Complaints" sub="Complaints from workers in any of the six languages, routed to the agency that can act. Workers can ask for their name to be kept from their employer." />
+      <div className="grid g-4 keep2">
+        <Kpi icon={Inbox} tone="warn" label="New" value={num(rows.filter((x) => x.status === 'New').length)} note="Not yet routed" />
+        <Kpi icon={RouteIcon} label="With an agency" value={num(rows.filter((x) => x.status === 'With agency').length)} />
+        <Kpi icon={CheckCircle2} tone="ok" label="Resolved" value={num(rows.filter((x) => x.status === 'Resolved').length)} note="Since May 2027" />
+        <Kpi icon={Clock} tone="purple" label="Median time to resolve" value={`${median} days`} />
+      </div>
+      <div className="grid g-main" style={{ alignItems: 'start' }}>
+        <Card title="Complaints" sub={`${list.length} of ${rows.length}`}>
+          <div className="toolbar" style={{ marginBottom: 14 }}>
+            <Select label="Agency" value={agency} onChange={setAgency} options={[{ value: 'All', label: 'All agencies' }, ...AGENCIES]} />
+            <Select label="Status" value={status} onChange={setStatus} options={[{ value: 'All', label: 'All statuses' }, 'New', 'With agency', 'Resolved']} />
+          </div>
+          <Table rows={list} onRowClick={openRow} columns={[
+            { key: 'id', label: 'Reference', render: (x) => <span><b className="mono-id">{x.id}</b><small className="muted" style={{ display: 'block', fontSize: 12 }}>{x.opened}</small></span> },
+            { key: 'topic', label: 'Topic' },
+            { key: 'district', label: 'District' },
+            { key: 'lang', label: 'Language' },
+            { key: 'agency', label: 'Agency' },
+            { key: 'status', label: 'Status', render: (x) => <Status>{x.status}</Status> },
+          ]} />
+        </Card>
+        <Card title="By agency" sub="All complaints since May 2027">
+          <HBarChart data={byAgency} />
+          <p className="small muted" style={{ marginTop: 16 }}>Complaints are never shared with employers. SCANS support handles app and payment problems; work and housing go to JTK Sabah.</p>
+        </Card>
+      </div>
+      {c && (
+        <Drawer title={c.topic} sub={`${c.id} · opened ${c.opened}`} onClose={() => setOpen(null)}
+          footer={c.status === 'Resolved' ? <button className="btn primary" onClick={() => setOpen(null)}>Close</button> : <><button className="btn outline" onClick={() => setOpen(null)}>Cancel</button><button className="btn primary" onClick={doRoute}><RouteIcon /> Route to agency</button></>}>
+          <div className="row wrap"><Status>{c.status}</Status>{c.anonymous && <Pill tone="purple">Name kept from employer</Pill>}</div>
+          <dl className="kv">
+            <div><dt>District</dt><dd>{c.district}</dd></div>
+            <div><dt>Written in</dt><dd>{c.lang}</dd></div>
+            <div><dt>Now with</dt><dd>{c.agency}</dd></div>
+            <div><dt>Worker</dt><dd>{c.anonymous ? 'Hidden from employer' : 'Shared with agency only'}</dd></div>
+          </dl>
+          <div>
+            <div className="gv-sub">What the worker wrote</div>
+            {c.original && <div className="gv-lang" style={{ marginBottom: 8 }}><b className="small muted">{c.lang}</b><p>{c.original}</p></div>}
+            <div className="gv-lang"><b className="small muted">English translation</b><p>{c.english}</p></div>
+          </div>
+          <ol className="gv-timeline">
+            {c.status === 'Resolved' && <li><span className="dot ok" /><b>Resolved by {c.agency}</b><span>Worker told in {c.lang}</span></li>}
+            {c.status !== 'New' && <li><span className="dot info" /><b>Routed to {c.agency}</b><span>{c.opened}</span></li>}
+            <li><span className="dot" /><b>Complaint received in the app</b><span>{c.opened}</span></li>
+          </ol>
+          {c.status !== 'Resolved' && (
+            <Field label="Route to" hint="The agency gets the complaint and the translation. The worker is told who has it.">
+              <select className="select" value={route} onChange={(e) => setRoute(e.target.value)}>{AGENCIES.map((a) => <option key={a}>{a}</option>)}</select>
+            </Field>
+          )}
+          <Callout icon={ShieldCheck}>Opening this complaint is written to the audit log.</Callout>
+        </Drawer>
+      )}
+    </>
   )
 }
