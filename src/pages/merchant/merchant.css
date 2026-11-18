@@ -243,6 +243,10 @@ table.data .who .mx-thumb small { display: none; }
   .mx-code .d:nth-child(3) { margin-right: 0; }
   .mx-enter-actions .btn { width: 100%; }
   .mx-form-foot .btn.lg { width: 100%; }
+  .mx-form-foot > .grow { display: none; }
+  .mx-form-foot > .btn { flex: 1 1 0; }
+  .mx-form-foot > .btn.ghost { order: 3; flex-basis: 100%; }
+  .mx-form-foot > .mx-stepcount { order: 4; flex-basis: 100%; text-align: center; }
   .mx-reg-card { padding: 18px; }
   .mx-reg-ic { display: none; }
   .mx-solo-tag { display: none; }

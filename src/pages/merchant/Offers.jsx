@@ -398,7 +398,9 @@ export function OfferDetail() {
 
   const isLive = o.status === 'Live' || o.status === 'Paused'
   const done = o.status === 'Expired' || o.status === 'Ended'
-  const monthly = offerMonthly(o)
+  const allMonths = offerMonthly(o)
+  const first = allMonths.findIndex((m) => m.value > 0)
+  const monthly = allMonths.slice(Math.max(0, Math.min(first, allMonths.length - 2)))
   const part = outletsForOffer(o, outlets).filter((x) => x.status !== 'Paused' || x.allTime > 0)
   const counts = split(o.redemptions, part.map((x) => x.weight || 1))
   const byOutlet = part.map((x, i) => ({ label: x.name.replace('7-Eleven ', ''), value: counts[i] })).sort((a, b) => b.value - a.value).slice(0, 8)
@@ -448,7 +450,7 @@ export function OfferDetail() {
 
       <div className="grid g-main">
         <Card title="Redemptions over time" sub="Confirmed redemptions per month, 2027">
-          {o.redemptions ? <LineChart data={monthly} format={num} height={220} /> : <Empty title="No redemptions yet">Figures appear once the offer is live and staff confirm the first code.</Empty>}
+          {o.redemptions ? <LineChart data={monthly} format={num} height={300} /> : <Empty title="No redemptions yet">Figures appear once the offer is live and staff confirm the first code.</Empty>}
         </Card>
         <Card title="By outlet" sub={o.redemptions ? `All time, top ${byOutlet.length} of ${part.length} outlets` : 'Outlets taking part'}>
           {o.redemptions ? <HBarChart data={byOutlet} /> : <Empty title={`${part.length} outlets`}>{o.outlets}</Empty>}
