@@ -110,6 +110,27 @@ export const OFFER_EXTRA = {
   'OS-2705-031': { expiry: '—', type: 'Points', desc: 'Double loyalty points on rice purchases.', terms: ['Needs a loyalty card.'] },
 }
 
+// Offer type and one-line description shown on the merchant's offer list (7-Eleven sample offers).
+export const OFFER_INFO = {
+  o1: { type: 'Voucher', desc: 'RM3 off any prepaid reload of RM30 or more, all networks.' },
+  o6: { type: 'Discount', desc: '20% off mobile top-up above RM50, up to RM15 off.' },
+  o7: { type: 'Voucher', desc: 'RM5 off a grocery bill above RM40.' },
+  o8: { type: 'Promotion', desc: 'Free delivery through the 7-Eleven app on orders above RM25.' },
+  o5: { type: 'Free item', desc: 'A free 600ml mineral water with any meal set.' },
+  o9: { type: 'Voucher', desc: 'RM2 off any phone case.' },
+  o10: { type: 'Promotion', desc: 'Hari Raya grocery bundle with RM8 off.' },
+}
+export function offerType(o) {
+  const t = (OFFER_INFO[o.id] && OFFER_INFO[o.id].type) || (OFFER_EXTRA[o.id] && OFFER_EXTRA[o.id].type)
+  if (t && t !== 'Points') return t
+  const d = o.discount && o.discount !== '—' ? o.discount : o.title
+  if (/^free item|free \d/i.test(d)) return 'Free item'
+  if (/%/.test(d)) return 'Discount'
+  if (/^RM\d+$|RM\d+ off/i.test(d)) return 'Voucher'
+  return 'Promotion'
+}
+export const offerDesc = (o) => (OFFER_INFO[o.id] && OFFER_INFO[o.id].desc) || (OFFER_EXTRA[o.id] && OFFER_EXTRA[o.id].desc) || o.terms || `${o.limit} · ${o.outlets}`
+
 // Analytics for a merchant: confirmed uses by month, unique workers, top offers, redeemer nationality.
 export const ANALYTIC_PERIODS = [{ value: '1M', label: '1M' }, { value: '3M', label: '3M' }, { value: '6M', label: '6M' }]
 export function merchantAnalytics(m, live, period) {
