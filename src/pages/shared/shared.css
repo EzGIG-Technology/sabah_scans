@@ -174,3 +174,4 @@
 
 .gv-nowrap { white-space: nowrap; }
 @media (max-width: 720px) { .gv-nowrap { white-space: normal; } }
+@media (max-width: 640px) { .gv-filters > .chip { grid-column: 1 / -1; justify-content: center; } }

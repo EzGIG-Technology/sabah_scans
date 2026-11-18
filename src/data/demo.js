@@ -223,7 +223,6 @@ const pick = (r, xs) => xs[Math.floor(r() * xs.length)]
 
 // Collection by period (gross, before the 70:30 split)
 export const collectionToday = 412300
-export const collectionWeek = 2318600
 export const collectionMonth = collectedThisMonth
 
 // Paid / 1 month owing / 3+ months owing across all registered workers
@@ -236,6 +235,8 @@ export const paymentMetrics = [
 // Daily collection for the demo month (1 to 17 June)
 export const dailyCollection = [612400, 958300, 1104200, 1322800, 1486100, 248600, 189400, 233900, 201700, 188300, 176200, 214800, 96400, 88100, 251300, 302700, 412300]
   .map((v, i) => ({ label: String(i + 1), value: v }))
+// Last 7 days of the daily figures. June settlements also include arrears cleared and months paid in advance.
+export const collectionWeek = dailyCollection.slice(-7).reduce((s, d) => s + d.value, 0)
 
 // Monthly collection split into State and operator share
 export const monthlySplit = monthly.map((m) => ({ label: m.m, values: [Math.round(m.v * STATE_SHARE), Math.round(m.v * (1 - STATE_SHARE))] }))
@@ -353,7 +354,8 @@ export function paymentsFor(w) {
 const FEED_METHODS = ['Touch ’n Go eWallet', 'DuitNow QR', 'Cash at 7-Eleven', 'FPX online banking', 'Boost', 'GrabPay', 'Employer bulk payment']
 export function makeTxn(n) {
   const r = rng(9000 + n * 13)
-  const w = workers[Math.floor(r() * workers.length)]
+  r()
+  const w = workers[(n * 37) % workers.length] // a different worker for each consecutive transaction
   const months = r() < 0.8 ? 1 : 3
   return {
     id: `TXN${String(74442815 + n * 7919).slice(-8)}`,

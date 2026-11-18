@@ -146,7 +146,9 @@ function CommandCentre() {
       </PageHead>
       <div className="grid g-4 keep2 gv-kpis">
         <Kpi hero icon={Wallet} label="Collected this month" value={rm(collectionMonth)} note={`${num(paidThisMonth)} workers paid for June`}>
+          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>State 70% <b>{rm(collectionMonth * 0.7)}</b></span><span>Operator 30% <b>{rm(collectionMonth * 0.3)}</b></span></div>
           <div className="gv-hero-spark"><Sparkline values={monthly.map((m) => m.v)} /></div>
+          <div className="gv-hero-split"><span>January to June 2027</span></div>
         </Kpi>
         <Kpi icon={CalendarDays} label="Today" value={rm(collectionToday)} note={`${num(collectionToday / 100)} payments to 15:00`} />
         <Kpi icon={CalendarRange} label="Last 7 days" value={rm(week)} note="11 to 17 June" />

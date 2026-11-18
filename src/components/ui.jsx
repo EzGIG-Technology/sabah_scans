@@ -15,7 +15,7 @@ export function Logo({ light = false, width = 140 }) {
 }
 
 export function initials(name = '') {
-  return name.replace(/[^A-Za-z ]/g, ' ').split(' ').filter(Boolean).map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+  return name.replace(/[^A-Za-z0-9 ]/g, ' ').split(' ').filter(Boolean).map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 }
 
 /* Coloured monogram used for merchants and companies (no third-party logos in the prototype). */
@@ -208,7 +208,7 @@ export function Kpi({ icon: Icon, label, value, note, delta, down, tone, hero, c
 /* Status pill: maps status text to a tone. */
 const tones = {
   Paid: 'ok', 'All paid': 'ok', Live: 'ok', Active: 'ok', Connected: 'ok', Resolved: 'ok', Sent: 'ok', Compliant: 'ok', Approved: 'ok',
-  Settled: 'ok', Verified: 'ok', Valid: 'ok', Confirmed: 'ok', 'Good standing': 'ok', Delivered: 'ok', Ready: 'ok', Online: 'ok', Enabled: 'ok', Given: 'ok',
+  Settled: 'ok', Reconciled: 'ok', Open: 'warn', Returned: 'warn', Verified: 'ok', Valid: 'ok', Confirmed: 'ok', 'Good standing': 'ok', Delivered: 'ok', Ready: 'ok', Online: 'ok', Enabled: 'ok', Given: 'ok',
   Due: 'info', New: 'info', 'Read only': 'info', 'With agency': 'info', Scheduled: 'info', 'In review': 'info', Processing: 'info', Invited: 'info',
   'Partly paid': 'warn', '1 month overdue': 'warn', Caution: 'warn', Pending: 'warn', 'Waiting for approval': 'warn', 'Waiting for State approval': 'warn',
   Paused: 'warn', Degraded: 'warn', 'Expiring soon': 'warn', 'Needs info': 'warn', 'Not given': 'warn', Draft: 'grey', Inactive: 'grey', Expired: 'grey', Closed: 'grey', Disabled: 'grey',
