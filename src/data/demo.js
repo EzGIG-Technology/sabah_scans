@@ -117,7 +117,7 @@ export const offers = [
   { id: 'o2', merchant: 'CelcomDigi', title: '10GB extra data on the RM35 plan', terms: 'New and existing prepaid lines.', ends: '31 Jul 2027', redemptions: 2287, status: 'Live' },
   { id: 'o3', merchant: 'Pasaraya Servay', title: '5% off rice and cooking oil', terms: 'Tawau, Sandakan and Lahad Datu branches.', ends: '15 Jul 2027', redemptions: 1904, status: 'Live' },
   { id: 'o4', merchant: 'Klinik Mesra Borneo', title: 'RM20 general consultation', terms: 'Show your SCANS card. Weekdays only.', ends: '31 Aug 2027', redemptions: 611, status: 'Live' },
-  { id: 'o5', merchant: '7-Eleven Sabah', title: 'Free 600ml water with any meal set', terms: 'Selected outlets in Kota Kinabalu.', ends: '20 Jul 2027', redemptions: 0, status: 'Waiting for approval' },
+  { id: 'o5', merchant: '7-Eleven Sabah', title: 'Free 600ml water with any meal set', terms: 'Selected outlets in Kota Kinabalu.', ends: '20 Aug 2027', redemptions: 0, status: 'Waiting for approval' },
 ]
 
 export const employers = [
@@ -369,7 +369,7 @@ export const recentTxns = Array.from({ length: 8 }, (_, i) => ({ ...makeTxn(1000
 
 /* ---------- Merchants ---------- */
 export const merchants = [
-  { id: 'mer-711', name: '7-Eleven Sabah', company: '7-Eleven Malaysia Sdn Bhd', ssm: '198401015607', category: 'Convenience store', outlets: 46, offers: 3, redemptions: 15234, joined: '12 Jan 2027', status: 'Active', color: '#0E8F57', contact: 'Tan Mei Ling', email: 'partners@7eleven.example.my' },
+  { id: 'mer-711', name: '7-Eleven Sabah', company: '7-Eleven Malaysia Sdn Bhd', ssm: '198401015607', category: 'Convenience store', outlets: 46, offers: 4, redemptions: 15234, joined: '12 Jan 2027', status: 'Active', color: '#0E8F57', contact: 'Tan Mei Ling', email: 'partners@7eleven.example.my' },
   { id: 'mer-cd', name: 'CelcomDigi', company: 'CelcomDigi Berhad', ssm: '199701009694', category: 'Telco', outlets: 18, offers: 2, redemptions: 6420, joined: '20 Jan 2027', status: 'Active', color: '#1460E0', contact: 'Hafiz Osman', email: 'b2b@celcomdigi.example.my' },
   { id: 'mer-grab', name: 'Grab', company: 'MyTeksi Sdn Bhd', ssm: '201201007917', category: 'Transport and food', outlets: 1, offers: 1, redemptions: 3102, joined: '3 Feb 2027', status: 'Active', color: '#17B26A', contact: 'Priya Nair', email: 'partners@grab.example.my' },
   { id: 'mer-servay', name: 'Pasaraya Servay', company: 'Servay Hypermarket Sdn Bhd', ssm: '198701004422', category: 'Supermarket', outlets: 12, offers: 1, redemptions: 1904, joined: '15 Feb 2027', status: 'Active', color: '#D42253', contact: 'Jessica Wong', email: 'marketing@servay.example.my' },
@@ -408,7 +408,7 @@ export const merchantOffers = [
   { id: 'o10', title: 'Hari Raya bundle', discount: 'RM8', category: 'Groceries', starts: '—', ends: '—', limit: '—', redemptions: 0, views: 0, status: 'Draft', outlets: '—' },
 ]
 export const merchantRedemptionsMonthly = [
-  { label: 'Jan', value: 1240 }, { label: 'Feb', value: 1810 }, { label: 'Mar', value: 2430 }, { label: 'Apr', value: 2960 }, { label: 'May', value: 3350 }, { label: 'Jun', value: 3404 },
+  { label: 'Jan', value: 1280 }, { label: 'Feb', value: 1810 }, { label: 'Mar', value: 2430 }, { label: 'Apr', value: 2960 }, { label: 'May', value: 3350 }, { label: 'Jun', value: 3404 },
 ]
 export const merchantPeakHours = [
   ['6am', 120], ['7am', 210], ['8am', 260], ['9am', 190], ['10am', 160], ['11am', 170], ['12pm', 310], ['1pm', 290], ['2pm', 180],

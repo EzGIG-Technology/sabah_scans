@@ -154,7 +154,7 @@ export const initialOffers = offersBase.map((o) => ({
 /* ---------------- Redemptions feed ---------------- */
 // Codes the counter staff can try in the demo. Never shows a name, passport or nationality.
 export const demoCodes = {
-  '482913': { kind: 'ok', offerId: 'o1', worker: 'SCN26W•••7218' },
+  '482913': { kind: 'ok', offerId: 'o1', worker: 'SCN26W•••2650' },
   '731406': { kind: 'ok', offerId: 'o7', worker: 'SCN26W•••5524' },
   '115820': { kind: 'expired' },
   '904417': { kind: 'used', offerId: 'o1', worker: 'SCN26W•••3092' },

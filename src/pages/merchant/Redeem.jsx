@@ -42,6 +42,12 @@ export default function Redeem() {
       if (!d) { setHit({ kind: 'notfound' }); setStage('error'); return }
       const offer = d.offerId && offers.find((o) => o.id === d.offerId)
       if (d.kind === 'ok' && offer && offer.status !== 'Live') { setHit({ kind: 'unavailable' }); setStage('error'); return }
+      // Respect the offer's limit per worker, counting confirmations already made.
+      if (d.kind === 'ok') {
+        const used = redemptions.filter((r) => r.status === 'Confirmed' && r.worker === d.worker && r.offer === offer.title).length
+        const allowed = offer.limit.startsWith('Two') ? 2 : 1
+        if (used >= allowed) { setHit({ ...d, offer, kind: 'used' }); setStage('error'); return }
+      }
       setHit({ ...d, offer })
       setLeft(LIFETIME)
       setStage(d.kind === 'ok' ? 'result' : 'error')
