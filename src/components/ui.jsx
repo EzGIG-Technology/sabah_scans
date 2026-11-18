@@ -608,7 +608,7 @@ export function MeterRows({ items, big }) {
             <span>{it.label}</span><span className="num muted">{it.text}</span>
           </div>
           <div className={'bar' + (big ? ' lg' : '')}>
-            <span style={{ width: Math.max(it.share * 100, big ? 8 : 1) + '%', background: it.color || 'var(--gradBtn)' }}>{big && pct(it.share)}</span>
+            <span style={{ width: Math.max(it.share * 100, big ? 8 : 1) + '%', background: it.color || 'var(--gradBtn)' }}>{big && it.share >= 0.12 && pct(it.share)}</span>
           </div>
         </div>
       ))}

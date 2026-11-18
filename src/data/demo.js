@@ -270,9 +270,14 @@ const NAT_SHARE = [['Indonesia', 0.61], ['Philippines', 0.29], ['India', 0.04], 
 const PASSPORT_PREFIX = { Indonesia: 'C', Philippines: 'P', Bangladesh: 'B', India: 'Z', Others: 'M' }
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// Days from the demo date (17 Jun 2027) to a permit expiry date.
+const DEMO_DAY = Date.UTC(2027, 5, 17)
+export const daysFromDemo = (y, m, d) => Math.round((Date.UTC(y, m, d) - DEMO_DAY) / 86400000)
+
 function makeWorkers() {
   const r = rng(20270617)
   const out = []
+  const usedNames = new Set([demoWorker.name])
   for (let i = 0; i < 160; i++) {
     const roll = r()
     let acc = 0, nat = 'Indonesia'
@@ -281,9 +286,13 @@ function makeWorkers() {
     const st = r()
     const status = st < 0.6 ? 'Paid' : st < 0.72 ? 'Due' : st < 0.88 ? '1 month overdue' : '3+ months overdue'
     const arrears = status === '1 month overdue' ? 100 : status === '3+ months overdue' ? 300 + Math.floor(r() * 4) * 100 : 0
-    const yr = 2027 + Math.floor(r() * 2)
+    let yr = 2027 + Math.floor(r() * 2)
     const mo = Math.floor(r() * 12)
-    const name = `${pick(r, FIRST[nat])} ${pick(r, LAST[nat])}`
+    if (yr === 2027 && mo < 6) yr = 2028 // every permit in the sample is still valid on the demo date
+    let name = `${pick(r, FIRST[nat])} ${pick(r, LAST[nat])}`
+    while (usedNames.has(name)) name = `${pick(r, FIRST[nat])} ${pick(r, LAST[nat])}`
+    usedNames.add(name)
+    const expiryDay = 1 + Math.floor(r() * 27)
     out.push({
       id: 'SCN26W00' + String(47218 + i * 37).padStart(5, '0'),
       name,
@@ -292,8 +301,8 @@ function makeWorkers() {
       nationality: nat,
       passport: `${PASSPORT_PREFIX[nat]} ${String(Math.floor(1000000 + r() * 8999999))}`,
       plks: `PLKS-SBH-2026-0${String(Math.floor(100000 + r() * 899999))}`,
-      permitExpiry: `${1 + Math.floor(r() * 27)} ${MONTHS[mo]} ${yr}`,
-      permitDays: Math.round(((yr - 2027) * 12 + mo - 5) * 30.4 + r() * 20),
+      permitExpiry: `${expiryDay} ${MONTHS[mo]} ${yr}`,
+      permitDays: daysFromDemo(yr, mo, expiryDay),
       employer: emp.name,
       employerId: emp.id,
       district: emp.district,
@@ -312,7 +321,7 @@ function makeWorkers() {
   // The demo worker is always first and always the same.
   out[0] = {
     ...out[0], id: demoWorker.scansId, name: demoWorker.name, gender: 'Male', dob: '12 Aug 1991', nationality: 'Indonesia',
-    passport: demoWorker.passport, plks: demoWorker.plks, permitExpiry: demoWorker.permitExpiry, permitDays: 636,
+    passport: demoWorker.passport, plks: demoWorker.plks, permitExpiry: demoWorker.permitExpiry, permitDays: daysFromDemo(2028, 2, 14),
     employer: demoWorker.employer, employerId: demoWorker.employerId, district: demoWorker.district, sector: 'Plantation',
     role: demoWorker.role, status: 'Due', arrears: 0, paidThrough: 'May 2027', appActive: true, consent: true,
     language: demoWorker.language, phone: demoWorker.phone, arrived: '3 Feb 2022',

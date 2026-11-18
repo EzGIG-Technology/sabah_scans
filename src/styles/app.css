@@ -66,7 +66,7 @@ p { margin: 0; }
 .between { justify-content: space-between; }
 .wrap { flex-wrap: wrap; }
 .grow { flex: 1; min-width: 0; }
-.stack { display: flex; flex-direction: column; gap: 16px; }
+.stack:not(table) { display: flex; flex-direction: column; gap: 16px; }
 .mono-id { font-weight: 600; letter-spacing: .2px; }
 
 /* ---------- Buttons ---------- */
@@ -478,6 +478,7 @@ dl.kv dd { margin: 2px 0 0; font-weight: 600; font-size: 14px; overflow-wrap: an
 }
 @media (max-width: 640px) {
   body { font-size: 14px; }
+  .chart text { font-size: 19px; }
   .g-6, .g-5, .g-4, .g-3, .g-2 { grid-template-columns: minmax(0, 1fr); }
   .g-4.keep2, .g-6.keep2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .form-grid { grid-template-columns: minmax(0, 1fr); }
