@@ -1,14 +1,15 @@
 // Shared in-memory store for the two government consoles.
 // The audit log, notices and the review queue live here so that an action in one
 // console (a Microtek announcement, a worker record view, an export) shows up in the
-// other (State approval queue, audit log) during a demo session.
+// other (State approval queue, audit log) during a demo session. The JIM portal (/jim) writes
+// its lookups and exports here too, and its notices wait here for State approval.
 // Replace with the live API: AuditEvent, Notice and Approval in SCANS_HANDOFF.md §6.
 import { useSyncExternalStore } from 'react'
 import { auditLog, globalAnnouncements, approvals as seedApprovals, offerSubmissions, merchantApplications } from '../../data/demo.js'
 
 const state = {
   audit: auditLog.map((a, i) => ({ id: 'AU-' + (9000 - i), ...a, kind: kindOf(a.action) })),
-  notices: globalAnnouncements.map((n) => ({ ...n, origin: n.sub === 'Safety notice from the State' ? 'State' : 'Microtek', message: '' })),
+  notices: globalAnnouncements.map((n) => ({ ...n, origin: n.origin || (n.sub === 'Safety notice from the State' ? 'State' : 'Microtek'), message: n.message || '' })),
   // Employer sign-ups and record mismatches. Merchant offers, merchant sign-ups and announcements
   // are read from offerSubs, merchantApps and notices so each item has one status everywhere.
   approvals: seedApprovals.filter((a) => a.type === 'Employer sign-up' || a.type === 'Record mismatch').map((a) => ({ ...a, status: 'Waiting' })),
@@ -33,7 +34,7 @@ export const currentActor = () => actor
 
 function kindOf(action) {
   const a = action.toLowerCase()
-  if (a.startsWith('viewed') || a.startsWith('looked up')) return 'View'
+  if (a.startsWith('viewed') || a.startsWith('looked up') || a.startsWith('checked')) return 'View'
   if (a.startsWith('exported') || a.startsWith('downloaded')) return 'Export'
   if (a.includes('sign') && a.includes('in')) return 'Sign-in'
   if (a.startsWith('daily') || a.startsWith('system')) return 'System'

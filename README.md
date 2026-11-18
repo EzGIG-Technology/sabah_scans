@@ -1,6 +1,6 @@
 # SCANS web prototype
 
-Responsive prototype of the Sabah Contribution Administration Network System (SCANS): the public page, sign-in and five portals (worker app, employer, State Government, merchant and Microtek operator), built with React and Vite.
+Responsive prototype of the Sabah Contribution Administration Network System (SCANS): the public page, sign-in and six portals (worker app, employer, State Government, Immigration (JIM Sabah), merchant and Microtek operator), built with React and Vite.
 
 All data is demo data in `src/data/demo.js`. Figures follow the SCANS proposal paper (130,391 registered workers, RM100 a month, 70:30 split); names, companies and records are samples.
 
@@ -32,6 +32,7 @@ npm run build      # production build in dist/
 | `/merchant/register` | Merchant sign-up: company, person in charge, outlets, documents, review |
 | `/merchant` … | Overview, offer management with a four-step new-offer flow, confirm a redemption at the counter, outlets and staff, reports, settings |
 | `/state` … | Overview, districts, FWECF account and settlements, workers and employers (read-only, lookups logged), notice approval, complaints, reports |
+| `/jim` … | Immigration (JIM): overview of record matching and permit data, status check by SCANS ID, passport, PLKS or QR, record matching (JIM confirms which value is correct; corrections go to Microtek), workers (read-only, contribution status only), permits ending soon (information only), JIM data link and officer accounts, notices sent to the State for approval, audit log |
 | `/admin` … | Microtek command centre, approvals, worker master list and profile tabs, employers, merchant onboarding and offer review, global announcements, reports centre, admin users and roles, audit log, connected systems |
 
 Actions carry across portals within one browser session (for example, a Microtek announcement waits for State approval and the State's decision shows back in the Microtek console). A reload resets the sample data.
@@ -41,5 +42,5 @@ Actions carry across portals within one browser session (for example, a Microtek
 - `src/styles/app.css`: design tokens and shared styles in the Sabah GO look (Poppins, light blue ground, white cards with soft shadows, navy to cyan gradient).
 - `src/components/ui.jsx`: app shell, cards, tables with paging, tabs, stepper, drawer, modal, charts and the Sabah district map.
 - `src/data/demo.js`: all shared sample data, derived so totals agree across portals.
-- `src/pages/<portal>/`: one folder per portal; `src/pages/shared/` holds the record screens and session store used by both government consoles.
+- `src/pages/<portal>/`: one folder per portal; `src/pages/shared/` holds the record screens and session store used by the government consoles (the JIM portal writes its lookups to the same audit log and its notices to the same State approval queue).
 - `public/img/`: photographs, the MOF Sabah crest and payment marks (reused from Sabah GO).

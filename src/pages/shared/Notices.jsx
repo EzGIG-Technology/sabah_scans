@@ -150,7 +150,7 @@ export function NoticeView({ n, onClose, footer }) {
       <dl className="kv">
         <div><dt>Recipients</dt><dd className="num">{n.recipients ? num(n.recipients) : '—'}</dd></div>
         <div><dt>{n.status === 'Sent' ? 'Sent on' : 'Date'}</dt><dd>{n.date}</dd></div>
-        <div><dt>From</dt><dd>{n.origin === 'State' ? 'Kerajaan Negeri Sabah' : 'Microtek for SCANS'}</dd></div>
+        <div><dt>From</dt><dd>{n.origin === 'State' ? 'Kerajaan Negeri Sabah' : n.origin === 'JIM' ? 'JIM Sabah (Jabatan Imigresen Malaysia)' : 'Microtek for SCANS'}</dd></div>
         <div><dt>Reached</dt><dd>{n.status === 'Sent' ? `${pct(n.reached)} (${num(Math.round(n.recipients * n.reached))})` : 'Not sent yet'}</dd></div>
       </dl>
       {n.status === 'Sent' && (

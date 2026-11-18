@@ -1,0 +1,99 @@
+/* Immigration dashboard styles (jim- prefix). Builds on app.css, shared.css and state.css. */
+
+/* ---------- KPI row: one hero and four figures ---------- */
+.jim-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--gap, 16px); }
+@media (max-width: 1280px) {
+  .jim-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .jim-kpis > :first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 1100px) {
+  .jim-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .jim-kpis .kpi .k-val { font-size: 22px; }
+}
+/* Three figures stay three across down to phones, then two plus one. */
+@media (max-width: 640px) {
+  .grid.g-3.jim-keep3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid.g-3.jim-keep3 > :last-child { grid-column: 1 / -1; }
+}
+
+/* ---------- Filters ---------- */
+.jim-filters { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 10px; align-items: center; }
+.jim-filters.four { grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)); }
+.jim-filters > label { min-width: 0 !important; }
+.jim-filters .seg { justify-self: start; }
+@media (max-width: 1100px) {
+  .jim-filters, .jim-filters.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jim-filters > :first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .jim-filters, .jim-filters.four { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Overview ---------- */
+.jim-src { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line2); }
+.jim-src dd small { font-weight: 400; font-size: 12px; display: block; }
+
+/* ---------- Status check ---------- */
+.jim-samples { display: flex; flex-direction: column; gap: 6px; }
+.jim-samples .chip { font-size: 12.5px; }
+.jim-rule { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--infoBg); color: var(--navy2); font-size: 13px; line-height: 1.45; }
+.jim-rule svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--blue); }
+.jim-scan { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 18px; border-radius: 16px; background: var(--navy); color: #fff; text-align: center; }
+.jim-scan b { font-size: 14px; font-weight: 600; }
+.jim-scan.done { background: var(--okBg); color: var(--ok); }
+.jim-scan-frame { position: relative; padding: 14px; border-radius: 14px; border: 2px dashed rgba(255, 255, 255, .5); overflow: hidden; }
+.jim-scan.done .jim-scan-frame { border-color: var(--okFill); }
+.jim-scan-line { position: absolute; left: 6px; right: 6px; height: 3px; top: 10px; border-radius: 3px; background: #4D9AD3; box-shadow: 0 0 12px #4D9AD3; animation: jim-scan 1.2s ease-in-out infinite alternate; }
+@keyframes jim-scan { to { top: calc(100% - 13px); } }
+
+/* ---------- Record matching ---------- */
+.jim-val { display: inline-block; padding: 2px 8px; border-radius: 8px; background: var(--surface2); font-size: 13px; overflow-wrap: anywhere; }
+.jim-val.jim { background: var(--sky); color: var(--navy2); }
+.jim-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.jim-compare > div { padding: 14px; border-radius: 14px; background: var(--surface2); border: 1px solid var(--line2); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.jim-compare > div.jim { background: var(--sky); border-color: var(--sky2); }
+.jim-compare small { font-size: 12px; color: var(--ink3); }
+.jim-compare b { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.jim-compare span { font-size: 12px; color: var(--ink2); }
+@media (max-width: 420px) { .jim-compare { grid-template-columns: minmax(0, 1fr); } }
+.jim-choice { align-items: flex-start; text-align: left; }
+.jim-choice .radio { margin-top: 2px; }
+.jim-choice b { display: block; font-size: 14px; font-weight: 600; }
+.jim-choice small { display: block; font-size: 12.5px; color: var(--ink3); font-weight: 400; margin-top: 2px; }
+
+/* ---------- Tables ---------- */
+.jim-nowrap { white-space: nowrap; }
+@media (max-width: 720px) { .jim-nowrap { white-space: normal; } }
+
+/* ---------- Data link ---------- */
+.jim-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.jim-link { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: center; }
+.jim-link-ends { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.jim-node { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 18px; border-radius: 16px; background: var(--surface2); min-width: 150px; flex: 1; text-align: center; }
+.jim-node img { width: 40px; height: 40px; object-fit: contain; }
+.jim-node b { font-size: 14px; }
+.jim-node small { font-size: 12px; color: var(--ink3); }
+.jim-arrow { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--sky); color: var(--blue); flex: none; }
+.jim-arrow svg { width: 20px; height: 20px; }
+.jim-link-state { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.jim-progress { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.jim-steps { list-style: none; margin: 0; padding: 0; display: flex; gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink3); }
+.jim-steps li { display: inline-flex; align-items: center; gap: 6px; }
+.jim-steps li span, .jim-steps li svg { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; background: var(--line2); flex: none; }
+.jim-steps li.on { color: var(--blue); font-weight: 600; }
+.jim-steps li.on span { background: var(--blue); color: #fff; }
+.jim-steps li.done { color: var(--ok); }
+.jim-steps li.done svg { background: var(--okBg); padding: 3px; }
+.jim-field .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; background: #fff; color: var(--blue); }
+.jim-field .ic svg { width: 17px; height: 17px; }
+.jim-field { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface2); }
+.jim-field b { display: block; font-size: 13.5px; font-weight: 600; }
+.jim-field small { display: block; font-size: 12.5px; color: var(--ink3); }
+@media (max-width: 960px) { .jim-link { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .jim-arrow { transform: rotate(90deg); margin: 0 auto; } .jim-link-ends { flex-direction: column; align-items: stretch; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .jim-scan-line { animation: none; }
+}

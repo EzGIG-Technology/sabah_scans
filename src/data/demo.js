@@ -175,8 +175,11 @@ export const approvals = [
 
 export const auditLog = [
   { at: '17 Jun 2027 09:42', who: 'Nurul Ain (State, JKN)', action: 'Exported monthly collection report', target: 'May 2027' },
+  { at: '17 Jun 2027 09:31', who: 'Jeffrey Gimbang (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0047477' },
   { at: '17 Jun 2027 09:15', who: 'Faizal Rahman (Microtek)', action: 'Viewed worker record', target: 'SCN26W0047218' },
+  { at: '17 Jun 2027 08:52', who: 'Mohd Hafiz Rahim (JIM Sabah)', action: 'Signed in with two steps', target: 'Immigration dashboard' },
   { at: '16 Jun 2027 17:03', who: 'System', action: 'Daily reconciliation completed, 0 breaks', target: '16 Jun 2027' },
+  { at: '16 Jun 2027 15:40', who: 'Nur Syafiqah Abdullah (JIM Sabah)', action: 'Exported permits ending soon', target: '11 sample records · within 60 days, Sandakan' },
   { at: '16 Jun 2027 14:22', who: 'Lim Wei Ling (Microtek)', action: 'Approved merchant offer', target: 'Pasaraya Servay · 5% off rice' },
   { at: '16 Jun 2027 11:08', who: 'Faizal Rahman (Microtek)', action: 'Corrected worker name after SWIMS check', target: 'SCN26W0051882' },
 ]
@@ -470,6 +473,7 @@ export const globalAnnouncements = [
   { id: 'GA-0046', title: 'New offer: RM5 off a GrabCar ride', sub: 'Merchant offer', audience: 'Workers', channels: ['App', 'Push'], recipients: 89730, date: '15 Jun 2027', status: 'Sent', reached: 0.81 },
   { id: 'GA-0045', title: 'Permit renewals: check your expiry date', sub: 'Information only, no action on contributions', audience: 'Employers', channels: ['Email', 'App'], recipients: 4821, date: '12 Jun 2027', status: 'Sent', reached: 0.97 },
   { id: 'GA-0044', title: 'Hari Raya Aidiladha office hours', sub: 'Festive notice', audience: 'All', channels: ['App', 'SMS', 'Email'], recipients: 135212, date: '14 Jun 2027', status: 'Waiting for State approval', reached: 0 },
+  { id: 'GA-0039', title: 'JIM counter hours over Hari Raya Aidiladha', sub: 'Notice from JIM Sabah', origin: 'JIM', audience: 'All', channels: ['App', 'SMS'], recipients: 135212, date: '14 Jun 2027', status: 'Sent', reached: 0.9, message: 'JIM offices in Sabah close on 17 June for Hari Raya Aidiladha and open again on 18 June at 8:00.' },
   { id: 'GA-0043', title: 'Flood warning: Lahad Datu and Kinabatangan', sub: 'Safety notice from the State', audience: 'Workers', channels: ['App', 'SMS', 'WhatsApp'], recipients: 41400, date: '6 May 2027', status: 'Sent', reached: 0.88 },
   { id: 'GA-0042', title: 'Pay 12 months at once', sub: 'Feature announcement', audience: 'All', channels: ['App'], recipients: 135212, date: '—', status: 'Draft', reached: 0 },
   { id: 'GA-0041', title: 'Employer portal: new monthly statements', sub: 'Feature announcement', audience: 'Employers', channels: ['Email'], recipients: 4821, date: '2 May 2027', status: 'Sent', reached: 0.99 },

@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Lock, ArrowRight, ChevronRight, Smartphone, CreditCard, Landmark, PieChart, ReceiptText, ShieldCheck, Database, FileLock2, HandHeart, Building2, Store, ServerCog, Languages, ScanFace, Plus } from 'lucide-react'
+import { Lock, ArrowRight, ChevronRight, BadgeCheck, Smartphone, CreditCard, Landmark, PieChart, ReceiptText, ShieldCheck, Database, FileLock2, HandHeart, Building2, Store, ServerCog, Languages, ScanFace, Plus } from 'lucide-react'
 import '../styles/landing.css'
 import { Logo } from '../components/ui.jsx'
 import { REGISTERED, RATE, STATE_SHARE, DEMO_DATE, num, rm, languages } from '../data/demo.js'
 
-/* The five portals, shared with the sign-in page. */
+/* The six portals, shared with the sign-in page. State and Immigration are the government sign-ins. */
 export const PORTALS = [
   { key: 'worker', to: '/worker', who: 'Workers · iOS and Android', name: 'Worker app', tag: 'Mobile app', img: '/img/portal-worker.jpg', crest: '/favicon.png', icon: Smartphone,
     desc: 'See what is due, pay any way you like, keep every receipt and read notices from the State in your own language.' },
   { key: 'employer', to: '/employer', who: 'Companies with foreign workers', name: 'Employer portal', img: '/img/portal-employer.jpg', icon: Building2,
     desc: 'See which workers have paid, pay for several at once with their consent, and download statements.' },
-  { key: 'state', to: '/state', who: 'Kerajaan Negeri Sabah', name: 'State dashboard', img: '/img/portal-state.jpg', crest: '/img/logos/mof-sabah.png', icon: Landmark,
+  { key: 'state', to: '/state', who: 'Kerajaan Negeri Sabah', name: 'State dashboard', img: '/img/portal-state.jpg', crest: '/img/logos/mof-sabah.png', icon: Landmark, group: 'Government',
     desc: 'Collection, the 70% State share and arrears by district and sector, the same day. Notices and complaints in one place.' },
+  { key: 'jim', to: '/jim', who: 'Jabatan Imigresen Malaysia, Negeri Sabah', name: 'Immigration dashboard', img: '/img/portal-immigration.jpg', crest: '/img/logos/imigresen.png', icon: BadgeCheck, group: 'Government',
+    desc: 'Read-only contribution status for information, the JIM permit data link, and matching records when SCANS and JIM disagree.' },
   { key: 'merchant', to: '/merchant', who: 'Partner shops', name: 'Merchant portal', img: '/img/portal-merchant.jpg', icon: Store,
     desc: 'Offer small savings to workers who are up to date and see how often they are used at each outlet.' },
   { key: 'admin', to: '/admin', who: 'Platform operator', name: 'Microtek operations', img: '/img/portal-operator.jpg', icon: ServerCog,

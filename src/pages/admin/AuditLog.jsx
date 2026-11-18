@@ -15,6 +15,7 @@ export default function AuditLog() {
     if (kind !== 'All' && a.kind !== kind) return false
     if (org === 'Microtek' && !a.who.includes('Microtek')) return false
     if (org === 'State' && !a.who.includes('State')) return false
+    if (org === 'JIM' && !a.who.includes('(JIM')) return false
     if (org === 'System' && a.who !== 'System') return false
     const t = q.toLowerCase()
     return !t || (a.who + a.action + a.target).toLowerCase().includes(t)
@@ -34,7 +35,7 @@ export default function AuditLog() {
         <div className="gv-filters f3" style={{ marginBottom: 14 }}>
           <SearchInput value={q} onChange={setQ} placeholder="Search user, action or record" />
           <Select label="Type" value={kind} onChange={setKind} options={[{ value: 'All', label: 'All types' }, 'View', 'Export', 'Change', 'Sign-in', 'System']} />
-          <Select label="Organisation" value={org} onChange={setOrg} options={[{ value: 'All', label: 'Everyone' }, 'Microtek', 'State', 'System']} />
+          <Select label="Organisation" value={org} onChange={setOrg} options={[{ value: 'All', label: 'Everyone' }, 'Microtek', 'State', { value: 'JIM', label: 'JIM Sabah' }, 'System']} />
         </div>
         <Table rows={rows} pageSize={12} columns={[
           { key: 'at', label: 'When', render: (a) => <span className="num">{a.at}</span> },

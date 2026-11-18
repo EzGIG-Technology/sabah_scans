@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import WorkerApp from './pages/worker/Worker.jsx'
 import EmployerApp from './pages/employer/Employer.jsx'
 import StateApp from './pages/state/State.jsx'
+import JimApp from './pages/jim/Jim.jsx'
 import AdminApp from './pages/admin/Admin.jsx'
 import MerchantApp from './pages/merchant/Merchant.jsx'
 import Ambient from './components/motion.jsx'
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/worker/*" element={<WorkerApp />} />
         <Route path="/employer/*" element={<EmployerApp />} />
         <Route path="/state/*" element={<StateApp />} />
+        <Route path="/jim/*" element={<JimApp />} />
         <Route path="/merchant/*" element={<MerchantApp />} />
         <Route path="/admin/*" element={<AdminApp />} />
         <Route path="*" element={<NotFound />} />

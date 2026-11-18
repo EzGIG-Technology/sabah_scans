@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, ShieldCheck, Smartphone, KeyRound, Check, ChevronRight, MessageSquareText } from 'lucide-react'
+import { ArrowLeft, Lock, ShieldCheck, Smartphone, KeyRound, Check, ChevronRight, MessageSquareText, Landmark } from 'lucide-react'
 import '../styles/landing.css'
 import { Logo } from '../components/ui.jsx'
 import { demoWorker } from '../data/demo.js'
+import { logEvent } from './shared/store.js'
 import { PORTALS, Crest } from './Landing.jsx'
 
 /* How each portal signs in. The sample account is filled in for the prototype. */
@@ -14,6 +15,8 @@ const HOW = {
     codeTo: 'Enter the 6-digit code from your authenticator app.', note: 'Your company must be registered with JTK Sabah in eNORES.' },
   state: { idLabel: 'Government email', id: 'nurul.ain@sabah.gov.my', user: 'Nurul Ain, Jabatan Kewangan Negeri',
     codeTo: 'Enter the 6-digit code from your authenticator app.', note: 'Every view and export is written to the audit log.' },
+  jim: { idLabel: 'Government email', id: 'hafiz.rahim@imi.gov.my', user: 'Mohd Hafiz Rahim, Immigration officer, KK office', actor: 'Mohd Hafiz Rahim (JIM Sabah)',
+    codeTo: 'Enter the 6-digit code from your authenticator app. 2-step sign-in is required for every JIM account.', note: 'Immigration sees contribution status only, for information. Every view, lookup and export is written to the audit log.' },
   merchant: { idLabel: 'Work email', id: 'partners@7eleven.example.my', user: 'Tan Mei Ling, 7-Eleven Sabah',
     codeTo: 'We sent a 6-digit code by SMS to +60 12-•••• 8810.', note: 'Merchant partners are approved by Microtek before they can sign in.' },
   admin: { idLabel: 'Microtek email', id: 'faizal@microtek.example.my', user: 'Faizal Rahman, Microtek operations',
@@ -31,12 +34,21 @@ export default function Login() {
   const p = PORTALS.find((x) => x.key === key)
   const h = HOW[key]
   useEffect(() => { setStage('id'); setBusy(false) }, [key])
+  // On phones the portal list scrolls sideways: keep the chosen portal in view.
+  const listRef = useRef(null)
+  useEffect(() => {
+    const list = listRef.current
+    const opt = list && list.querySelector('.si-opt[aria-checked="true"]')
+    if (!opt || list.scrollWidth <= list.clientWidth) return
+    list.scrollLeft += opt.getBoundingClientRect().left - list.getBoundingClientRect().left - 8
+  }, [key])
   useEffect(() => { if (q && PORTALS.some((x) => x.key === q)) setKey(q) }, [q])
 
   const toCode = (e) => { e && e.preventDefault(); setStage('code') }
   const signIn = (e) => {
     e.preventDefault()
     setBusy(true)
+    if (h.actor) logEvent('Signed in with two steps', p.name, h.actor)
     setTimeout(() => nav(p.to), 500)
   }
 
@@ -63,14 +75,25 @@ export default function Login() {
 
       <main className="lp-wrap si-main">
         <section className="si-pick" aria-label="Portal">
-          <div role="radiogroup" aria-label="Portal" className="si-list">
-            {PORTALS.map((x) => (
-              <button key={x.key} type="button" role="radio" aria-checked={key === x.key} className="si-opt" onClick={() => setKey(x.key)}>
-                <span className="si-thumb" style={{ backgroundImage: `url(${x.img})` }} aria-hidden="true"><span className="si-crest"><Crest p={x} size={26} /></span></span>
-                <span className="grow"><small>{x.who}</small><b>{x.name}</b></span>
-                <span className="si-radio" aria-hidden="true">{key === x.key && <Check />}</span>
-              </button>
-            ))}
+          <div role="radiogroup" aria-label="Portal" className="si-list" ref={listRef}>
+            {PORTALS.map((x, i) => {
+              const opt = (y) => (
+                <button key={y.key} type="button" role="radio" aria-checked={key === y.key} className="si-opt" onClick={() => setKey(y.key)}>
+                  <span className="si-thumb" style={{ backgroundImage: `url(${y.img})` }} aria-hidden="true"><span className="si-crest"><Crest p={y} size={26} /></span></span>
+                  <span className="grow"><small>{y.who}</small><b>{y.name}</b></span>
+                  <span className="si-radio" aria-hidden="true">{key === y.key && <Check />}</span>
+                </button>
+              )
+              if (!x.group) return opt(x)
+              // Government sign-ins (State and Immigration) sit together under one label.
+              if (PORTALS[i - 1] && PORTALS[i - 1].group === x.group) return null
+              return (
+                <div key={x.group} className="si-gov">
+                  <span className="si-gov-label"><Landmark aria-hidden="true" />{x.group}</span>
+                  {PORTALS.filter((y) => y.group === x.group).map(opt)}
+                </div>
+              )
+            })}
           </div>
           <div className="si-join">
             <Link to="/employer/register"><span><b>Register your company</b><small>For employers of foreign workers in Sabah</small></span><ChevronRight aria-hidden="true" /></Link>
@@ -102,7 +125,7 @@ export default function Login() {
                 </label>
               )}
               <button className="btn primary lg block">{key === 'worker' ? <><MessageSquareText aria-hidden="true" /> {h.first}</> : <><Lock aria-hidden="true" /> Continue</>}</button>
-              {key === 'state' && <>
+              {(key === 'state' || key === 'jim') && <>
                 <div className="si-or"><span>or</span></div>
                 <button type="button" className="btn lg block si-mydid" onClick={toCode}><ShieldCheck aria-hidden="true" /> Sign in with MyDigital ID</button>
               </>}

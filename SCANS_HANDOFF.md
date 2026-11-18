@@ -45,14 +45,15 @@ Every registered foreign worker in Sabah (130,391 on 31 Dec 2025) pays a contrib
 | Worker app | Registered PLKS holders (mostly plantation and agriculture) | `/worker/*` | Mobile first; bottom tab bar on phones, side rail ≥960px |
 | Employer portal | Companies employing foreign workers | `/employer/*` | Web dashboard |
 | State dashboard | Kerajaan Negeri Sabah, Kementerian Kewangan Negeri Sabah, Jabatan Kewangan Negeri, auditors | `/state/*` | Web dashboard |
+| Immigration dashboard | Jabatan Imigresen Malaysia, Negeri Sabah (JIM Sabah) officers | `/jim/*` | Web dashboard |
 | Merchant portal | Partner shops (e.g. 7-Eleven Sabah) | `/merchant/*` | Web dashboard |
 | Operator console | Microtek operations | `/admin/*` | Web dashboard |
 
 ### Full screen list (all exist in the prototype)
 
 **Public**
-- `/` Landing: folder-stack hero ("RM100 a month"), how it works (one receipt card in four states), stepped figure tiles (130,391 · RM100 · 70%), five-portal index with live preview, FAQ accordion, block-built SCANS footer.
-- `/login` Sign-in with a folder tab per portal. Workers: phone + SMS code. State: email/password or MyDigital ID. Microtek: 2-step sign-in required.
+- `/` Landing: folder-stack hero ("RM100 a month"), how it works (one receipt card in four states), stepped figure tiles (130,391 · RM100 · 70%), six-portal index (State and Immigration are the two government sign-ins), FAQ accordion, block-built SCANS footer.
+- `/login` Sign-in with a folder tab per portal. Workers: phone + SMS code. State and Immigration (grouped as Government): email/password or MyDigital ID, then a 2-step code; `?portal=jim` preselects Immigration. Microtek: 2-step sign-in required.
 
 **Worker app**
 - `/worker/start` Sign-up, 5 steps: language (6 languages) → six plain rules + consent checkbox (unticked by default) → passport scan (MRZ) → face check via KDN → record matched from SWIMS/eNORES ("Something is wrong" goes to manual review, never rejection).
@@ -81,6 +82,16 @@ Every registered foreign worker in Sabah (130,391 on 31 Dec 2025) pays a contrib
 - `/state/notices` Sent notices + "Write a notice" drawer (audience by district, sector or arrears; translated into 6 languages; State approves before sending).
 - `/state/complaints` Complaint figures and table by agency.
 - `/state/reports` Collection and reconciliation, FWECF account statement, district/sector report, audit log extract, complaints by agency.
+
+**Immigration (JIM Sabah)** — contribution status only, for information. SCANS never decides immigration status and has no function to issue, hold, suspend or cancel a permit; each page says once that contribution status must not be used to refuse, delay or cancel a permit. JIM permit data comes in read-only; nothing JIM confirms changes a worker's status. No wages, complaint content or merchant data. Every view, lookup and export is written to the shared audit log. Code in `src/pages/jim/` (data and session store in `data.js`, styles in `jim.css`).
+- `/jim` Overview: PLKS holders matched to a JIM permit record (of 130,391 registered; SWIMS 122,228 shown for reference), records waiting for JIM to confirm, permits ending within 60 days (information), live status checks today, JIM data link health; waiting records by district, record match donut, latest checks feed, checks per JIM office (KK, Tawau, Sandakan, Lahad Datu, Keningau, Semporna, Kudat), permits ending by month.
+- `/jim/check` Status check by SCANS ID, passport or PLKS number, sample chips, or SCANS card QR (mock). Result: name, nationality, PLKS, permit expiry from JIM, employer, contribution status (Up to date / 1 month owing / 3+ months owing) with the rule note, link to the record. Every check (including no match) is logged and listed under "Your recent checks".
+- `/jim/records` Record matching: Waiting / Confirmed / Sent to Microtek. Drawer compares the SCANS and JIM values (name spelling, renewed passport, changed employer, date of birth); the officer chooses "JIM value is correct" (correction goes to the Microtek review queue at `/admin/approvals`), "SCANS value is correct" or "Needs a check at the office", with a remark.
+- `/jim/workers`, `/jim/workers/:id` Read-only list and record: identity, PLKS and permit dates from JIM, employer, contribution status, match with JIM, who opened the record. No payments, phone or consent details.
+- `/jim/permits` Permits ending within 30/60/90 days by district and employer, by JIM office; export logged. For planning office workload only, not linked to contributions (no contribution status shown).
+- `/jim/sync` JIM data link: one way, read-only; last runs (received, updated, failed), "Run sync now" with progress, fields read, officer accounts linked to JIM staff IDs.
+- `/jim/notices` JIM drafts notices on office matters (closures, counter hours); they go to the shared notices store as "Waiting for State approval" and appear on `/state/notices`, where the State approves or returns them to JIM.
+- `/jim/audit` This portal's lookups, exports and changes from the shared audit log.
 
 **Merchant**
 - `/merchant` Uses this month, live offers, outlets, uses per week and per outlet.

@@ -29,6 +29,8 @@ import './state.css'
 
 const BASE = '/state'
 const ACTOR = 'Nurul Ain (State, JKN)'
+const FROM = { State: 'the State', JIM: 'JIM Sabah', Microtek: 'Microtek' }
+const fromName = (n) => FROM[n.origin] || 'Microtek'
 const axisRm = (v) => (v >= 1e6 ? (v / 1e6).toFixed(1) + 'm' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : String(v))
 const rmM = (v) => 'RM ' + (v / 1e6).toFixed(2) + 'm'
 
@@ -65,7 +67,7 @@ export default function StateApp() {
     ] },
   ]
   const notifications = [
-    ...(waiting ? [{ title: `${waiting} notice${waiting > 1 ? 's' : ''} from Microtek waiting for your approval`, time: 'Official notices' }] : []),
+    ...(waiting ? [{ title: `${waiting} notice${waiting > 1 ? 's' : ''} from Microtek or JIM waiting for your approval`, time: 'Official notices' }] : []),
     { title: 'Settlement of RM 302,700 credited to the FWECF account', time: '16 Jun 2027, 23:04' },
     { title: 'New complaint routed to JTK Sabah', time: 'Keningau · 26 May 2027' },
   ]
@@ -257,7 +259,7 @@ function Notices() {
   const doReturn = () => {
     updateNotice(ret.id, { status: 'Returned', comment: comment.trim() })
     logEvent('Returned notice with comment', `${ret.id} · ${ret.title}`)
-    toast('Returned to Microtek with your comment')
+    toast(`Returned to ${fromName(ret)} with your comment`)
     setRet(null); setComment(''); setView(null)
   }
   const submit = (n) => {
@@ -269,11 +271,11 @@ function Notices() {
 
   return (
     <>
-      <PageHead title="Official notices" sub="Notices go to workers in the language they chose. Notices written by Microtek wait here until the State approves them.">
+      <PageHead title="Official notices" sub="Notices go to workers in the language they chose. Notices written by Microtek or JIM Sabah wait here until the State approves them.">
         <button className="btn primary" onClick={() => setCompose(true)}><Plus /> Write a notice</button>
       </PageHead>
       <div className="grid g-4 keep2">
-        <Kpi icon={Inbox} tone="warn" label="Waiting for you" value={num(waiting.length)} note="From Microtek" />
+        <Kpi icon={Inbox} tone="warn" label="Waiting for you" value={num(waiting.length)} note="From Microtek and JIM Sabah" />
         <Kpi icon={Send} tone="ok" label="Sent" value={num(sentOnly.length)} note="Since May 2027" />
         <Kpi icon={Users} label="Reached" value={pct(reach)} note="Of people each notice was sent to" />
         <Kpi icon={Languages} tone="purple" label="Languages" value="6" note="BM, English, Indonesian, Filipino, Bengali, Nepali" />
@@ -281,12 +283,12 @@ function Notices() {
       <Card>
         <Tabs items={[{ value: 'waiting', label: 'Waiting for approval', count: waiting.length }, { value: 'sent', label: 'Sent and scheduled', count: sent.length }, { value: 'returned', label: 'Returned', count: returned.length }]} value={tab} onChange={setTab} label="Notices" />
         <div style={{ paddingTop: 4 }}>
-          {list.length === 0 && <Empty title={tab === 'waiting' ? 'Nothing waiting for approval' : 'Nothing here'} icon={CheckCircle2}>{tab === 'waiting' ? 'Notices Microtek writes for workers will appear here for you to approve.' : 'Notices appear here after they are sent or returned.'}</Empty>}
+          {list.length === 0 && <Empty title={tab === 'waiting' ? 'Nothing waiting for approval' : 'Nothing here'} icon={CheckCircle2}>{tab === 'waiting' ? 'Notices Microtek or JIM Sabah write will appear here for you to approve.' : 'Notices appear here after they are sent or returned.'}</Empty>}
           {list.map((n) => (
             <div className="gv-ap" key={n.id}>
               <span className="ic"><Megaphone aria-hidden="true" /></span>
               <div className="txt">
-                <small>{n.id} · from {n.origin === 'State' ? 'the State' : 'Microtek'} · {n.date}</small>
+                <small>{n.id} · from {fromName(n)} · {n.date}</small>
                 <b>{n.title}</b>
                 <div className="row wrap" style={{ gap: 8, marginTop: 4 }}><AudiencePill a={n.audience} /><ChannelIcons list={n.channels} /><span className="small muted num">{num(n.recipients)} recipients</span></div>
                 {n.comment && <small style={{ color: 'var(--bad)', marginTop: 4 }}>Your comment: {n.comment}</small>}
@@ -309,10 +311,10 @@ function Notices() {
         ? <><button className="btn outline" onClick={() => setRet(v)}><X /> Return with comment</button><button className="btn success" onClick={() => approve(v)}><Check /> Approve and send</button></>
         : null} />}
       {ret && (
-        <Modal title="Return to Microtek" onClose={() => setRet(null)} actions={<><button className="btn outline" onClick={() => setRet(null)}>Cancel</button><button className="btn primary" disabled={comment.trim().length < 5} onClick={doReturn}>Return with comment</button></>}>
+        <Modal title={`Return to ${fromName(ret)}`} onClose={() => setRet(null)} actions={<><button className="btn outline" onClick={() => setRet(null)}>Cancel</button><button className="btn primary" disabled={comment.trim().length < 5} onClick={doReturn}>Return with comment</button></>}>
           <div className="stack" style={{ gap: 12 }}>
-            <p className="ink2">“{ret.title}” goes back to Microtek with your comment. It is not sent to anyone.</p>
-            <Field label="Comment" hint="Microtek sees this."><textarea className="input" autoFocus value={comment} onChange={(e) => setComment(e.target.value)} placeholder="For example: please add the help desk phone number" /></Field>
+            <p className="ink2">“{ret.title}” goes back to {fromName(ret)} with your comment. It is not sent to anyone.</p>
+            <Field label="Comment" hint={`${fromName(ret)} sees this.`}><textarea className="input" autoFocus value={comment} onChange={(e) => setComment(e.target.value)} placeholder="For example: please add the help desk phone number" /></Field>
           </div>
         </Modal>
       )}
