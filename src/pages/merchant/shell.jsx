@@ -1,23 +1,27 @@
-import { LayoutDashboard, Tag, ScanLine, Store, FileBarChart, Settings as SettingsIcon, UserPlus } from 'lucide-react'
+import { LayoutDashboard, Tag, ScanLine, Store, FileBarChart, Settings as SettingsIcon, UserPlus, Bell } from 'lucide-react'
 import { AppShell } from '../../components/ui.jsx'
 import { useMerchant } from './store.jsx'
 import { ME, MERCHANT } from './data.js'
 
-const notifications = [
-  { title: 'Free 600ml water offer is with Microtek for review', time: 'Sent 14 Jun 2027' },
-  { title: 'Statement for May 2027 is ready to download', time: '1 Jun 2027' },
-  { title: 'RM3 off a RM30 prepaid reload ends on 30 Jun', time: 'Reminder' },
-]
-
 export function MShell({ title, children }) {
-  const { offers, outlets } = useMerchant()
+  const { offers, outlets, notes } = useMerchant()
   const waiting = offers.filter((o) => o.status === 'Waiting for approval').length
+  const sentBack = offers.filter((o) => o.status === 'Sent back').length
+  const unread = notes.filter((n) => !n.read)
+  // The top bar shows the newest unread items; the full list is on the Notifications page.
+  const notifications = unread.slice(0, 4).map((n) => ({ title: n.title, time: n.ago }))
   const nav = [
-    { group: 'Overview', items: [{ to: '/merchant', label: 'Dashboard', icon: LayoutDashboard, end: true }] },
+    {
+      group: 'Overview',
+      items: [
+        { to: '/merchant', label: 'Dashboard', icon: LayoutDashboard, end: true },
+        { to: '/merchant/notifications', label: 'Notifications', icon: Bell, count: unread.length || undefined },
+      ],
+    },
     {
       group: 'Perks',
       items: [
-        { to: '/merchant/offers', label: 'Offer management', icon: Tag, count: waiting || undefined },
+        { to: '/merchant/offers', label: 'Offer management', icon: Tag, count: waiting + sentBack || undefined },
         { to: '/merchant/redeem', label: 'Confirm a redemption', icon: ScanLine },
       ],
     },
@@ -39,6 +43,7 @@ export function MShell({ title, children }) {
       kicker="Merchant partner"
       title={title}
       notifications={notifications}
+      notificationsHref="/merchant/notifications"
       searchPlaceholder="Search offers or outlets"
     >
       {children}

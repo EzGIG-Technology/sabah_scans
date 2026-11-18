@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
-import { Plus, Eye, CheckCircle2, Percent, Pause, Play, Pencil, Ban, Copy, Trash2, Hourglass, Send, ShieldCheck, LayoutGrid, List, ChevronRight, ChevronLeft, Save, Info, Lock, Undo2 } from 'lucide-react'
+import { Plus, Eye, CheckCircle2, Percent, Pause, Play, Pencil, Ban, Copy, Trash2, Hourglass, Send, ShieldCheck, LayoutGrid, List, ChevronRight, ChevronLeft, Save, Info, Lock, Undo2, XCircle, ImagePlus } from 'lucide-react'
 import { PageHead, Card, Kpi, Status, Tabs, SearchInput, Seg, Field, Stepper, Modal, Callout, Empty, LineChart, HBarChart, Table, useToast } from '../../components/ui.jsx'
 import { num, pct } from '../../data/demo.js'
 import { MShell } from './shell.jsx'
 import { useMerchant } from './store.jsx'
-import { categories, limits, districtOptions, districtName, discountLabel, outletsForOffer, offerMonthly, split, NOW } from './data.js'
+import { categories, limits, districtOptions, districtName, discountLabel, outletsForOffer, offerMonthly, split, thisWeek, NOW } from './data.js'
 import { OfferThumb, PerkPhone, fmtDate, toIso } from './parts.jsx'
 
 const TABS = [
   { value: 'live', label: 'Live', match: ['Live', 'Paused'] },
   { value: 'waiting', label: 'Waiting for approval', match: ['Waiting for approval'] },
+  { value: 'sentback', label: 'Sent back', match: ['Sent back'] },
   { value: 'draft', label: 'Draft', match: ['Draft'] },
   { value: 'expired', label: 'Expired', match: ['Expired', 'Ended'] },
 ]
@@ -53,7 +54,7 @@ export function OffersList() {
         </div>
         {list.length === 0 ? (
           <Empty title={q ? 'No offers match' : 'No offers here'}>
-            {q ? 'Try another word.' : tab === 'draft' ? 'Offers you save without sending appear here.' : 'Offers will appear here when their status changes.'}
+            {q ? 'Try another word.' : tab === 'draft' ? 'Offers you save without sending appear here.' : tab === 'sentback' ? 'Offers Microtek returns with a reason appear here.' : 'Offers will appear here when their status changes.'}
             {!q && <div style={{ marginTop: 14 }}><Link className="btn primary sm" to="/merchant/offers/new"><Plus /> New offer</Link></div>}
           </Empty>
         ) : view === 'cards' ? (
@@ -79,12 +80,12 @@ function OfferCard({ o }) {
         </div>
       </div>
       <div className="row between wrap" style={{ gap: 8 }}>
-        <Status>{o.status}</Status>
-        <span className="small muted">{o.status === 'Draft' ? 'Not sent yet' : o.status === 'Waiting for approval' ? 'Sent ' + o.submitted : `${o.starts} to ${o.ends}`}</span>
+        <Status tone={o.status === 'Sent back' ? 'bad' : undefined}>{o.status}</Status>
+        <span className="small muted">{o.status === 'Draft' ? 'Not sent yet' : o.status === 'Waiting for approval' ? 'Sent ' + o.submitted : o.status === 'Sent back' ? 'Sent back ' + o.reviewed : `${o.starts} to ${o.ends}`}</span>
       </div>
-      {o.status === 'Waiting for approval' || o.status === 'Draft' ? (
-        <div className="mx-offer-note">
-          {o.status === 'Draft' ? <><Pencil size={14} /> Finish the details and send it to Microtek</> : <><Hourglass size={14} /> Microtek replies within 2 working days</>}
+      {o.status === 'Waiting for approval' || o.status === 'Draft' || o.status === 'Sent back' ? (
+        <div className={'mx-offer-note' + (o.status === 'Sent back' ? ' bad' : '')}>
+          {o.status === 'Draft' ? <><Pencil size={14} /> Finish the details and send it to Microtek</> : o.status === 'Sent back' ? <><XCircle size={14} /> Change it and send it again</> : <><Hourglass size={14} /> Microtek replies within 2 working days</>}
         </div>
       ) : (
         <>
@@ -109,7 +110,7 @@ function OfferTable({ rows }) {
       { key: 'views', label: 'Views', align: 'r', render: (o) => num(o.views) },
       { key: 'redemptions', label: 'Redemptions', align: 'r', render: (o) => num(o.redemptions) },
       { key: 'conv', label: 'Conversion', align: 'r', render: (o) => (o.views ? pct(conv(o), 1) : '—') },
-      { key: 'status', label: 'Status', render: (o) => <Status>{o.status}</Status> },
+      { key: 'status', label: 'Status', render: (o) => <Status tone={o.status === 'Sent back' ? 'bad' : undefined}>{o.status}</Status> },
     ]} />
   )
 }
@@ -118,13 +119,14 @@ function OfferTable({ rows }) {
    New / edit offer
    ===================================================================== */
 const STEPS = ['Details', 'Rules', 'Outlets', 'Preview']
-const blank = { title: '', category: 'Top-up', type: 'amount', value: '', minSpend: '', what: '', starts: '2027-07-01', ends: '2027-08-31', limit: 'One a month', terms: '', outletMode: 'all', districts: [], outletIds: [] }
+const blank = { title: '', category: 'Top-up', type: 'amount', value: '', minSpend: '', what: '', starts: '2027-07-01', ends: '2027-08-31', limit: 'One a month', terms: '', outletMode: 'all', districts: [], outletIds: [], maxUses: '', image: null, imageName: '' }
 
 function formFromOffer(o) {
   return {
     title: o.title, category: o.category, type: o.type || 'amount', value: o.value || '', minSpend: o.minSpend || '', what: o.what || '',
     starts: toIso(o.starts), ends: toIso(o.ends), limit: limits.includes(o.limit) ? o.limit : 'One a month', terms: o.terms || '',
     outletMode: o.outletIds && o.outletIds.length ? 'pick' : o.districtsIn ? 'districts' : 'all', districts: o.districtsIn || [], outletIds: o.outletIds || [],
+    maxUses: o.maxUses || '', image: o.image || null, imageName: o.imageName || '',
   }
 }
 
@@ -171,25 +173,26 @@ function OfferForm({ initial, mode, offer }) {
     else if (f.starts < '2027-06-21') e.starts = 'Start on 21 Jun 2027 or later. Microtek needs up to 2 working days to check it.'
     if (!f.ends) e.ends = 'Choose an end date.'
     else if (f.starts && f.ends <= f.starts) e.ends = 'The end date must be after the start date.'
+    if (f.maxUses && !(Number(f.maxUses) >= 1 && Number.isInteger(Number(f.maxUses)))) e.maxUses = 'Enter a whole number, for example 1000, or leave it empty.'
     if (f.outletMode === 'districts' && !f.districts.length) e.outlets = 'Choose at least one district.'
     if (f.outletMode === 'pick' && !f.outletIds.length) e.outlets = 'Choose at least one outlet.'
     return e
   }, [f])
-  const stepFields = [['title', 'value'], ['starts', 'ends'], ['outlets'], []]
+  const stepFields = [['title', 'value', 'image'], ['starts', 'ends', 'maxUses'], ['outlets'], []]
   const stepOk = (i) => !stepFields[i].some((k) => errors[k])
 
   const label = discountLabel(f.type, f.value)
   const preview = {
     title: f.title, discountText: label, what: f.what, limit: f.limit, terms: f.terms,
-    starts: fmtDate(f.starts), ends: fmtDate(f.ends), outletsText: outletsText(f, outlets),
+    starts: fmtDate(f.starts), ends: fmtDate(f.ends), outletsText: outletsText(f, outlets), image: f.image,
   }
   const toOffer = (status) => ({
     title: f.title.trim() || 'Untitled offer', category: f.category, type: f.type, value: f.value, minSpend: f.minSpend, what: f.what, terms: f.terms,
     discount: f.type === 'amount' ? 'RM' + f.value : f.type === 'percent' ? f.value + '%' : 'Free item',
     starts: fmtDate(f.starts) || '—', ends: fmtDate(f.ends) || '—', limit: f.limit,
     districtsIn: f.outletMode === 'districts' ? f.districts : null, outletIds: f.outletMode === 'pick' ? f.outletIds : [],
-    outlets: outletsText(f, outlets), status,
-    submitted: status === 'Waiting for approval' ? NOW : null,
+    outlets: outletsText(f, outlets), status, maxUses: f.maxUses, image: f.image, imageName: f.imageName,
+    submitted: status === 'Waiting for approval' ? NOW : null, reason: null,
   })
 
   const next = () => {
@@ -200,7 +203,7 @@ function OfferForm({ initial, mode, offer }) {
     window.scrollTo(0, 0)
   }
   const saveDraft = () => {
-    if (mode === 'edit' && offer.status !== 'Draft') {
+    if (editingLive) {
       // A live offer keeps running; a draft of the change is not kept in this prototype.
       toast('Changes discarded. The offer is unchanged.')
       go('/merchant/offers/' + offer.id)
@@ -218,7 +221,7 @@ function OfferForm({ initial, mode, offer }) {
     if (!ack) return
     const ref = 'OS-2706-0' + (22 + Math.floor(Math.random() * 70))
     if (mode === 'edit') {
-      updateOffer(offer.id, { ...toOffer('Waiting for approval'), ref, changeOf: offer.status === 'Draft' ? null : offer.status })
+      updateOffer(offer.id, { ...toOffer('Waiting for approval'), ref, changeOf: editingLive ? offer.status : null })
       toast('Sent to Microtek for approval')
       go('/merchant/offers/' + offer.id)
     } else {
@@ -228,7 +231,7 @@ function OfferForm({ initial, mode, offer }) {
     }
   }
 
-  const editingLive = mode === 'edit' && offer.status !== 'Draft'
+  const editingLive = mode === 'edit' && offer.status !== 'Draft' && offer.status !== 'Sent back'
   const visibleOutlets = outlets.filter((o) => (o.name + o.district).toLowerCase().includes(outletQ.toLowerCase()))
   const err = (k) => (tried ? errors[k] : undefined)
 
@@ -239,6 +242,7 @@ function OfferForm({ initial, mode, offer }) {
         sub="Keep it simple: one saving, plain conditions. Microtek checks it before workers see it." />
 
       {editingLive && <Callout tone="warn" icon={Info}>Changes go back to Microtek for approval. Until they approve, the offer is shown as waiting for approval.</Callout>}
+      {mode === 'edit' && offer.status === 'Sent back' && <Callout tone="bad" icon={XCircle}><b>Microtek sent this back on {offer.reviewed}.</b> {offer.reason}</Callout>}
 
       <div className="grid mx-form-grid">
         <Card>
@@ -269,6 +273,7 @@ function OfferForm({ initial, mode, offer }) {
                 <Field label="What the worker gets, in one line" full hint="Short sentences translate better into the six worker languages">
                   <input className="input" value={f.what} onChange={set('what')} placeholder="RM2 off when you top up RM20 or more for any network." />
                 </Field>
+                <ImageField f={f} setF={setF} />
               </div>
             )}
 
@@ -276,6 +281,9 @@ function OfferForm({ initial, mode, offer }) {
               <div className="form-grid">
                 <Field label="Starts" error={err('starts')}><input type="date" className={'input' + (err('starts') ? ' err' : '')} value={f.starts} onChange={set('starts')} /></Field>
                 <Field label="Ends" error={err('ends')}><input type="date" className={'input' + (err('ends') ? ' err' : '')} value={f.ends} onChange={set('ends')} /></Field>
+                <Field label="Most uses in total (optional)" hint="The offer stops by itself when it reaches this number. Leave empty for no limit." error={err('maxUses')}>
+                  <input className={'input' + (err('maxUses') ? ' err' : '')} value={f.maxUses} onChange={set('maxUses')} inputMode="numeric" placeholder="No limit" />
+                </Field>
                 <div className="field full">
                   <span>Limit per worker</span>
                   <div className="chips">{limits.map((l) => <button type="button" key={l} className="chip" aria-pressed={f.limit === l} onClick={() => set('limit')(l)}>{l}</button>)}</div>
@@ -340,7 +348,9 @@ function OfferForm({ initial, mode, offer }) {
                   <div><dt>Category</dt><dd>{f.category}</dd></div>
                   <div><dt>Runs</dt><dd>{fmtDate(f.starts)} to {fmtDate(f.ends)}</dd></div>
                   <div><dt>Limit per worker</dt><dd>{f.limit}</dd></div>
+                  <div><dt>Most uses in total</dt><dd>{f.maxUses ? num(Number(f.maxUses)) : 'No limit'}</dd></div>
                   <div><dt>Outlets</dt><dd>{preview.outletsText}</dd></div>
+                  <div><dt>Picture</dt><dd>{f.imageName || 'Discount tile only'}</dd></div>
                   <div style={{ gridColumn: '1 / -1' }}><dt>Terms</dt><dd style={{ fontWeight: 400 }}>{f.terms || 'None added'}</dd></div>
                 </dl>
                 <div className="mx-timeline">
@@ -405,6 +415,8 @@ export function OfferDetail() {
   const counts = split(o.redemptions, part.map((x) => x.weight || 1))
   const byOutlet = part.map((x, i) => ({ label: x.name.replace('7-Eleven ', ''), value: counts[i] })).sort((a, b) => b.value - a.value).slice(0, 8)
   const label = discountLabel(o.type, o.value)
+  const week = thisWeek(o.june || 0)
+  const top = o.redemptions ? byOutlet[0] : null
 
   const actions = (
     <>
@@ -414,8 +426,8 @@ export function OfferDetail() {
       {(isLive || o.status === 'Waiting for approval') && <button className="btn outline" onClick={() => setModal('edit')}><Pencil /> Edit</button>}
       {o.status === 'Waiting for approval' && <button className="btn outline" onClick={() => setModal('withdraw')}><Undo2 /> Withdraw</button>}
       {isLive && <button className="btn danger" onClick={() => setModal('end')}><Ban /> End offer</button>}
-      {o.status === 'Draft' && <button className="btn danger" onClick={() => setModal('delete')}><Trash2 /> Delete draft</button>}
-      {o.status === 'Draft' && <Link className="btn primary" to={`/merchant/offers/${o.id}/edit`}><Pencil /> Continue editing</Link>}
+      {(o.status === 'Draft' || o.status === 'Sent back') && <button className="btn danger" onClick={() => setModal('delete')}><Trash2 /> Delete</button>}
+      {(o.status === 'Draft' || o.status === 'Sent back') && <Link className="btn primary" to={`/merchant/offers/${o.id}/edit`}><Pencil /> {o.status === 'Sent back' ? 'Change and send again' : 'Continue editing'}</Link>}
       {done && <button className="btn primary" onClick={() => go('/merchant/offers/new', { state: { copy: o } })}><Copy /> Run again</button>}
     </>
   )
@@ -439,13 +451,23 @@ export function OfferDetail() {
       )}
       {o.status === 'Paused' && <Callout tone="warn" icon={Pause}>This offer is paused. Workers do not see it and codes cannot be confirmed until you resume it.</Callout>}
       {o.status === 'Draft' && <Callout icon={Pencil}>This draft has not been sent. Finish it and send it to Microtek for approval.</Callout>}
+      {o.status === 'Sent back' && (
+        <Card>
+          <div className="mx-timeline wide">
+            <div className="on"><span><Send size={14} /></span><div><b>Sent to Microtek</b><small>{o.submitted}</small></div></div>
+            <div className="bad"><span><XCircle size={14} /></span><div><b>Sent back with a reason</b><small>{o.reviewed}</small></div></div>
+            <div><span><Pencil size={14} /></span><div><b>Change it and send again</b><small>Workers have not seen it</small></div></div>
+          </div>
+          <Callout tone="bad" icon={XCircle} style={{ marginTop: 14 }}><b>What Microtek asked for:</b> {o.reason}</Callout>
+        </Card>
+      )}
 
       {(o.views > 0 || isLive || done) && <>
       <div className="grid g-4 keep2">
         <Kpi hero icon={Eye} label="Views" value={num(o.views)} note="Workers who opened the perk" />
         <Kpi icon={CheckCircle2} tone="ok" label="Redemptions" value={num(o.redemptions)} note="Confirmed at the counter" />
         <Kpi icon={Percent} tone="purple" label="Conversion" value={o.views ? pct(conv(o), 1) : '—'} note="Views that led to a use" />
-        <Kpi icon={CheckCircle2} label="This month" value={num(o.june || 0)} note="1 to 17 June 2027" />
+        <Kpi icon={CheckCircle2} label="This month" value={num(o.june || 0)} note={isLive ? `${num(week)} this week, 14 to 17 June` : '1 to 17 June 2027'} />
       </div>
 
       <div className="grid g-main">
@@ -465,7 +487,9 @@ export function OfferDetail() {
             <div><dt>Category</dt><dd>{o.category}</dd></div>
             <div><dt>Runs</dt><dd>{o.starts === '—' ? 'Not set' : `${o.starts} to ${o.ends}`}</dd></div>
             <div><dt>Limit per worker</dt><dd>{o.limit}</dd></div>
+            <div><dt>Most uses in total</dt><dd>{o.maxUses ? num(Number(o.maxUses)) : 'No limit'}</dd></div>
             <div><dt>Outlets</dt><dd>{o.outlets}</dd></div>
+            {top && <div><dt>Top outlet</dt><dd>{top.label} · {num(top.value)}</dd></div>}
             <div><dt>Who can use it</dt><dd>Workers whose contribution is up to date</dd></div>
             <div style={{ gridColumn: '1 / -1' }}><dt>What the worker gets</dt><dd style={{ fontWeight: 400 }}>{o.what || '—'}</dd></div>
             <div style={{ gridColumn: '1 / -1' }}><dt>Terms</dt><dd style={{ fontWeight: 400 }}>{o.terms || '—'}</dd></div>
@@ -492,10 +516,41 @@ export function OfferDetail() {
         </Modal>
       )}
       {modal === 'delete' && (
-        <Modal title="Delete this draft?" onClose={() => setModal(null)} actions={<><button className="btn outline" onClick={() => setModal(null)}>Cancel</button><button className="btn danger" onClick={() => { updateOffer(o.id, { status: 'Deleted' }); toast('Draft deleted'); go('/merchant/offers?tab=draft') }}><Trash2 /> Delete</button></>}>
-          <p className="ink2">The draft has not been sent to anyone. Deleting it cannot be undone.</p>
+        <Modal title={o.status === 'Sent back' ? 'Delete this offer?' : 'Delete this draft?'} onClose={() => setModal(null)} actions={<><button className="btn outline" onClick={() => setModal(null)}>Cancel</button><button className="btn danger" onClick={() => { updateOffer(o.id, { status: 'Deleted' }); toast(o.status === 'Sent back' ? 'Offer deleted' : 'Draft deleted'); go('/merchant/offers?tab=' + (o.status === 'Sent back' ? 'sentback' : 'draft')) }}><Trash2 /> Delete</button></>}>
+          <p className="ink2">{o.status === 'Sent back' ? 'Workers have never seen this offer.' : 'The draft has not been sent to anyone.'} Deleting it cannot be undone.</p>
         </Modal>
       )}
     </MShell>
+  )
+}
+
+/* Optional picture for the perk card. Microtek checks it with the rest of the offer. */
+function ImageField({ f, setF }) {
+  const [error, setError] = useState('')
+  const pick = (e) => {
+    const file = e.target.files && e.target.files[0]
+    e.target.value = ''
+    if (!file) return
+    if (!/^image\/(png|jpeg)$/.test(file.type)) { setError('Choose a PNG or JPG picture.'); return }
+    if (file.size > 2 * 1024 * 1024) { setError('The picture is over 2 MB. Choose a smaller one.'); return }
+    setError('')
+    setF((x) => ({ ...x, image: URL.createObjectURL(file), imageName: file.name }))
+  }
+  return (
+    <Field label="Picture (optional)" full hint="PNG or JPG up to 2 MB, wider than tall. No people's faces and no prices that may change." error={error}>
+      {f.image ? (
+        <div className="mx-imgfield">
+          <img src={f.image} alt="" />
+          <div className="grow"><b>{f.imageName}</b><small className="muted">Shown on the perk in the worker app</small></div>
+          <button type="button" className="btn ghost sm" onClick={() => setF((x) => ({ ...x, image: null, imageName: '' }))}><Trash2 /> Remove</button>
+        </div>
+      ) : (
+        <label className="mx-drop">
+          <ImagePlus aria-hidden="true" />
+          <span><b>Choose a picture</b><small>Without one, workers see the discount tile</small></span>
+          <input type="file" accept="image/png,image/jpeg" onChange={pick} className="vh" />
+        </label>
+      )}
+    </Field>
   )
 }

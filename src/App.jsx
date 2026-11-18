@@ -7,6 +7,9 @@ import EmployerApp from './pages/employer/Employer.jsx'
 import StateApp from './pages/state/State.jsx'
 import AdminApp from './pages/admin/Admin.jsx'
 import MerchantApp from './pages/merchant/Merchant.jsx'
+import Ambient from './components/motion.jsx'
+// Glass and motion layer loads last so it sits over every portal's own styles.
+import './styles/glass.css'
 
 function NotFound() {
   return (
@@ -21,6 +24,7 @@ function NotFound() {
 export default function App() {
   return (
     <ToastProvider>
+      <Ambient />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />

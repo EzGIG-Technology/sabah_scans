@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Check, X, Download, Share2, Store, Clock, WifiOff, LifeBuoy, RotateCcw, ShieldCheck, Lock, Receipt as ReceiptIcon, ChevronRight, Building2, Info } from 'lucide-react'
+import { Check, CheckCircle2, X, Download, Share2, Store, Clock, WifiOff, LifeBuoy, RotateCcw, ShieldCheck, Lock, Receipt as ReceiptIcon, ChevronRight, Building2, Info } from 'lucide-react'
 import { Logo } from '../../components/ui.jsx'
 import { demoWorker as w, workerPayments, RATE, rm } from '../../data/demo.js'
 import { useWk, useTone, TopBar } from './shell.jsx'
@@ -28,6 +28,8 @@ export function MethodMark({ m }) {
   if (m.tile) return <span className="wk-mark" style={{ background: m.tile.bg }}>{m.tile.t}</span>
   return <span className="wk-mark" style={{ background: 'var(--blue)' }}><ReceiptIcon aria-hidden="true" /></span>
 }
+const GROUPS = ['E-wallet', 'Bank', 'Cash', 'Card']
+const GROUP_LABEL = { 'E-wallet': 'E-wallets', Bank: 'Bank and DuitNow', Cash: 'Cash', Card: 'Cards' }
 const markFor = (name) => METHODS.find((m) => m.name === name) || (name === 'Employer bulk payment' ? { tile: { t: 'BP', bg: '#0B2F7A' } } : {})
 
 const NEW_ID = 'RCP-2706-121907'
@@ -37,7 +39,7 @@ export default function Pay() {
   const loc = useLocation()
   const nav = useNavigate()
   const { offline } = useWk()
-  const [plan, setPlan] = useState('m')
+  const [plan, setPlan] = useState(() => { try { return localStorage.getItem('scans-plan') || 'm' } catch { return 'm' } })
   const [method, setMethod] = useState('tng')
   const [fail, setFail] = useState(new URLSearchParams(loc.search).get('demo') === 'fail')
   const [phase, setPhase] = useState('choose') // choose | cash | processing | success | failed
@@ -132,26 +134,49 @@ export default function Pay() {
     <div className="wk-page has-bar">
       <TopBar title="Pay contribution" sub={`${w.name} · ${w.scansId}`} />
       <div className="wk-pad">
+        <div className="wk-duecard">
+          <span className="lbl">Amount due</span>
+          <b className="num">{rm(w.due.amount)}</b>
+          <span className="sub">for {w.due.month} · pay by {w.due.dueDate}</span>
+          <span className="pill white"><CheckCircle2 aria-hidden="true" /> Nothing owing from earlier months</span>
+        </div>
+
         <h2 className="wk-h2">What are you paying for?</h2>
-        <div className="wk-opts" role="radiogroup" aria-label="Period">
+        <div className="wk-plans" role="radiogroup" aria-label="Period">
           {PLANS.map((x) => (
-            <button key={x.id} type="button" role="radio" aria-checked={plan === x.id} className="wk-opt" onClick={() => setPlan(x.id)}>
-              <span className="radio" aria-hidden="true" />
-              <span className="grow"><b>{x.name}</b><small>{x.label}</small></span>
-              <span className="price num">{rm(x.months * RATE)}</span>
+            <button key={x.id} type="button" role="radio" aria-checked={plan === x.id} className="wk-plan" onClick={() => setPlan(x.id)}>
+              <span className="tick" aria-hidden="true"><Check /></span>
+              <span className="mo num">{x.months}</span>
+              <span className="unit">{x.months === 1 ? 'month' : 'months'}</span>
+              <b className="num">{rm(x.months * RATE)}</b>
+              <small>to {x.upTo.replace(' 20', ' ’')}</small>
             </button>
           ))}
         </div>
+        <p className="wk-hint">{p.label}. Paid up to {p.upTo} after this.</p>
 
         <h2 className="wk-h2">How will you pay?</h2>
-        <div className="wk-methods" role="radiogroup" aria-label="Payment method">
-          {METHODS.map((x) => (
-            <button key={x.id} type="button" role="radio" aria-checked={method === x.id} className="wk-method" onClick={() => setMethod(x.id)}>
-              <MethodMark m={x} />
-              <span className="grow"><b>{x.name}</b>{x.note && <small>{x.note}</small>}</span>
-              <span className="radio" aria-hidden="true" />
-            </button>
-          ))}
+        {GROUPS.map((g) => (
+          <section key={g} className="wk-mgroup">
+            <h3 id={'mg-' + g}>{GROUP_LABEL[g]}</h3>
+            <div className="wk-methods" role="radiogroup" aria-labelledby={'mg-' + g}>
+              {METHODS.filter((x) => x.group === g).map((x) => (
+                <button key={x.id} type="button" role="radio" aria-checked={method === x.id} className="wk-method" onClick={() => setMethod(x.id)}>
+                  <MethodMark m={x} />
+                  <span className="grow"><b>{x.name}</b>{x.note && <small>{x.note}</small>}</span>
+                  <span className="radio" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        <div className="wk-card wk-summary">
+          <h3>Summary</h3>
+          <div><span>Contribution · {p.months} × {rm(RATE)}</span><b className="num">{rm(total, 2)}</b></div>
+          <div><span>Period</span><b>{p.label}</b></div>
+          <div><span>Paid with</span><b>{m.name}</b></div>
+          <div className="tot"><span>Total</span><b className="num">{rm(total, 2)}</b></div>
         </div>
 
         {method === 'cash' && <p className="wk-note"><Store aria-hidden="true" />You get a counter code next. Pay in cash at any 7-Eleven in Sabah and keep the printed slip.</p>}

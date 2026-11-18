@@ -156,6 +156,11 @@
 .gv-filters.f4 { grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(130px, 1fr)); }
 .gv-filters.f3 { grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(130px, 1fr)); }
 @media (max-width: 1280px) { .gv-filters.f4, .gv-filters.f3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Worker list: search on its own row, six filters below */
+.gv-filters.f6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.gv-filters.f6 > :first-child { grid-column: 1 / -1; }
+@media (max-width: 1280px) { .gv-filters.f6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .gv-filters.f6 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 @media (max-width: 640px) { .gv-filters.f4, .gv-filters.f3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
 /* Command centre KPI block: hero spans two rows */

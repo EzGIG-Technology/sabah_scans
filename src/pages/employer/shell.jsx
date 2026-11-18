@@ -1,4 +1,4 @@
-import { LayoutGrid, Users, CreditCard, Repeat, FileText, Settings, UserPlus } from 'lucide-react'
+import { LayoutGrid, Users, CreditCard, Repeat, FileText, Settings, UserPlus, BarChart3 } from 'lucide-react'
 import { AppShell, Status } from '../../components/ui.jsx'
 import { useRoster, summarise } from './data.js'
 import './employer.css'
@@ -13,6 +13,7 @@ export function EmpShell({ title, children }) {
     { group: 'Monitor', items: [
       { to: '/employer', label: 'Overview', icon: LayoutGrid, end: true },
       { to: '/employer/workers', label: 'Workers', icon: Users, count: s.unpaid || undefined },
+      { to: '/employer/reports', label: 'Reports', icon: BarChart3 },
     ] },
     { group: 'Payments', items: [
       { to: '/employer/pay', label: 'Pay for workers', icon: CreditCard },

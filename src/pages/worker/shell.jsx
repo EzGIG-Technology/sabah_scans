@@ -62,6 +62,11 @@ export function useTone(v) {
    Stage: phone frame centred on desktop with a side panel of quick links
    ===================================================================== */
 const quick = [
+  { group: 'First open', items: [
+    ['Splash and intro', '/worker/welcome'],
+    ['Sign in', '/worker/signin'],
+    ['Create account', '/worker/signin?tab=up'],
+  ] },
   { group: 'Sign-up', items: [
     ['Start sign-up', '/worker/start'],
     ['Passport scan fails', '/worker/start?step=3&demo=scanfail'],
@@ -78,7 +83,11 @@ const quick = [
     ['Notices', '/worker/notices'],
     ['A notice', '/worker/notices/n2'],
     ['Help', '/worker/help'],
-    ['SCANS card', '/worker/me'],
+    ['Me', '/worker/me'],
+    ['SCANS card', '/worker/card'],
+    ['My details', '/worker/details'],
+    ['Questions', '/worker/faq'],
+    ['Assistant (preview)', '/worker/assistant'],
     ['Privacy', '/worker/privacy'],
   ] },
 ]
@@ -163,7 +172,7 @@ export function Stage({ children }) {
   const scroller = useRef(null)
   const [scrolled, setScrolled] = useState(false)
   const p = loc.pathname.replace(/\/$/, '')
-  const flow = p === '/worker/start' || p.startsWith('/worker/pay') || p.startsWith('/worker/receipt')
+  const flow = ['/worker/start', '/worker/welcome', '/worker/signin', '/worker/card', '/worker/assistant'].includes(p) || p.startsWith('/worker/pay') || p.startsWith('/worker/receipt')
   useEffect(() => {
     if (scroller.current) scroller.current.scrollTop = 0
     window.scrollTo(0, 0)

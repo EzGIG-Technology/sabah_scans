@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState, useCallback } from 'react'
 import { recentRedemptions } from '../../data/demo.js'
-import { initialOffers, initialOutlets, initialUsers } from './data.js'
+import { initialOffers, initialOutlets, initialUsers, initialNotes, documents } from './data.js'
 
 // Earlier confirmations the same evening, so the feeds have a full page.
 const earlier = [
@@ -18,6 +18,10 @@ export function MerchantProvider({ children }) {
   const [users, setUsers] = useState(initialUsers)
   const [redemptions, setRedemptions] = useState([...recentRedemptions, ...earlier])
   const [seq, setSeq] = useState(1)
+  const [notes, setNotes] = useState(initialNotes)
+  const [docs, setDocs] = useState(documents)
+  const markRead = useCallback((id) => setNotes((xs) => xs.map((n) => (id == null || n.id === id ? { ...n, read: true } : n))), [])
+  const updateDoc = useCallback((k, patch) => setDocs((xs) => xs.map((d) => (d.k === k ? { ...d, ...patch } : d))), [])
 
   const updateOffer = useCallback((id, patch) => setOffers((xs) => xs.map((o) => (o.id === id ? { ...o, ...patch } : o))), [])
   const addOffer = useCallback((o) => {
@@ -39,8 +43,8 @@ export function MerchantProvider({ children }) {
     return { id, at }
   }, [seq])
 
-  const value = useMemo(() => ({ offers, updateOffer, addOffer, outlets, updateOutlet, addOutlet, setOutlets, users, setUsers, redemptions, confirmRedemption }),
-    [offers, updateOffer, addOffer, outlets, updateOutlet, addOutlet, users, redemptions, confirmRedemption])
+  const value = useMemo(() => ({ offers, updateOffer, addOffer, outlets, updateOutlet, addOutlet, setOutlets, users, setUsers, redemptions, confirmRedemption, notes, markRead, docs, updateDoc }),
+    [offers, updateOffer, addOffer, outlets, updateOutlet, addOutlet, users, redemptions, confirmRedemption, notes, markRead, docs, updateDoc])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

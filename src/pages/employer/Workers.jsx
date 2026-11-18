@@ -1,12 +1,76 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Download, ShieldCheck, CreditCard, CalendarClock, Receipt, UserX } from 'lucide-react'
-import { PageHead, Card, Status, Callout, Tabs, SearchInput, Select, Table, Empty, Avatar, useToast } from '../../components/ui.jsx'
-import { rm, num } from '../../data/demo.js'
+import { Download, ShieldCheck, CreditCard, CalendarClock, Receipt, UserX, SlidersHorizontal, X, CheckCircle2, Clock, AlertTriangle, Smartphone } from 'lucide-react'
+import { PageHead, Card, Status, Callout, Tabs, SearchInput, Table, Empty, Avatar, Modal, Field, useToast } from '../../components/ui.jsx'
+import { rm, num, pct, RATE } from '../../data/demo.js'
 import { EmpShell, WStatus, Who, permitText } from './shell.jsx'
 import { COMPANY, useRoster, summarise, useEmp, historyFor, monthLabel, CUR } from './data.js'
 
 const TABS = ['All', 'Not paid', 'Permit ends soon']
+const BUCKETS = [
+  { value: 'paid', label: 'Paid for June' },
+  { value: 'due', label: 'June not paid yet' },
+  { value: 'late', label: 'Owing 1 to 2 months' },
+  { value: 'risk', label: 'Owing 3+ months' },
+]
+const PERMIT = [{ value: '30', label: 'Permit ends within 30 days' }, { value: '90', label: 'Permit ends within 90 days' }]
+const NO_FILTER = { buckets: [], permit: '', nat: [], consent: '', app: '' }
+
+/* Figma "Filter" modal (893:58210): status, permit renewal window and nationality, plus consent and app use. */
+function FilterModal({ value, natOptions, onApply, onClose }) {
+  const [f, setF] = useState(value)
+  const tog = (key, v) => setF({ ...f, [key]: f[key].includes(v) ? f[key].filter((x) => x !== v) : [...f[key], v] })
+  return (
+    <Modal title="Filter workers" onClose={onClose} actions={<>
+      <button className="btn ghost" onClick={() => setF(NO_FILTER)}>Clear all</button>
+      <span className="grow" />
+      <button className="btn outline" onClick={onClose}>Cancel</button>
+      <button className="btn primary" onClick={() => onApply(f)}>Apply</button>
+    </>}>
+      <p className="small muted" style={{ marginTop: -6, marginBottom: 10 }}>Choose as many as you need.</p>
+      <div className="emp-fsec"><fieldset className="emp-fgroup"><legend>June 2027 status</legend>
+        <div className="emp-fgrid">{BUCKETS.map((b) => (
+          <label key={b.value} className="check"><input type="checkbox" checked={f.buckets.includes(b.value)} onChange={() => tog('buckets', b.value)} /><span>{b.label}</span></label>
+        ))}</div>
+      </fieldset></div>
+      <div className="emp-fsec"><fieldset className="emp-fgroup"><legend>Permit renewal</legend>
+        <div className="emp-fgrid">
+          {[{ value: '', label: 'Any date' }, ...PERMIT].map((o) => (
+            <label key={o.value} className="check"><input type="radio" name="permit" checked={f.permit === o.value} onChange={() => setF({ ...f, permit: o.value })} /><span>{o.label}</span></label>
+          ))}
+        </div>
+        <small className="muted">From JIM, for planning only. It has nothing to do with contributions.</small>
+      </fieldset></div>
+      <div className="emp-fsec"><fieldset className="emp-fgroup"><legend>Nationality</legend>
+        <div className="emp-fgrid">{natOptions.map((n) => (
+          <label key={n} className="check"><input type="checkbox" checked={f.nat.includes(n)} onChange={() => tog('nat', n)} /><span>{n}</span></label>
+        ))}</div>
+      </fieldset></div>
+      <div className="emp-fsec"><div className="emp-fgrid">
+        <Field label="Consent to company payment">
+          <select className="select" value={f.consent} onChange={(e) => setF({ ...f, consent: e.target.value })}>
+            <option value="">Any</option><option value="yes">Given</option><option value="no">Not given</option>
+          </select>
+        </Field>
+        <Field label="SCANS app">
+          <select className="select" value={f.app} onChange={(e) => setF({ ...f, app: e.target.value })}>
+            <option value="">Any</option><option value="yes">Uses the app</option><option value="no">Not using it recently</option>
+          </select>
+        </Field>
+      </div></div>
+    </Modal>
+  )
+}
+
+function chipsFor(f) {
+  const out = []
+  f.buckets.forEach((b) => out.push({ k: 'buckets', v: b, label: BUCKETS.find((x) => x.value === b).label }))
+  if (f.permit) out.push({ k: 'permit', v: f.permit, label: PERMIT.find((x) => x.value === f.permit).label })
+  f.nat.forEach((n) => out.push({ k: 'nat', v: n, label: n }))
+  if (f.consent) out.push({ k: 'consent', v: f.consent, label: f.consent === 'yes' ? 'Consent given' : 'No consent' })
+  if (f.app) out.push({ k: 'app', v: f.app, label: f.app === 'yes' ? 'Uses the app' : 'Not using the app' })
+  return out
+}
 
 export function WorkersList() {
   const roster = useRoster()
@@ -14,42 +78,116 @@ export function WorkersList() {
   const [params, setParams] = useSearchParams()
   const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'All'
   const [q, setQ] = useState('')
-  const [consent, setConsent] = useState('all')
+  const [f, setF] = useState(() => {
+    const b = params.get('status')
+    return BUCKETS.some((x) => x.value === b) ? { ...NO_FILTER, buckets: [b] } : NO_FILTER
+  })
+  const [open, setOpen] = useState(false)
   const go = useNavigate()
   const toast = useToast()
   const soon = (w) => w.permitDays <= 60
+  const natOptions = [...new Set(roster.map((w) => w.nationality))].sort()
   const counts = { All: roster.length, 'Not paid': roster.filter((w) => w.bucket !== 'paid').length, 'Permit ends soon': roster.filter(soon).length }
   const rows = roster
     .filter((w) => tab === 'All' || (tab === 'Not paid' ? w.bucket !== 'paid' : soon(w)))
-    .filter((w) => consent === 'all' || (consent === 'yes' ? w.consent : !w.consent))
+    .filter((w) => !f.buckets.length || f.buckets.includes(w.bucket))
+    .filter((w) => !f.permit || (w.permitDays >= 0 && w.permitDays <= Number(f.permit)))
+    .filter((w) => !f.nat.length || f.nat.includes(w.nationality))
+    .filter((w) => !f.consent || (f.consent === 'yes' ? w.consent : !w.consent))
+    .filter((w) => !f.app || (f.app === 'yes' ? w.appActive : !w.appActive))
     .filter((w) => !q || (w.name + ' ' + w.id + ' ' + w.role).toLowerCase().includes(q.toLowerCase()))
     .sort((a, b) => (tab === 'Permit ends soon' ? a.permitDays - b.permitDays : tab === 'Not paid' ? b.owing - a.owing : 0))
+  const chips = chipsFor(f)
+  const only = (b) => setF(f.buckets.length === 1 && f.buckets[0] === b ? NO_FILTER : { ...NO_FILTER, buckets: [b] })
+  const removeChip = (c) => setF({ ...f, [c.k]: Array.isArray(f[c.k]) ? f[c.k].filter((x) => x !== c.v) : '' })
+  const tiles = [
+    { b: 'paid', label: 'Paid for June', v: s.paid, note: `${pct(s.rate, 1)} of ${num(s.total)}`, tone: 'ok', Icon: CheckCircle2, click: false },
+    { b: 'due', label: 'June not paid yet', v: s.due, note: 'No earlier months owing', tone: '', Icon: Clock, click: true },
+    { b: 'late', label: 'Owing 1 to 2 months', v: s.late, note: 'Caution', tone: 'warn', Icon: AlertTriangle, click: true },
+    { b: 'risk', label: 'Owing 3+ months', v: s.risk, note: 'Critical', tone: 'bad', Icon: AlertTriangle, click: true },
+    { b: 'app', label: 'Not using the app', v: s.total - COMPANY.appUsers, note: `${num(COMPANY.appUsers)} workers use it`, tone: 'grey', Icon: Smartphone, click: false },
+  ]
   return (
     <EmpShell title="Workers">
       <PageHead title="Workers" sub={`${num(s.total)} workers registered to ${COMPANY.name} in eNORES. This list shows every worker who has not paid for June and a sample of those who have. Records can only be corrected through JTK Sabah.`}>
-        <button className="btn outline" onClick={() => toast('Worker list downloaded as CSV')}><Download /> Download list</button>
+        <button className="btn outline" onClick={() => toast(`Worker list downloaded as CSV (${num(rows.length)} rows). The download is recorded in the audit log.`)}><Download /> Download list</button>
         <Link to="/employer/pay" className="btn primary"><CreditCard /> Pay for workers</Link>
       </PageHead>
+      <div className="emp-tiles">
+        {tiles.map((t) => {
+          const body = (<>
+            <span className="row" style={{ gap: 8 }}><span className={'emp-ic ' + t.tone} style={{ width: 30, height: 30, borderRadius: 9 }}><t.Icon size={16} /></span><span className="small ink2">{t.label}</span></span>
+            <span className="v num" style={{ color: t.tone && t.tone !== 'grey' ? `var(--${t.tone})` : undefined }}>{num(t.v)}</span>
+            <small>{t.note}</small>
+          </>)
+          return t.click
+            ? <button key={t.b} type="button" className="emp-tile" aria-pressed={f.buckets.length === 1 && f.buckets[0] === t.b} onClick={() => only(t.b)} title={`Show only: ${t.label}`}>{body}</button>
+            : <div key={t.b} className="emp-tile">{body}</div>
+        })}
+      </div>
       <Card>
         <Tabs label="Filter workers" value={tab} onChange={(t) => setParams(t === 'All' ? {} : { tab: t })} items={TABS.map((t) => ({ value: t, label: t, count: counts[t] }))} />
         <div className="toolbar" style={{ margin: '16px 0 12px' }}>
           <SearchInput value={q} onChange={setQ} placeholder="Search name, SCANS ID or job" />
-          <Select label="Consent" value={consent} onChange={setConsent} options={[{ value: 'all', label: 'Any consent' }, { value: 'yes', label: 'Consent given' }, { value: 'no', label: 'No consent' }]} />
+          <button className="btn outline emp-filterbtn" onClick={() => setOpen(true)}><SlidersHorizontal /> Filter{chips.length > 0 && <span className="n">{chips.length}</span>}</button>
         </div>
+        {chips.length > 0 && (
+          <div className="emp-filters" aria-label="Active filters">
+            {chips.map((c) => <span key={c.k + c.v} className="chip">{c.label}<button type="button" aria-label={`Remove filter: ${c.label}`} onClick={() => removeChip(c)}><X size={14} /></button></span>)}
+            <button className="btn ghost sm" onClick={() => setF(NO_FILTER)}>Clear all</button>
+            <span className="small muted num">{num(rows.length)} {rows.length === 1 ? 'worker' : 'workers'}</span>
+          </div>
+        )}
         {tab === 'Permit ends soon' && <Callout icon={CalendarClock} style={{ marginBottom: 12 }}>Permit dates come from JIM and are shown for renewal planning only. They do not affect contributions, and late payment never affects a permit.</Callout>}
         <Table rows={rows} onRowClick={(w) => go('/employer/workers/' + w.id)} pageSize={10}
-          empty={<Empty title={q ? 'No worker matches your search' : 'Nobody here'}>{q ? 'Check the spelling or search by SCANS ID.' : 'Every worker in this view is up to date.'}</Empty>}
+          empty={<Empty title={q || chips.length ? 'No worker matches' : 'Nobody here'}>{q || chips.length ? <>Check the spelling, search by SCANS ID or clear the filters. <div style={{ marginTop: 12 }}><button className="btn outline sm" onClick={() => { setQ(''); setF(NO_FILTER) }}>Clear search and filters</button></div></> : 'Every worker in this view is up to date.'}</Empty>}
           columns={[
             { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
+            { key: 'nationality', label: 'Nationality' },
             { key: 'role', label: 'Job' },
             { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
             { key: 'paidThrough', label: 'Paid up to' },
-            { key: 'owing', label: 'Owing', align: 'r', render: (w) => <span className="num" style={{ fontWeight: 600, color: w.owing ? (w.bucket === 'risk' ? 'var(--bad)' : 'var(--ink)') : 'var(--ink3)' }}>{rm(w.owing)}</span> },
-            { key: 'consent', label: 'Consent to employer payment', render: (w) => <Status tone={w.consent ? 'ok' : 'grey'}>{w.consent ? 'Given' : 'Not given'}</Status> },
+            { key: 'owing', label: 'Owing', align: 'r', render: (w) => <span className="num" style={{ whiteSpace: 'nowrap', fontWeight: 600, color: w.owing ? (w.bucket === 'risk' ? 'var(--bad)' : 'var(--ink)') : 'var(--ink3)' }}>{rm(w.owing)}</span> },
+            { key: 'consent', label: 'Consent', render: (w) => <Status tone={w.consent ? 'ok' : 'grey'}>{w.consent ? 'Given' : 'Not given'}</Status> },
+            { key: 'app', label: 'App', render: (w) => <span className={'pill ' + (w.appActive ? 'info' : 'grey')} style={{ whiteSpace: 'nowrap' }}>{w.appActive ? 'Uses app' : 'Not recently'}</span> },
             { key: 'permit', label: 'Permit valid until', render: (w) => <span className={w.permitDays <= 60 ? '' : 'muted'} style={{ color: w.permitDays < 0 ? 'var(--ink3)' : w.permitDays <= 60 ? 'var(--warn)' : undefined }}>{permitText(w)}</span> },
           ]} />
       </Card>
+      {open && <FilterModal value={f} natOptions={natOptions} onClose={() => setOpen(false)} onApply={(v) => { setF(v); setOpen(false) }} />}
     </EmpShell>
+  )
+}
+
+/* Twelve months of 2027 for one worker: who paid each month, what is owing, what is ahead. */
+function Months({ w, history, added }) {
+  const cells = Array.from({ length: 12 }, (_, m) => {
+    const label = monthLabel(m)
+    if (m <= w.paidIdx) {
+      const h = history.find((p) => p.month === monthLabel(m, true))
+      const company = m > w.paidIdx - added || (h && h.by === COMPANY.name)
+      return { m, label, cls: company ? 'company' : 'self', text: company ? 'Paid by company' : 'Paid' }
+    }
+    if (m < CUR) return { m, label, cls: 'owing', text: 'Not paid' }
+    if (m === CUR) return { m, label, cls: 'due', text: 'Due 5 Jun' }
+    return { m, label, cls: 'ahead', text: 'Not due yet' }
+  })
+  return (
+    <div className="stack">
+      <div className="emp-stat2">
+        <div><small>Owing now</small><b className="num" style={{ color: w.bucket === 'risk' ? 'var(--bad)' : undefined }}>{rm(w.owing)}</b></div>
+        <div><small>Monthly contribution</small><b className="num">{rm(RATE)}</b></div>
+        <div><small>Paid up to</small><b>{w.paidThrough}</b></div>
+      </div>
+      <div className="emp-months" role="list" aria-label="Months of 2027">
+        {cells.map((c) => <div key={c.m} role="listitem" className={'emp-month ' + c.cls}><b>{c.label.split(' ')[0]}</b><small>{c.text}</small></div>)}
+      </div>
+      <div className="legend">
+        <span><i style={{ background: 'var(--okFill)' }} />Paid by the worker</span>
+        <span><i style={{ background: 'var(--purple)' }} />Paid by your company</span>
+        <span><i style={{ background: 'var(--info)' }} />Due this month</span>
+        <span><i style={{ background: 'var(--bad)' }} />Not paid</span>
+      </div>
+    </div>
   )
 }
 
@@ -95,13 +233,15 @@ export function WorkerProfile() {
           </div>
         </Card>
         <Card>
-          <Tabs label="Worker details" value={tab} onChange={setTab} items={['Contribution', { value: 'History', label: 'Payment history', count: history.length }]} />
+          <Tabs label="Worker details" value={tab} onChange={setTab} items={['Contribution', { value: 'Months', label: 'Months covered' }, { value: 'History', label: 'Payment history', count: history.length }]} />
           <div style={{ marginTop: 18 }}>
-            {tab === 'Contribution' ? (
+            {tab === 'Months' ? <Months w={w} history={history} added={st.paidAdd[w.id] || 0} /> : tab === 'Contribution' ? (
               <div className="stack">
                 <dl className="kv">
                   <div><dt>SCANS ID</dt><dd className="num">{w.id}</dd></div>
                   <div><dt>Job</dt><dd>{w.role}</dd></div>
+                  <div><dt>Nationality</dt><dd>{w.nationality}</dd></div>
+                  <div><dt>Work site</dt><dd>{COMPANY.site}</dd></div>
                   <div><dt>June 2027</dt><dd><WStatus w={w} /></dd></div>
                   <div><dt>Paid up to</dt><dd>{w.paidThrough}</dd></div>
                   <div><dt>Amount owing</dt><dd className="num">{rm(w.owing)}</dd></div>

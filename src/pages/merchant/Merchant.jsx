@@ -7,6 +7,7 @@ import Outlets from './Outlets.jsx'
 import Reports from './Reports.jsx'
 import Settings from './Settings.jsx'
 import Register from './Register.jsx'
+import Notifications from './Notifications.jsx'
 import './merchant.css'
 
 export default function MerchantApp() {
@@ -23,6 +24,7 @@ export default function MerchantApp() {
         <Route path="outlets" element={<Outlets />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="*" element={<Navigate to="/merchant" replace />} />
       </Routes>
     </MerchantProvider>

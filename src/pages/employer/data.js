@@ -104,7 +104,7 @@ export function statusOf(paidIdx) {
 }
 
 /* ---------- Session store: payments, auto-pay, permit and invites made in this visit ---------- */
-let state = { paidAdd: {}, batches: [], mandate: null, permit: null, invited: [], seq: 0 }
+let state = { paidAdd: {}, batches: [], mandate: null, permit: null, invited: [], seq: 0, exports: [], pic: null }
 const subs = new Set()
 const subscribe = (f) => { subs.add(f); return () => subs.delete(f) }
 export const getEmp = () => state
@@ -168,3 +168,34 @@ export const allBatches = (s) => [...s.batches.map((b) => ({ ...b, session: true
 
 const BANK_COLOURS = ['#E0A800', '#C8102E', '#D42253', '#1460E0', '#0B2F7A', '#0E8F57', '#B85407', '#7B4DE3']
 export const banks = fpxBanks.map((name, i) => ({ name, color: BANK_COLOURS[i % BANK_COLOURS.length] }))
+
+/* ---------- Reports: month-by-month figures that end at today's live counts ---------- */
+/* Jan to May are fixed history; June comes from the live roster so every screen agrees. */
+const TREND = [
+  // paid, june-style "this month not paid yet", owing 1-2 earlier months, owing 3+ months (sums to 412)
+  { label: 'Jan', paid: 298, due: 114, late: 0, risk: 0 },
+  { label: 'Feb', paid: 322, due: 58, late: 32, risk: 0 },
+  { label: 'Mar', paid: 340, due: 44, late: 28, risk: 0 },
+  { label: 'Apr', paid: 351, due: 33, late: 20, risk: 8 },
+  { label: 'May', paid: 366, due: 20, late: 14, risk: 12 },
+]
+export const complianceTrend = (s) => [...TREND, { label: 'Jun', paid: s.paid, due: s.due, late: s.late, risk: s.risk }]
+
+/* Workers using the SCANS app each month (June = COMPANY.appUsers). */
+export const appUsersByMonth = [
+  { label: 'Jan', value: 240 }, { label: 'Feb', value: 281 }, { label: 'Mar', value: 305 },
+  { label: 'Apr', value: 322 }, { label: 'May', value: 347 }, { label: 'Jun', value: 363 },
+]
+/* Who paid June: the company's June batch (214 workers) plus batches made this visit; the rest paid themselves. */
+export function juneSplit(roster, s, st) {
+  const fromSession = roster.filter((w) => st.paidAdd[w.id] && w.paidIdx >= CUR).length
+  const company = 214 + fromSession
+  return { company, self: s.paid - company }
+}
+
+export const SEED_EXPORTS = [
+  { id: 'EXP-2706-031', name: 'Contribution status report, May 2027', date: '1 Jun 2027', format: 'PDF', size: '412 KB' },
+  { id: 'EXP-2705-022', name: 'Payment history report, Jan to Apr 2027', date: '8 May 2027', format: 'CSV', size: '96 KB' },
+  { id: 'EXP-2705-019', name: 'App use report, April 2027', date: '3 May 2027', format: 'PDF', size: '188 KB' },
+]
+export const PIC_DEFAULT = { name: 'Jennifer Liew', role: 'HR manager', email: 'jennifer.liew@bpp.example.my', phone: '012-884 4410' }

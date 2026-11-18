@@ -17,14 +17,16 @@ export function EmployerList({ base }) {
   const [district, setDistrict] = useState('All')
   const [sector, setSector] = useState('All')
   const [status, setStatus] = useState('All')
+  const [band, setBand] = useState('All')
   const rows = useMemo(() => employers.filter((e) => {
     const t = q.trim().toLowerCase()
     if (t && !(e.name.toLowerCase().includes(t) || e.ssm.includes(t))) return false
     if (district !== 'All' && e.district !== district) return false
     if (sector !== 'All' && e.sector !== sector) return false
     if (status !== 'All' && e.status !== status) return false
+    if (band !== 'All' && !(e.paid / e.workers < Number(band) / 100)) return false
     return true
-  }), [q, district, sector, status])
+  }), [q, district, sector, status, band])
   const shareAll = employers.reduce((s, e) => s + e.paid, 0) / employers.reduce((s, e) => s + e.workers, 0)
   return (
     <>
@@ -37,18 +39,20 @@ export function EmployerList({ base }) {
         <Kpi icon={CheckCircle2} tone="ok" label="Sample paid for June" value={pct(shareAll)} note="Workers paid at sample employers" />
         <Kpi icon={AlertTriangle} tone="bad" label="Behind" value={num(employers.filter((e) => e.status === 'Behind').length)} note="Sample employers under 60% paid" />
       </div>
-      <Card title="Employer records" sub={`${rows.length} of ${employers.length} sample employers. Employers see contribution status only.`}>
+      <Card title="Employer records" sub={`${rows.length} of ${employers.length} sample employers. Employers see contribution status only.`}
+        action={(q || district !== 'All' || sector !== 'All' || status !== 'All' || band !== 'All') ? <button className="link" onClick={() => { setQ(''); setDistrict('All'); setSector('All'); setStatus('All'); setBand('All') }}>Clear filters</button> : null}>
         <div className="stack" style={{ gap: 14 }}>
-          <div className="gv-filters f4">
+          <div className="gv-filters">
             <SearchInput value={q} onChange={setQ} placeholder="Search company name or SSM number" />
             <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
             <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((s) => s.name)]} />
             <Select label="Status" value={status} onChange={setStatus} options={[{ value: 'All', label: 'All statuses' }, ...STATUSES]} />
+            <Select label="Paid for June" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any paid share' }, { value: '90', label: 'Under 90% paid' }, { value: '80', label: 'Under 80% paid' }, { value: '70', label: 'Under 70% paid' }]} />
           </div>
           <Table rows={rows} onRowClick={(e) => go(`${base}/employers/${e.id}`)} columns={[
             { key: 'name', label: 'Company', render: (e) => <div className="who"><Mono name={e.name} /><div style={{ minWidth: 0 }}><b>{e.name}</b><small>SSM {e.ssm}</small></div></div> },
             { key: 'district', label: 'District' },
-            { key: 'sector', label: 'Sector' },
+            { key: 'sector', label: 'Sector', render: (e) => <span className="pill grey">{e.sector}</span> },
             { key: 'workers', label: 'Workers', align: 'r', render: (e) => num(e.workers) },
             { key: 'paid', label: 'Paid for June', render: (e) => <div className="row" style={{ gap: 8, minWidth: 120 }}><div className="bar grow" style={{ minWidth: 50 }}><span style={{ width: pct(e.paid / e.workers) }} /></div><span className="num small">{pct(e.paid / e.workers)}</span></div> },
             { key: 'owing', label: 'Owing', align: 'r', render: (e) => <span className="num">{rm((e.workers - e.paid) * 100)}</span> },

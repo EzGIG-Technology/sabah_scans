@@ -1,13 +1,15 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag, Hourglass, Trophy, ScanLine, Plus, CheckCircle2, Clock, ChevronRight, ShieldCheck, EyeOff, Check, X } from 'lucide-react'
-import { PageHead, Card, Kpi, BarChart, HBarChart, LineChart, Donut, Sparkline, Status } from '../../components/ui.jsx'
+import { PageHead, Card, Kpi, BarChart, HBarChart, LineChart, Donut, Sparkline, Status, Seg } from '../../components/ui.jsx'
 import { merchantPeakHours, merchantRedeemers, num, pct } from '../../data/demo.js'
 import { MShell } from './shell.jsx'
 import { useMerchant } from './store.jsx'
-import { MERCHANT, JUNE_TOTAL, MONTHLY, peakIndex } from './data.js'
+import { MERCHANT, JUNE_TOTAL, MONTHLY, peakIndex, juneDaily } from './data.js'
 
 export default function Overview() {
   const { offers, redemptions } = useMerchant()
+  const [span, setSpan] = useState('month')
   const live = offers.filter((o) => o.status === 'Live')
   const waiting = offers.filter((o) => o.status === 'Waiting for approval')
   const allTime = offers.reduce((s, o) => s + o.redemptions, 0)
@@ -59,9 +61,10 @@ export default function Overview() {
           <BarChart data={merchantPeakHours.map((h) => ({ ...h, label: h.label.replace('am', 'a').replace('pm', 'p') }))} highlight={peak} height={230} format={num} />
           <p className="small muted" style={{ marginTop: 8 }}>Most workers come after their shift. Keep a second till open from 7pm.</p>
         </Card>
-        <Card title="Redemptions over time" sub="Confirmed redemptions per month, 2027" action={<Link className="link" to="/merchant/reports">Reports <ChevronRight size={15} /></Link>}>
-          <LineChart data={monthly} height={230} format={num} />
-          <p className="small muted" style={{ marginTop: 8 }}>June is up to 17 June.</p>
+        <Card title="Redemptions over time" sub={span === 'month' ? 'Confirmed redemptions per month, 2027' : 'Confirmed redemptions per day, June 2027'}
+          action={<Seg label="Show" value={span} onChange={setSpan} items={[{ value: 'month', label: 'Monthly' }, { value: 'day', label: 'Daily' }]} />}>
+          {span === 'month' ? <LineChart data={monthly} height={230} format={num} /> : <BarChart data={juneDaily(june)} height={230} format={num} />}
+          <p className="small muted" style={{ marginTop: 8 }}>{span === 'month' ? 'June is up to 17 June. ' : `${num(june)} in June so far. Busier at weekends. `}<Link className="link" to="/merchant/reports">Reports</Link></p>
         </Card>
       </div>
 

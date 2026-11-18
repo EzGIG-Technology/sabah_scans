@@ -51,7 +51,7 @@ export default function Overview() {
   const st = useEmp()
   const go = useNavigate()
   const toast = useToast()
-  const risk = roster.filter((w) => w.bucket === 'risk')
+  const behind = roster.filter((w) => w.bucket === 'risk' || w.bucket === 'late').sort((a, b) => b.owing - a.owing)
   const soon = roster.filter((w) => w.permitDays >= 0 && w.permitDays <= 60).sort((a, b) => a.permitDays - b.permitDays)
   const batches = allBatches(st).slice(0, 4)
   const perMonth = paidPerMonth(s.paid)
@@ -73,22 +73,27 @@ export default function Overview() {
 
       <Score s={s} />
 
-      {risk.length > 0 ? (
+      {behind.length > 0 ? (
         <Card>
           <div className="emp-risk">
             <span className="ic"><AlertTriangle size={22} /></span>
             <div className="grow">
-              <h3>{risk.length} {risk.length === 1 ? 'worker owes' : 'workers owe'} 3 months or more</h3>
+              <h3>{behind.length} {behind.length === 1 ? 'worker owes' : 'workers owe'} earlier months</h3>
+              <div className="pills">
+                <span className="pill warn num">{s.late} owe 1 to 2 months</span>
+                <span className="pill bad num">{s.risk} owe 3 months or more</span>
+              </div>
               <p>Late payment never affects a permit. You can pay for a worker only if they agreed in the app.</p>
             </div>
             <Link to="/employer/workers?tab=Not+paid" className="btn sm outline">All workers who owe <ChevronRight /></Link>
           </div>
           <div style={{ marginTop: 14 }}>
-            <Table rows={risk} pageSize={8} onRowClick={(w) => go('/employer/workers/' + w.id)} columns={[
+            <Table rows={behind} pageSize={6} onRowClick={(w) => go('/employer/workers/' + w.id)} columns={[
               { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
               { key: 'status', label: 'Status', render: (w) => <WStatus w={w} /> },
               { key: 'paidThrough', label: 'Paid up to' },
-              { key: 'owing', label: 'Owing', align: 'r', render: (w) => <b className="num" style={{ color: 'var(--bad)' }}>{rm(w.owing)}</b> },
+              { key: 'permit', label: 'Permit valid until', render: (w) => <span className="muted">{w.permitExpiry}</span> },
+              { key: 'owing', label: 'Owing', align: 'r', render: (w) => <b className="num" style={{ color: w.bucket === 'risk' ? 'var(--bad)' : 'var(--warn)' }}>{rm(w.owing)}</b> },
               { key: 'act', label: 'Action', align: 'r', render: (w) => w.consent
                 ? <button className="btn sm primary" onClick={(e) => { e.stopPropagation(); go('/employer/pay?w=' + w.id) }}>Pay now</button>
                 : <span className="small muted" title="This worker has not agreed to employer payment in the app">No consent</span> },
@@ -96,7 +101,7 @@ export default function Overview() {
           </div>
         </Card>
       ) : (
-        <Callout tone="ok" icon={CheckCircle2}>No worker owes 3 months or more.</Callout>
+        <Callout tone="ok" icon={CheckCircle2}>No worker owes any month before June.</Callout>
       )}
 
       <div className="grid g-2">

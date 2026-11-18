@@ -1,59 +1,99 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ChevronRight, Clock, CheckCircle2, Store, Mic, EyeOff, Send, Volume2, Languages, ShieldCheck, Receipt, LifeBuoy, LogOut, Lock, Database, Eye, Ban, FileText, UserCheck, WifiOff, Megaphone, Info, Check } from 'lucide-react'
+import { ChevronRight, Clock, CheckCircle2, Store, Mic, EyeOff, Send, Volume2, Languages, ShieldCheck, Receipt, LifeBuoy, LogOut, Lock, Database, Eye, Ban, FileText, UserCheck, WifiOff, Megaphone, Info, Check, QrCode, IdCard, CalendarDays, BellRing, Bell, MessageSquare, MessageCircle, Fingerprint, HelpCircle, Sparkles } from 'lucide-react'
 import { Logo, Mono, Status, initials } from '../../components/ui.jsx'
-import { demoWorker as w, notices, offers, languages } from '../../data/demo.js'
+import { demoWorker as w, notices, offers, workerPayments } from '../../data/demo.js'
+import { Group, LangSheet } from './kit.jsx'
 import { useWk, useTone, TopBar, Sheet, QR } from './shell.jsx'
 import { kindIcon, kindTone } from './Home.jsx'
 import { langName } from './i18n.js'
 
-/* ---------- Perks ---------- */
+/* ---------- Perks (Sabah GO rewards pattern, no points: perks are open to workers who are up to date) ---------- */
 const USED = [
-  { id: 'u1', merchant: '7-Eleven Sabah', title: 'RM3 off a RM30 prepaid reload', at: '7-Eleven Fajar Centre, Lahad Datu', when: '12 May 2027, 18:20' },
+  { id: 'u1', merchant: '7-Eleven Sabah', title: 'RM3 off a RM30 prepaid reload', at: '7-Eleven Fajar Centre, Lahad Datu', when: '12 May 2027, 18:20', saved: 3 },
 ]
+const STUB = { o1: ['RM3', 'off'], o2: ['10GB', 'extra'], o3: ['5%', 'off'], o4: ['RM20', 'visit'] }
+const STUB_C = { '7-Eleven Sabah': '#0E8F57', CelcomDigi: '#1460E0', 'Pasaraya Servay': '#D42253', 'Klinik Mesra Borneo': '#7B4DE3' }
+const CODE_SECS = 300
+
+function Stub({ o }) {
+  const [a, b] = STUB[o.id] || ['', '']
+  return <span className="wk-stub" style={{ background: STUB_C[o.merchant] || 'var(--blue)' }} aria-hidden="true"><b>{a}</b><small>{b}</small></span>
+}
 
 export function Perks() {
-  const { t, toast } = useWk()
+  const { t, toast, offline } = useWk()
   const [tab, setTab] = useState('all')
   const [open, setOpen] = useState(null)
-  const [confirmed, setConfirmed] = useState(false)
+  const [phase, setPhase] = useState('detail') // detail | code | done | expired
+  const [left, setLeft] = useState(CODE_SECS)
+  const [how, setHow] = useState(false)
   const [used, setUsed] = useState(USED)
   const live = offers.filter((o) => o.status === 'Live')
-  const close = () => { setOpen(null); setConfirmed(false) }
+  const close = () => { setOpen(null); setPhase('detail') }
   const code = open ? String(482913 + live.indexOf(open) * 104729).slice(-6) : ''
+  useEffect(() => {
+    if (phase !== 'code') return
+    if (left <= 0) { setPhase('expired'); return }
+    const id = setTimeout(() => setLeft(left - 1), 1000)
+    return () => clearTimeout(id)
+  }, [phase, left])
+  const showCode = () => { setLeft(CODE_SECS); setPhase('code') }
   const shopConfirms = () => {
-    setConfirmed(true)
+    setPhase('done')
     setUsed((u) => [{ id: 'u-' + open.id, merchant: open.merchant, title: open.title, at: open.merchant === '7-Eleven Sabah' ? '7-Eleven Fajar Centre, Lahad Datu' : open.merchant + ', Lahad Datu', when: 'Today, 10:42' }, ...u.filter((x) => x.id !== 'u-' + open.id)])
     toast('The shop confirmed. Perk used.')
   }
+  const saved = used.reduce((a, u) => a + (u.saved || 0), 0)
+  const mmss = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`
   return (
     <div className="wk-page has-nav">
       <TopBar title={t.perks} back={false} />
       <div className="wk-pad">
-        <div className="wk-perk-hero">
-          <b>Thank you for paying on time</b>
-          <p>Small savings from partner shops for workers who are up to date. Shops never see your record.</p>
+        <div className="wk-tier">
+          <div className="row">
+            <span className="wk-tier-ic"><ShieldCheck aria-hidden="true" /></span>
+            <div className="grow"><b>You are up to date</b><small>Paid up to {w.paidThrough}. All perks are open to you.</small></div>
+          </div>
+          <div className="wk-tier-stats">
+            <div><b className="num">{live.length}</b><span>Perks open</span></div>
+            <div><b className="num">{used.length}</b><span>Used</span></div>
+            <div><b className="num">RM{saved}</b><span>Saved so far</span></div>
+          </div>
+          <p>Shops never see your record. They see only that a code is valid.</p>
         </div>
+
+        <section className="wk-how">
+          <button type="button" aria-expanded={how} onClick={() => setHow(!how)}><Info aria-hidden="true" /><span>How perks work</span><ChevronRight className={'chev' + (how ? ' down' : '')} aria-hidden="true" /></button>
+          {how && (
+            <ol>
+              <li>Pick a perk and tap <b>Show code</b> at the counter.</li>
+              <li>The code works for 5 minutes. The shop scans it or keys in the 6 digits.</li>
+              <li>It counts as used only after the shop confirms. If you close it before, you can use it later.</li>
+              <li>New perks come every month. If you fall behind, perks wait until you are up to date. Your permit is never affected.</li>
+            </ol>
+          )}
+        </section>
+
         <div className="seg wk-seg" role="tablist" aria-label="Perks">
-          <button type="button" role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')}>All <span className="n">{live.length}</span></button>
+          <button type="button" role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')}>Open <span className="n">{live.length}</span></button>
           <button type="button" role="tab" aria-selected={tab === 'used'} onClick={() => setTab('used')}>Used <span className="n">{used.length}</span></button>
         </div>
         {tab === 'all' ? (
           <div className="wk-perks">
             {live.map((o) => (
-              <article key={o.id} className="wk-perk">
-                <Mono name={o.merchant} size="lg" />
-                <div className="grow">
+              <button key={o.id} type="button" className="wk-coupon" onClick={() => { setOpen(o); setPhase('detail') }}>
+                <Stub o={o} />
+                <span className="grow">
                   <small>{o.merchant}</small>
                   <b>{o.title}</b>
-                  <span>{o.terms}</span>
                   <span className="ends"><Clock aria-hidden="true" /> Ends {o.ends}</span>
-                </div>
-                <button type="button" className="btn primary sm" onClick={() => setOpen(o)}>Show code</button>
-              </article>
+                </span>
+                <ChevronRight className="chev" aria-hidden="true" />
+              </button>
             ))}
           </div>
-        ) : (
+        ) : used.length ? (
           <div className="wk-perks">
             {used.map((u) => (
               <article key={u.id} className="wk-perk used">
@@ -67,23 +107,53 @@ export function Perks() {
               </article>
             ))}
           </div>
-        )}
+        ) : <p className="wk-empty">No perks used yet.</p>}
       </div>
       {open && (
         <Sheet title={open.title} onClose={close}>
-          <div className="wk-code">
-            <Mono name={open.merchant} size="lg" />
-            <small>{open.merchant}</small>
-            <h2>{open.title}</h2>
-            <div className="qr"><QR seed={open.id} size={176} label={'Code for ' + open.title} /></div>
-            <b className="digits num" aria-label={'Code ' + code.split('').join(' ')}>{code.slice(0, 3)} {code.slice(3)}</b>
-            {confirmed
-              ? <p className="wk-state ok" role="status"><CheckCircle2 aria-hidden="true" /> The shop confirmed at 10:42. This perk is now used.</p>
-              : <p className="wk-state" role="status"><span className="pulse" aria-hidden="true" /> Waiting for the shop to scan</p>}
-            <p className="wk-note"><Info aria-hidden="true" />Counts as used only after the shop confirms. If you close this before, you can use it later.</p>
-            {!confirmed && <button type="button" className="wk-demo" onClick={shopConfirms}>Demo: the shop confirms</button>}
-            <button type="button" className="btn outline lg block" onClick={() => { const c = confirmed; close(); if (c) setTab('used') }}>{confirmed ? 'See used perks' : 'Close'}</button>
-          </div>
+          {phase === 'detail' ? (
+            <div className="wk-code">
+              <Stub o={open} />
+              <small>{open.merchant}</small>
+              <h2>{open.title}</h2>
+              <div className="wk-terms">
+                <b>Terms</b>
+                <ul>
+                  <li>{open.terms}</li>
+                  <li>For workers who are up to date with their contribution.</li>
+                  <li>Cannot be combined with other offers.</li>
+                  <li>Ends {open.ends}.</li>
+                </ul>
+              </div>
+              {offline && <p className="wk-note warn"><WifiOff aria-hidden="true" />You are offline. The shop needs a connection to confirm the code.</p>}
+              <button type="button" className="btn primary lg block" onClick={showCode}>Show code</button>
+            </div>
+          ) : phase === 'expired' ? (
+            <div className="wk-code">
+              <span className="wk-state warn"><Clock aria-hidden="true" /> The code expired</span>
+              <h2>Nothing was used</h2>
+              <p className="wk-lead small">The shop did not confirm in 5 minutes, so the perk is still yours.</p>
+              <button type="button" className="btn primary lg block" onClick={showCode}>Show a new code</button>
+              <button type="button" className="btn ghost block" onClick={close}>Close</button>
+            </div>
+          ) : (
+            <div className="wk-code">
+              <div className="wk-code-top">
+                <span className={'pill ' + (phase === 'done' ? 'ok' : 'info')}>{phase === 'done' ? 'Used' : 'Ready to scan'}</span>
+                {phase === 'code' && <span className="wk-timer num" aria-label={'Code works for ' + mmss + ' more'}><Clock aria-hidden="true" /> {mmss}</span>}
+              </div>
+              <small>{open.merchant}</small>
+              <h2>{open.title}</h2>
+              <div className="qr"><QR seed={open.id} size={176} label={'Code for ' + open.title} /></div>
+              <b className="digits num" aria-label={'Code ' + code.split('').join(' ')}>{code.slice(0, 3)} {code.slice(3)}</b>
+              {phase === 'done'
+                ? <p className="wk-state ok" role="status"><CheckCircle2 aria-hidden="true" /> The shop confirmed at 10:42. This perk is now used.</p>
+                : <p className="wk-state" role="status"><span className="pulse" aria-hidden="true" /> Waiting for the shop to scan</p>}
+              <p className="wk-note"><Info aria-hidden="true" />Counts as used only after the shop confirms. If you close this before, you can use it later.</p>
+              {phase === 'code' && <button type="button" className="wk-demo" onClick={shopConfirms}>Demo: the shop confirms</button>}
+              <button type="button" className="btn outline lg block" onClick={() => { const c = phase === 'done'; close(); if (c) setTab('used') }}>{phase === 'done' ? 'See used perks' : 'Close'}</button>
+            </div>
+          )}
         </Sheet>
       )}
     </div>
@@ -103,9 +173,10 @@ export function Notices() {
       <div className="wk-pad">
         <p className="wk-lead small"><Languages aria-hidden="true" className="inl" />Official notices from the State and its agencies, sent in {langName[lang]}.</p>
         <div className="wk-chips scroll" role="group" aria-label="Filter">
-          {KINDS.map((k) => <button key={k} type="button" className="chip" aria-pressed={kind === k} onClick={() => setKind(k)}>{k}</button>)}
+          {KINDS.map((k) => <button key={k} type="button" className="chip" aria-pressed={kind === k} onClick={() => setKind(k)}>{k} <span className="n num">{k === 'All' ? notices.length : notices.filter((n) => n.kind === k).length}</span></button>)}
         </div>
-        <div className="wk-list">
+        {list.length === 0 && <p className="wk-empty">No notices of this kind yet.</p>}
+        <div className="wk-list" hidden={list.length === 0}>
           {list.map((n) => {
             const Icon = kindIcon[n.kind] || Megaphone
             const fresh = notices.indexOf(n) < 2
@@ -226,62 +297,103 @@ export function Help() {
   )
 }
 
-/* ---------- Me: digital SCANS card ---------- */
+/* ---------- Me: profile with the SCANS card (Sabah GO profile pattern) ---------- */
+const PLAN_NAMES = { m: 'One month', q: 'Three months', y: 'One year' }
+const readLS = (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } }
+const writeLS = (k, v) => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
+
+function Row({ to, icon: Icon, c, title, sub, children, onClick }) {
+  const inner = <><span className={'wk-ico ' + (c || '')}><Icon aria-hidden="true" /></span><span className="tx"><b>{title}</b>{sub && <small>{sub}</small>}</span>{children || <ChevronRight className="chev" aria-hidden="true" />}</>
+  if (to) return <Link to={to} className="wk-li">{inner}</Link>
+  if (onClick) return <button type="button" className="wk-li" onClick={onClick}>{inner}</button>
+  return <div className="wk-li">{inner}</div>
+}
+
 export function Me() {
   useTone('light')
-  const { lang, setLang, offline, setOffline, t } = useWk()
+  const { lang, offline, setOffline, t, toast } = useWk()
   const nav = useNavigate()
+  const [langOpen, setLangOpen] = useState(false)
+  const [planOpen, setPlanOpen] = useState(false)
+  const [plan, setPlan] = useState(() => readLS('scans-plan', 'm'))
+  const [pref, setPref] = useState(() => {
+    try { return { remind: true, sms: true, wa: false, push: true, bio: false, ...JSON.parse(readLS('scans-notif', '{}')) } } catch { return { remind: true, sms: true, wa: false, push: true, bio: false } }
+  })
+  const flip = (k) => { const n = { ...pref, [k]: !pref[k] }; setPref(n); writeLS('scans-notif', JSON.stringify(n)) }
+  const loc = useLocation()
+  useEffect(() => { if (loc.hash === '#language') setLangOpen(true) }, [loc.hash])
+  const monthsPaid = 5 // January to May 2027, from the receipts list
+  const sw = (k, label) => <button type="button" className="switch" role="switch" aria-checked={pref[k]} aria-label={label} onClick={() => flip(k)} />
   return (
     <div className="wk-page has-nav">
-      <section className="wk-mehead">
-        <h1>{t.card}</h1>
-        <div className="wk-idcard">
-          <div className="top"><Logo light width={92} /><span>Contribution card</span></div>
-          <div className="who">
-            <span className="wk-av lg">{initials(w.name)}</span>
-            <div className="grow"><b>{w.name}</b><small className="num">{w.scansId}</small></div>
+      <section className="wk-profhead">
+        <div className="who">
+          <span className="wk-av xl">{initials(w.name)}</span>
+          <div className="grow">
+            <h1>{w.name}</h1>
+            <small>{w.nationality} · {w.role}</small>
+            <span className="pill white"><CheckCircle2 aria-hidden="true" /> Paid up to {w.paidThrough}</span>
           </div>
-          <div className="qrwrap">
-            <div className="qr"><QR seed="card" size={150} /></div>
-            <div className="st">
-              <span className="pill ok dot">Paid</span>
-              <small>Paid up to</small><b>{w.paidThrough}</b>
-              <small>Owing</small><b>None</b>
-            </div>
-          </div>
-          <p className="note"><ShieldCheck aria-hidden="true" />Shows contribution status only. Not an immigration document.</p>
         </div>
-        {offline && <p className="wk-stamp light"><WifiOff aria-hidden="true" />Works without a connection. Checked today at 08:12.</p>}
+        <div className="wk-stats" role="list">
+          <div role="listitem"><b className="num">{monthsPaid}</b><span>Months paid in 2027</span></div>
+          <div role="listitem"><b className="num">{workerPayments.length}</b><span>{t.receipts}</span></div>
+          <div role="listitem"><b className="num">1</b><span>Perks used</span></div>
+        </div>
       </section>
       <div className="wk-pad">
-        <div className="wk-card wk-kv">
-          <div><span>Work permit (PLKS)</span><b className="num">{w.plks}</b></div>
-          <div><span>Permit valid until</span><b>{w.permitExpiry}</b></div>
-          <div><span>Passport</span><b className="num">{w.passport}</b></div>
-          <div><span>Nationality</span><b>{w.nationality}</b></div>
-          <div><span>Phone</span><b className="num">{w.phone}</b></div>
-          <div><span>{t.employer}</span><b>{w.employer}</b></div>
-        </div>
-        <p className="wk-note"><Info aria-hidden="true" />Permit dates come from JIM and are shown for your information only. SCANS cannot change them.</p>
+        <Link to="/worker/card" className="wk-cardmini">
+          <span className="qrbox"><QR seed="card" size={54} label="" /></span>
+          <span className="grow"><b>{t.card}</b><small>{t.cardSub}</small><small className="num">{w.scansId}</small></span>
+          <ChevronRight aria-hidden="true" className="ic" />
+        </Link>
+        {offline && <p className="wk-stamp"><WifiOff aria-hidden="true" />Works without a connection. Checked today at 08:12.</p>}
 
-        <div className="wk-sec-h" id="language"><h2>Language</h2></div>
-        <div className="wk-opts compact" role="radiogroup" aria-label="Language">
-          {languages.map((l) => (
-            <button key={l.code} type="button" role="radio" aria-checked={lang === l.code} className="wk-opt" onClick={() => setLang(l.code)}>
-              <span className="grow"><b>{l.label}</b></span><span className="radio" aria-hidden="true" />
-            </button>
-          ))}
-        </div>
+        <Group title="My documents">
+          <Row to="/worker/card" icon={QrCode} c="c-blue" title={t.card} sub="Not an immigration document" />
+          <Row to="/worker/details" icon={IdCard} c="c-navy" title="Permit and record details" sub={'PLKS valid until ' + w.permitExpiry} />
+        </Group>
 
-        <div className="wk-sec-h"><h2>More</h2></div>
-        <div className="wk-list">
-          <Link to="/worker/history" className="wk-li"><span className="wk-ico c-green"><Receipt aria-hidden="true" /></span><span className="tx"><b>{t.receipts}</b></span><ChevronRight className="chev" aria-hidden="true" /></Link>
-          <Link to="/worker/help" className="wk-li"><span className="wk-ico c-purple"><LifeBuoy aria-hidden="true" /></span><span className="tx"><b>Help and complaints</b></span><ChevronRight className="chev" aria-hidden="true" /></Link>
-          <Link to="/worker/privacy" className="wk-li"><span className="wk-ico c-navy"><Lock aria-hidden="true" /></span><span className="tx"><b>How we use your information</b></span><ChevronRight className="chev" aria-hidden="true" /></Link>
-          <div className="wk-li"><span className="wk-ico c-orange"><WifiOff aria-hidden="true" /></span><span className="tx"><b>Try with no connection</b><small>Demo only</small></span><button type="button" className="switch" role="switch" aria-checked={offline} aria-label="Try with no connection" onClick={() => setOffline(!offline)} /></div>
-          <button type="button" className="wk-li" onClick={() => nav('/login?portal=worker')}><span className="wk-ico"><LogOut aria-hidden="true" /></span><span className="tx"><b>Sign out</b></span><ChevronRight className="chev" aria-hidden="true" /></button>
-        </div>
+        <Group title="Payments">
+          <Row to="/worker/history" icon={Receipt} c="c-green" title={t.receipts} sub={'Paid up to ' + w.paidThrough} />
+          <Row icon={CalendarDays} c="c-teal" title="Usual payment period" sub={PLAN_NAMES[plan] + ' · chosen first in Pay'} onClick={() => setPlanOpen(true)} />
+          <Row icon={BellRing} c="c-orange" title="Payment reminders" sub="3 days before the 5th">{sw('remind', 'Payment reminders')}</Row>
+        </Group>
+
+        <Group title="Preferences" id="language">
+          <Row icon={Languages} c="c-blue" title={t.changeLang} sub={langName[lang]} onClick={() => setLangOpen(true)} />
+          <Row icon={MessageSquare} c="c-green" title="SMS" sub="Receipts, reminders and notices">{sw('sms', 'SMS')}</Row>
+          <Row icon={MessageCircle} c="c-teal" title="WhatsApp" sub="The same messages on WhatsApp">{sw('wa', 'WhatsApp')}</Row>
+          <Row icon={Bell} c="c-purple" title="App notifications" sub="Notices from the State">{sw('push', 'App notifications')}</Row>
+          <Row icon={Fingerprint} c="c-navy" title="Fingerprint or face sign-in" sub="Stays on this phone">{sw('bio', 'Fingerprint or face sign-in')}</Row>
+        </Group>
+
+        <Group title="Support">
+          <Row to="/worker/help" icon={LifeBuoy} c="c-purple" title="Help and complaints" sub="In your own language" />
+          <Row to="/worker/faq" icon={HelpCircle} c="c-blue" title="Questions and answers" sub="About SCANS" />
+          <Row to="/worker/assistant" icon={Sparkles} c="c-purple" title={t.assistant} sub={t.preview + ' · explains, never changes anything'} />
+          <Row to="/worker/privacy" icon={Lock} c="c-navy" title="How we use your information" sub="PDPA · kept in Malaysia" />
+          <Row icon={WifiOff} c="c-orange" title="Try with no connection" sub="Demo only"><button type="button" className="switch" role="switch" aria-checked={offline} aria-label="Try with no connection" onClick={() => setOffline(!offline)} /></Row>
+        </Group>
+
+        <button type="button" className="btn danger lg block wk-logout" onClick={() => nav('/worker/signin')}><LogOut aria-hidden="true" /> Sign out</button>
+        <button type="button" className="btn ghost block" onClick={() => nav('/worker/welcome')}>Restart the demo</button>
+        <p className="wk-ver">SCANS worker app · prototype · Kerajaan Negeri Sabah</p>
       </div>
+      {langOpen && <LangSheet onClose={() => { setLangOpen(false); if (loc.hash) nav('/worker/me', { replace: true }) }} />}
+      {planOpen && (
+        <Sheet title="Usual payment period" onClose={() => setPlanOpen(false)}>
+          <h2 className="wk-sheet-h">Usual payment period</h2>
+          <p className="wk-lead small">We choose this first when you pay. You can still change it each time.</p>
+          <div className="wk-opts compact" role="radiogroup" aria-label="Usual payment period">
+            {Object.entries(PLAN_NAMES).map(([k, v]) => (
+              <button key={k} type="button" role="radio" aria-checked={plan === k} className="wk-opt" onClick={() => { setPlan(k); writeLS('scans-plan', k); setPlanOpen(false); toast('Saved') }}>
+                <span className="grow"><b>{v}</b><small>{k === 'm' ? 'RM100' : k === 'q' ? 'RM300' : 'RM1,200'}</small></span><span className="radio" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
     </div>
   )
 }

@@ -26,7 +26,9 @@ export function WorkerList({ base, readOnly }) {
   const [district, setDistrict] = useState(params.get('district') || 'All')
   const [sector, setSector] = useState('All')
   const [status, setStatus] = useState(params.get('status') || 'All')
-  const [soon, setSoon] = useState(false)
+  // Permit window in days (0 = any). '?permit=30' or '?permit=90' preselects it.
+  const [soon, setSoon] = useState(() => (['30', '90'].includes(params.get('permit')) ? Number(params.get('permit')) : 0))
+  const [app, setApp] = useState('All')
 
   const rows = useMemo(() => workers.filter((w) => {
     const t = q.trim().toLowerCase()
@@ -35,24 +37,26 @@ export function WorkerList({ base, readOnly }) {
     if (district !== 'All' && w.district !== district) return false
     if (sector !== 'All' && w.sector !== sector) return false
     if (status !== 'All' && w.status !== status) return false
-    if (soon && !(w.permitDays >= 0 && w.permitDays <= 90)) return false
+    if (soon && !(w.permitDays >= 0 && w.permitDays <= soon)) return false
+    if (app !== 'All' && (app === 'Signed up') !== w.appActive) return false
     return true
-  }), [q, nat, district, sector, status, soon])
+  }), [q, nat, district, sector, status, soon, app])
 
-  const anyFilter = q || nat !== 'All' || district !== 'All' || sector !== 'All' || status !== 'All' || soon
-  const clear = () => { setQ(''); setNat('All'); setDistrict('All'); setSector('All'); setStatus('All'); setSoon(false) }
+  const anyFilter = q || nat !== 'All' || district !== 'All' || sector !== 'All' || status !== 'All' || soon || app !== 'All'
+  const clear = () => { setQ(''); setNat('All'); setDistrict('All'); setSector('All'); setStatus('All'); setSoon(0); setApp('All') }
   const exportList = () => {
-    const desc = anyFilter ? [nat, district, sector, status].filter((x) => x !== 'All').join(', ') || 'Search results' : 'All records'
+    const desc = anyFilter ? [nat, district, sector, status, app, soon ? `permit ends within ${soon} days` : 'All'].filter((x) => x !== 'All').join(', ') || 'Search results' : 'All records'
     logEvent('Exported worker list', `${num(rows.length)} records · ${desc}`)
     toast(`Worker list exported (${num(rows.length)} records). The export is in the audit log.`)
   }
 
   const cols = [
     { key: 'name', label: 'Worker', render: (w) => <div className="who"><Avatar name={w.name} /><div style={{ minWidth: 0 }}><b>{w.name}</b><small>{w.id}</small></div></div> },
-    { key: 'nationality', label: 'Nationality' },
+    { key: 'nationality', label: 'Nationality', render: (w) => <span>{w.nationality}<small className="muted" style={{ display: 'block', fontSize: 12 }}>Passport {w.passport}</small></span> },
     { key: 'employer', label: 'Employer', render: (w) => <span>{shortEmp(w.employer)}<small className="muted" style={{ display: 'block', fontSize: 12 }}>{w.sector}</small></span> },
     { key: 'district', label: 'District' },
     { key: 'status', label: 'June 2027', render: (w) => <Status>{w.status}</Status> },
+    { key: 'app', label: 'SCANS app', render: (w) => (w.appActive ? <Pill tone="info">Signed up</Pill> : <Pill tone="grey">Not yet</Pill>) },
     { key: 'arrears', label: 'Arrears', align: 'r', render: (w) => <span className="num" style={{ fontWeight: w.arrears ? 600 : 400 }}>{rm(w.arrears)}</span> },
     { key: 'permit', label: 'Permit ends', render: (w) => <span className="num">{w.permitExpiry}<small className="muted" style={{ display: 'block', fontSize: 12 }}>{permitText(w)}</small></span> },
   ]
@@ -72,13 +76,14 @@ export function WorkerList({ base, readOnly }) {
       <Card title="Worker records" sub={anyFilter ? `${num(rows.length)} of ${num(workers.length)} sample records match` : `Sample of ${num(workers.length)} records. Choose a row to open the profile.`}
         action={anyFilter ? <button className="link" onClick={clear}>Clear filters</button> : null}>
         <div className="stack" style={{ gap: 14 }}>
-          <div className="gv-filters">
+          <div className="gv-filters f6">
             <SearchInput value={q} onChange={setQ} placeholder="Search name, SCANS ID, passport or employer" />
             <Select label="Nationality" value={nat} onChange={setNat} options={[{ value: 'All', label: 'All nationalities' }, ...NATS]} />
             <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
             <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((s) => s.name)]} />
             <Select label="Status" value={status} onChange={setStatus} options={[{ value: 'All', label: 'All statuses' }, ...STATUSES]} />
-            <button className="chip" aria-pressed={soon} onClick={() => setSoon(!soon)} style={{ height: 42 }}>Permit ends within 90 days</button>
+            <Select label="SCANS app" value={app} onChange={setApp} options={[{ value: 'All', label: 'App: everyone' }, 'Signed up', 'Not signed up']} />
+            <Select label="Permit ends" value={String(soon)} onChange={(v) => setSoon(Number(v))} options={[{ value: '0', label: 'Any permit date' }, { value: '30', label: 'Permit ends within 30 days' }, { value: '90', label: 'Permit ends within 90 days' }]} />
           </div>
           <Table columns={cols} rows={rows} onRowClick={(w) => go(`${base}/workers/${w.id}`)} pageSize={10} />
         </div>
@@ -187,6 +192,7 @@ export function WorkerProfile({ base, readOnly }) {
                 <div className="gv-mini">
                   <div><span>Paid up to</span><b>{w.paidThrough}</b></div>
                   <div><span>Current arrears</span><b className="num">{rm(w.arrears)}</b></div>
+                  <div><span>Monthly contribution</span><b className="num">{rm(100)}</b></div>
                   <div><span>Usual method</span><b style={{ fontSize: 14 }}>{usual ? usual[0] : '—'}</b></div>
                   <div><span>Paid since January</span><b className="num">{rm(pays.reduce((s, p) => s + p.amount, 0))}</b></div>
                 </div>

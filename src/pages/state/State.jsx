@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Map as MapIcon, Users, Building2, Landmark, Megaphone, MessageSquareWarning, FileBarChart, Wallet, Percent,
-  PiggyBank, UserCheck, Download, Check, X, Eye, Plus, Send, Scale, CalendarCheck, Clock, CheckCircle2, Inbox, Languages, ShieldCheck, Route as RouteIcon,
+  PiggyBank, UserCheck, Download, Check, X, Eye, Plus, Send, Scale, CalendarCheck, Clock, CheckCircle2, Inbox, Languages, ShieldCheck, Route as RouteIcon, ScanLine, Store,
 } from 'lucide-react'
 import {
   AppShell, PageHead, Card, Kpi, Status, Pill, Callout, Empty, Tabs, Field, Table, Drawer, Modal, BarChart, HBarChart, Donut,
@@ -22,6 +22,10 @@ import { EmployerList, EmployerProfile } from '../shared/Employers.jsx'
 import { ReportsCentre } from '../shared/Reports.jsx'
 import { NoticeComposer, NoticeView, ChannelIcons, AudiencePill } from '../shared/Notices.jsx'
 import '../shared/shared.css'
+import Overview from './Overview.jsx'
+import WorkerCheck from './WorkerCheck.jsx'
+import Merchants from './Merchants.jsx'
+import './state.css'
 
 const BASE = '/state'
 const ACTOR = 'Nurul Ain (State, JKN)'
@@ -31,7 +35,7 @@ const rmM = (v) => 'RM ' + (v / 1e6).toFixed(2) + 'm'
 const TITLES = [
   [/^\/state\/?$/, 'Overview'], [/^\/state\/districts/, 'Districts'], [/^\/state\/workers\/.+/, 'Worker profile'], [/^\/state\/workers/, 'Workers'],
   [/^\/state\/employers\/.+/, 'Employer profile'], [/^\/state\/employers/, 'Employers'], [/^\/state\/finance/, 'FWECF account'],
-  [/^\/state\/notices/, 'Official notices'], [/^\/state\/complaints/, 'Complaints'], [/^\/state\/reports/, 'Reports'],
+  [/^\/state\/notices/, 'Official notices'], [/^\/state\/complaints/, 'Complaints'], [/^\/state\/reports/, 'Reports'], [/^\/state\/check/, 'Worker check'], [/^\/state\/merchants/, 'Merchant partners'],
 ]
 
 export default function StateApp() {
@@ -49,6 +53,8 @@ export default function StateApp() {
     { group: 'Records', items: [
       { to: BASE + '/workers', label: 'Workers', icon: Users },
       { to: BASE + '/employers', label: 'Employers', icon: Building2 },
+      { to: BASE + '/check', label: 'Worker check', icon: ScanLine },
+      { to: BASE + '/merchants', label: 'Merchant partners', icon: Store },
     ] },
     { group: 'Communicate', items: [
       { to: BASE + '/notices', label: 'Official notices', icon: Megaphone, count: waiting || null },
@@ -73,6 +79,8 @@ export default function StateApp() {
         <Route path="workers/:id" element={<WorkerProfile base={BASE} readOnly />} />
         <Route path="employers" element={<EmployerList base={BASE} />} />
         <Route path="employers/:id" element={<EmployerProfile base={BASE} readOnly />} />
+        <Route path="check" element={<WorkerCheck />} />
+        <Route path="merchants" element={<Merchants />} />
         <Route path="finance" element={<Finance />} />
         <Route path="notices" element={<Notices />} />
         <Route path="complaints" element={<Complaints />} />
@@ -80,67 +88,6 @@ export default function StateApp() {
         <Route path="*" element={<Card><Empty title="This page does not exist">Use the menu to find what you need.</Empty></Card>} />
       </Routes>
     </AppShell>
-  )
-}
-
-/* =====================================================================
-   Overview
-   ===================================================================== */
-function Overview() {
-  const toast = useToast()
-  const go = useNavigate()
-  const [sel, setSel] = useState('lahaddatu')
-  const [filter, setFilter] = useState('all')
-  return (
-    <>
-      <PageHead title="Collection, June 2027" sub={`${num(paidThisMonth)} of ${num(REGISTERED)} registered workers have paid for June. Payment was due on 5 June.`}>
-        <button className="btn outline" onClick={() => { logEvent('Downloaded report', 'Monthly collection and reconciliation · June 2027 · PDF'); toast('June 2027 report downloaded. The download is in the audit log.') }}><Download /> Monthly report</button>
-      </PageHead>
-      <div className="grid g-4 keep2">
-        <Kpi hero icon={Wallet} label="Collected this month" value={rm(collectedThisMonth)} note={`State share ${rm(collectedThisMonth * STATE_SHARE)}`}>
-          <div className="gv-hero-spark"><Sparkline values={monthly.map((m) => m.v)} /></div>
-        </Kpi>
-        <Kpi icon={Percent} tone="ok" label="Workers paying" value={pct(complianceRate)} note="Year 1 target in the proposal: 60%" />
-        <Kpi icon={PiggyBank} tone="purple" label="State share this year" value={rmM(stateYtd)} note={`70% of ${rmM(ytd)} collected`} />
-        <Kpi icon={UserCheck} label="Workers registered" value={num(REGISTERED)} note="31 Dec 2025, proposal s.3.1" />
-      </div>
-      <div className="grid g-main">
-        <Card title="Collected each month" sub="2027, split between the State (70%) and the operator (30%)">
-          <BarChart data={monthlySplit} series={['State share (70%)', 'Operator (30%)']} colors={['#1460E0', '#22B5F0']} height={250} format={axisRm} />
-        </Card>
-        <Card title="Where the money goes" sub="January to June 2027">
-          <SplitBar parts={[
-            { label: 'Kerajaan Negeri Sabah', share: STATE_SHARE, text: rm(stateYtd), color: '#1460E0' },
-            { label: 'Operator, Microtek', share: 1 - STATE_SHARE, text: rm(operatorYtd), color: '#22B5F0' },
-          ]} />
-          <div className="gv-sub" style={{ marginTop: 22 }}>Workers this month</div>
-          <MeterRows big items={paymentMetrics.map((m) => ({ label: m.label, share: m.value / REGISTERED, text: num(m.value), color: m.color }))} />
-          <p className="small muted" style={{ marginTop: 12 }}>Arrears lead to reminders only, never to permit action.</p>
-        </Card>
-      </div>
-      <div className="grid g-main">
-        <Card title="Paid by district" sub="Colour shows the share not yet paid for June. Choose a district."
-          action={<div className="chips">{[['all', 'All'], ['high', 'High arrears'], ['low', 'Low arrears']].map(([v, l]) => <button key={v} className="chip" aria-pressed={filter === v} onClick={() => setFilter(v)}>{l}</button>)}</div>}>
-          <SabahMap districts={districts} selected={sel} onSelect={setSel} filter={filter} renderPanel={(d) => (
-            <div className="stack" style={{ gap: 14 }}>
-              <DistrictDetail d={d} />
-              <button className="btn sm outline" onClick={() => go(`${BASE}/workers?district=${encodeURIComponent(d.name)}`)}><Users /> Look up workers</button>
-            </div>
-          )} />
-        </Card>
-        <Card title="By sector" sub="Registered workers, proposal s.3.1">
-          <HBarChart data={sectors.map((s) => ({ label: s.name, value: s.workers }))} />
-        </Card>
-      </div>
-      <div className="grid g-2">
-        <Card title="How workers paid" sub="Payment channel, June 2027">
-          <Donut data={channelData} center={rmM(collectedThisMonth)} centerSub="June" size={170} />
-        </Card>
-        <Card title="Nationality" sub="Registered workers">
-          <Donut data={nationalityCounts} center={num(REGISTERED)} centerSub="workers" size={170} />
-        </Card>
-      </div>
-    </>
   )
 }
 

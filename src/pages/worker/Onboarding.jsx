@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Camera, ScanLine, User, Wallet, CalendarDays, ShieldC
 import { Logo } from '../../components/ui.jsx'
 import { demoWorker as w, languages } from '../../data/demo.js'
 import { useWk } from './shell.jsx'
+import { Busy } from './kit.jsx'
 import { langNote } from './i18n.js'
 
 const STEPS = ['Language', 'Rules', 'Passport', 'Face', 'Your record']
@@ -36,6 +37,8 @@ export default function Onboarding() {
   const [review, setReview] = useState(demo === 'review' ? 'record' : null) // null | 'record' | 'face'
   const [sent, setSent] = useState(false)
   const [wrong, setWrong] = useState([])
+  const [finding, setFinding] = useState(false)
+  const [finished, setFinished] = useState(false)
 
   // A new quick link from the side panel resets the flow to that point.
   useEffect(() => {
@@ -54,6 +57,30 @@ export default function Onboarding() {
     const id = setTimeout(() => { setFace(failFace ? 'mismatch' : 'done'); setFailFace(false) }, 1800)
     return () => clearTimeout(id)
   }, [face, failFace])
+
+  // Looking up the record in SWIMS and eNORES before step 5 shows it.
+  useEffect(() => {
+    if (step !== 4 || demo === 'review') return
+    setFinding(true)
+    const id = setTimeout(() => setFinding(false), 1500)
+    return () => clearTimeout(id)
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!finished) return
+    const id = setTimeout(() => { toast('Welcome to SCANS'); nav('/worker') }, 2200)
+    return () => clearTimeout(id)
+  }, [finished]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (finished) return (
+    <div className="wk-onb">
+      <section className="wk-onb-body wk-allset" role="status">
+        <div className="wk-badge-mark"><Check aria-hidden="true" /></div>
+        <h1 className="wk-h1 center">You are all set</h1>
+        <p className="wk-lead center">Your SCANS account is ready. Taking you to your home screen…</p>
+        <span className="wk-splash-bar" aria-hidden="true"><i /></span>
+      </section>
+    </div>
+  )
 
   const back = () => {
     if (review) { setReview(null); setSent(false); return }
@@ -206,6 +233,7 @@ export default function Onboarding() {
         </section>
       )}
 
+      {step === 4 && finding && <Busy label="Finding your record…" sub="Checking SWIMS (Sabah State) and eNORES (JTK Sabah)" />}
       {step === 4 && (
         <section className="wk-onb-body">
           <h1 className="wk-h1">We found your record</h1>
@@ -220,7 +248,7 @@ export default function Onboarding() {
             <div><span>Workplace</span><b>{w.site}</b></div>
           </div>
           <div className="wk-foot">
-            <button type="button" className="btn primary lg block" onClick={() => { toast('Welcome to SCANS'); nav('/worker') }}>Everything is right</button>
+            <button type="button" className="btn primary lg block" onClick={() => setFinished(true)}>Everything is right</button>
             <button type="button" className="btn ghost block" onClick={() => setReview('record')}>Something is wrong</button>
           </div>
         </section>

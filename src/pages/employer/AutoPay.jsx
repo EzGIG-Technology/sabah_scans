@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Repeat, ArrowRight, CheckCircle2, Lock, Upload, FileText, ShieldCheck, Landmark, Users, CalendarDays, AlertTriangle, Circle } from 'lucide-react'
-import { PageHead, Card, Status, Callout, Stepper, Table, Mono, Switch, Modal, useToast } from '../../components/ui.jsx'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Repeat, ArrowRight, CheckCircle2, Lock, Upload, FileText, ShieldCheck, Landmark, Users, CalendarDays, AlertTriangle, Circle, Info } from 'lucide-react'
+import { PageHead, Card, Status, Callout, Stepper, Table, Mono, Switch, Modal, SearchInput, Seg, Empty, useToast } from '../../components/ui.jsx'
 import { RATE, rm, num } from '../../data/demo.js'
 import { EmpShell, Who, WStatus } from './shell.jsx'
 import { COMPANY, DEMO_TODAY, useRoster, useEmp, setEmp, banks } from './data.js'
@@ -130,6 +131,61 @@ function Wizard({ initial, onDone, onCancel }) {
   )
 }
 
+/* Figma "Auto-Debit Management" (636:147163): who is on auto-pay, and adding or removing workers. */
+function Enrolment({ m }) {
+  const roster = useRoster()
+  const toast = useToast()
+  const [q, setQ] = useState('')
+  const [view, setView] = useState('all')
+  const [sel, setSel] = useState(() => new Set())
+  const [remove, setRemove] = useState(null)
+  const on = useMemo(() => new Set(m.workers), [m.workers])
+  const since = (id) => (m.added && m.added[id]) || m.since
+  const rows = roster
+    .filter((w) => view === 'all' || (view === 'on' ? on.has(w.id) : !on.has(w.id)))
+    .filter((w) => !q || (w.name + ' ' + w.id).toLowerCase().includes(q.toLowerCase()))
+  const canAdd = (w) => w.consent && !on.has(w.id)
+  const notOn = roster.filter(canAdd)
+  const add = () => {
+    const ids = [...sel].filter((id) => !on.has(id))
+    setEmp((st) => ({ mandate: { ...st.mandate, workers: [...st.mandate.workers, ...ids], added: { ...(st.mandate.added || {}), ...Object.fromEntries(ids.map((id) => [id, DEMO_TODAY])) } } }))
+    setSel(new Set())
+    toast(`${ids.length} ${ids.length === 1 ? 'worker' : 'workers'} added to auto-pay from ${m.day} Jul 2027. They are told in the app first.`)
+  }
+  return (
+    <Card title="Workers on auto-pay" sub={`${num(m.workers.length)} of the ${num(roster.filter((w) => w.consent).length)} workers in this list who agreed in the app`}>
+      <div className="toolbar" style={{ marginBottom: 12 }}>
+        <SearchInput value={q} onChange={setQ} placeholder="Search name or SCANS ID" />
+        <Seg label="Show" value={view} onChange={setView} items={[{ value: 'all', label: 'All' }, { value: 'on', label: 'On auto-pay' }, { value: 'off', label: 'Not on it' }]} />
+        <button className="btn outline sm" disabled={notOn.length === 0} onClick={() => setSel(new Set(notOn.map((w) => w.id)))}>Select all not on auto-pay</button>
+        {sel.size > 0 && <button className="btn primary sm" onClick={add}><CheckCircle2 /> Add {num(sel.size)} to auto-pay</button>}
+      </div>
+      <Table rows={rows} selectable selected={sel} onSelect={setSel} isSelectable={canAdd} pageSize={8}
+        empty={<Empty icon={Users} title="No worker matches">Try another search or show all workers.</Empty>}
+        columns={[
+          { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
+          { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
+          { key: 'owing', label: 'Owing', align: 'r', render: (w) => <span className="num">{rm(w.owing)}</span> },
+          { key: 'auto', label: 'Auto-pay', render: (w) => (on.has(w.id) ? <span className="pill ok dot">On</span> : w.consent ? <span className="pill grey">Not on it</span> : <span className="small muted"><Lock size={13} style={{ verticalAlign: -2 }} /> No consent</span>) },
+          { key: 'since', label: 'Added on', render: (w) => (on.has(w.id) ? since(w.id) : <span className="muted">-</span>) },
+          { key: 'act', label: '', align: 'r', render: (w) => (on.has(w.id) ? <button className="btn ghost sm" onClick={(e) => { e.stopPropagation(); setRemove(w) }}>Remove</button> : null) },
+        ]} />
+      <Callout icon={Info} style={{ marginTop: 12 }}>Auto-pay covers the month due. Months a worker already owes are not taken automatically. Pay those from <Link to="/employer/pay">Pay for workers</Link>.</Callout>
+      {remove && (
+        <Modal title={`Remove ${remove.name} from auto-pay?`} onClose={() => setRemove(null)} actions={<>
+          <button className="btn outline" onClick={() => setRemove(null)}>Keep</button>
+          <button className="btn danger" onClick={() => {
+            setEmp((st) => ({ mandate: { ...st.mandate, workers: st.mandate.workers.filter((id) => id !== remove.id) } }))
+            toast(`${remove.name} removed from auto-pay`); setRemove(null)
+          }}>Remove</button>
+        </>}>
+          <p className="ink2">The company stops paying for {remove.name} from July 2027. They stay responsible for their own contribution and are told in the app.</p>
+        </Modal>
+      )}
+    </Card>
+  )
+}
+
 function Deduction() {
   const { permit } = useEmp()
   const toast = useToast()
@@ -232,6 +288,8 @@ export default function AutoPay() {
           </div>
         </Card>
       </div>
+
+      {m && !wizard && <Enrolment m={m} />}
 
       <Deduction />
 

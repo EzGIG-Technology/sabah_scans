@@ -54,7 +54,7 @@ export const useToast = () => useContext(ToastCtx)
    nav: [{ group: 'Monitor', items: [{ to, label, icon, end, count }] }]
    portal: { name, sub, crest (img src) | mark (text) }
    ===================================================================== */
-export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', kicker, notifications = [], searchPlaceholder = 'Search name, SCANS ID or passport', topExtra, children }) {
+export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', kicker, notifications = [], notificationsHref, searchPlaceholder = 'Search name, SCANS ID or passport', topExtra, children }) {
   // Accept the older flat nav and org props too.
   const nav = navIn[0] && navIn[0].to ? [{ items: navIn }] : navIn
   const portal = portalIn || { name: org ? org.name : 'SCANS', sub: org ? org.detail : '' }
@@ -123,12 +123,15 @@ export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', 
               <div className="popover" role="dialog" aria-label="Notifications">
                 <div style={{ padding: '8px 10px 4px', fontWeight: 600 }}>Notifications</div>
                 {notifications.length === 0 && <div className="empty" style={{ padding: 20 }}>Nothing new</div>}
-                {notifications.map((n, i) => (
-                  <div className="item" key={i}>
-                    <span className="k-ic" style={{ width: 32, height: 32, borderRadius: 10, display: 'grid', placeItems: 'center', background: 'var(--sky)', color: 'var(--blue)', flex: 'none' }}><Bell size={15} /></span>
-                    <div><b>{n.title}</b><span>{n.time}</span></div>
-                  </div>
-                ))}
+                {notifications.map((n, i) => {
+                  const inner = <><span className="k-ic" style={{ width: 32, height: 32, borderRadius: 10, display: 'grid', placeItems: 'center', background: 'var(--sky)', color: 'var(--blue)', flex: 'none' }}><Bell size={15} /></span>
+                    <div><b>{n.title}</b><span>{n.time}</span></div></>
+                  const to = n.to || notificationsHref
+                  return to
+                    ? <button type="button" className="item" key={i} onClick={() => go(to)} style={{ width: '100%', textAlign: 'left', background: 'none', border: 0, font: 'inherit', color: 'inherit', cursor: 'pointer' }}>{inner}</button>
+                    : <div className="item" key={i}>{inner}</div>
+                })}
+                {notificationsHref && <button type="button" className="btn ghost sm" style={{ width: '100%', justifyContent: 'center', marginTop: 4 }} onClick={() => go(notificationsHref)}>See all</button>}
               </div>
             )}
           </div>

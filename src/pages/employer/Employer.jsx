@@ -9,6 +9,7 @@ import Pay from './Pay.jsx'
 import AutoPay from './AutoPay.jsx'
 import Statements from './Statements.jsx'
 import Settings from './Settings.jsx'
+import Reports from './Reports.jsx'
 import Register from './Register.jsx'
 
 export default function EmployerApp() {
@@ -21,7 +22,7 @@ export default function EmployerApp() {
       <Route path="pay" element={<Pay />} />
       <Route path="auto-debit" element={<AutoPay />} />
       <Route path="statements" element={<Statements />} />
-      <Route path="reports" element={<Navigate to="/employer/statements" replace />} />
+      <Route path="reports" element={<Reports />} />
       <Route path="settings" element={<Settings />} />
       <Route path="*" element={<Navigate to="/employer" replace />} />
     </Routes>

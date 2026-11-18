@@ -40,6 +40,7 @@ export function PerkPhone({ offer }) {
           <span className="mx-ph-badge">{label}</span>
         </div>
         <div className="mx-ph-detail">
+          {offer.image ? <img className="mx-ph-img" src={offer.image} alt="" /> : null}
           <div className="mx-ph-big">{label}</div>
           <p>{offer.what || 'Say in one line what the worker gets.'}</p>
           <ul>

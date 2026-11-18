@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CheckCircle2, ArrowRight, ArrowLeft, Search, Upload, FileText, X, Info, ShieldCheck, Smartphone, KeyRound, AlertTriangle, Send } from 'lucide-react'
+import { CheckCircle2, ArrowRight, ArrowLeft, Search, Upload, FileText, X, Info, ShieldCheck, Smartphone, KeyRound, AlertTriangle, Send, Database } from 'lucide-react'
 import { Logo, Card, Callout, Stepper, Field, useToast } from '../../components/ui.jsx'
-import { num } from '../../data/demo.js'
+import { num, sectors } from '../../data/demo.js'
 import './employer.css'
 
 const STEPS = ['Verify', 'Person in charge', 'Documents', 'Review']
@@ -181,7 +181,7 @@ export default function Register() {
   const [docs, setDocs] = useState({ ssm: null, auth: null, permit: null })
   const [docErr, setDocErr] = useState(false)
   const [agree, setAgree] = useState(false)
-  const [phase, setPhase] = useState('form') // form | sending | done
+  const [phase, setPhase] = useState('intro') // intro | form | sending | done
   useEffect(() => { window.scrollTo(0, 0) }, [step, phase])
   useEffect(() => {
     if (phase !== 'sending') return
@@ -220,7 +220,44 @@ export default function Register() {
         </div>
       </header>
       <main className="solo-body">
-        {phase === 'done' ? (
+        {phase === 'intro' ? (
+          <div className="emp-intro">
+            <span className="pill info">Employer portal</span>
+            <h1>Register your company on SCANS</h1>
+            <p>For employers of foreign workers in Sabah. See each worker’s contribution status and, with their consent, pay for them in one go. The worker stays responsible for their own contribution.</p>
+            <div className="emp-benefits">
+              {[
+                [Database, 'Records from SSM and eNORES', 'Your company and your foreign workers are filled in for you. Nothing to type twice.'],
+                [CheckCircle2, 'Contribution status for every worker', 'Paid, not paid yet or owing. Never wages, complaints or immigration details.'],
+                [ShieldCheck, 'Pay safely with FPX', 'Batch payments and monthly auto-pay go straight to the State’s FWECF account.'],
+              ].map(([Icon, t, d]) => (
+                <Card key={t}><span className="emp-ic"><Icon size={20} /></span><b>{t}</b><p>{d}</p></Card>
+              ))}
+            </div>
+            <Card style={{ width: '100%' }}>
+              <div className="emp-need">
+                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>You will need</h2>
+                <div className="emp-rows">
+                  {[
+                    [FileText, 'Your 12-digit SSM registration number', 'We check it with SSM and eNORES (JTK Sabah)'],
+                    [Upload, 'SSM certificate and a signed letter of authorisation', 'PDF or a clear photo, up to 10 MB each'],
+                    [Smartphone, 'The person in charge’s MyKad number and mobile phone', 'For 2-step sign-in. It takes about 5 minutes'],
+                  ].map(([Icon, t, d]) => (
+                    <div key={t}><span className="emp-ic"><Icon size={18} /></span><div className="grow"><b>{t}</b><small>{d}</small></div></div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+            <div className="row wrap" style={{ justifyContent: 'center' }}>
+              <button className="btn primary lg" onClick={() => setPhase('form')}>Start registration <ArrowRight /></button>
+            </div>
+            <p className="small muted">Already registered? <Link to="/login">Sign in</Link></p>
+            <div className="chips" style={{ justifyContent: 'center' }} aria-label="Sectors on SCANS">
+              {sectors.map((x) => <span key={x.name} className="chip">{x.name}</span>)}
+            </div>
+            <p className="small muted">Every sign-up is checked by Microtek before the account opens.</p>
+          </div>
+        ) : phase === 'done' ? (
           <Card>
             <div className="emp-state">
               <span className="emp-badge"><CheckCircle2 /></span>
@@ -259,7 +296,7 @@ export default function Register() {
                   {step === 2 && <Docs docs={docs} setDocs={(d) => { setDocs(d); setDocErr(false) }} ssm={company.ssm} err={docErr} />}
                   {step === 3 && <Review company={company} pic={pic} docs={docs} go={setStep} agree={agree} setAgree={setAgree} />}
                   <div className="row between" style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--line2)' }}>
-                    {step === 0 ? <Link to="/" className="btn outline"><ArrowLeft /> Cancel</Link> : <button className="btn outline" onClick={() => setStep(step - 1)}><ArrowLeft /> Back</button>}
+                    {step === 0 ? <button className="btn outline" onClick={() => setPhase('intro')}><ArrowLeft /> Back</button> : <button className="btn outline" onClick={() => setStep(step - 1)}><ArrowLeft /> Back</button>}
                     {step < 3
                       ? <button className="btn primary" disabled={!canNext} onClick={next}>Next <ArrowRight /></button>
                       : <button className="btn primary" disabled={!agree} onClick={() => setPhase('sending')}><Send /> Submit for review</button>}

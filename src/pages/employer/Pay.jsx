@@ -54,6 +54,7 @@ export default function Pay() {
   const [view, setView] = useState(presetW && presetW.owing === 0 ? 'all' : 'owing')
   const [q, setQ] = useState('')
   const [months, setMonths] = useState(0)
+  const [other, setOther] = useState('')
   const [bank, setBank] = useState(null)
   const [agree, setAgree] = useState(false)
   const [fail, setFail] = useState(false)
@@ -93,7 +94,16 @@ export default function Pay() {
     return () => clearTimeout(t)
   }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const restart = () => { setSel(new Set()); setMonths(0); setBank(null); setAgree(false); setBatch(null); setPhase('form'); setStep(0) }
+  /* Quick selects from Figma ("Select all red", "Select all yellow + red"). Workers without consent are never added. */
+  const pick = (test) => {
+    const match = roster.filter(test)
+    const ok = match.filter((w) => w.consent)
+    setSel(new Set(ok.map((w) => w.id)))
+    const left = match.length - ok.length
+    toast(`${ok.length} ${ok.length === 1 ? 'worker' : 'workers'} selected.${left ? ` ${left} without consent ${left === 1 ? 'was' : 'were'} left out.` : ''}`)
+  }
+
+  const restart = () => { setSel(new Set()); setMonths(0); setOther(''); setBank(null); setAgree(false); setBatch(null); setPhase('form'); setStep(0) }
 
   const head = (
     <PageHead title="Pay for workers"
@@ -114,7 +124,9 @@ export default function Pay() {
             <div className="toolbar" style={{ marginBottom: 12 }}>
               <SearchInput value={q} onChange={setQ} placeholder="Search name or SCANS ID" />
               <Seg label="Show" value={view} onChange={setView} items={[{ value: 'owing', label: 'Owing' }, { value: 'all', label: 'All workers' }]} />
-              <button className="btn outline sm" onClick={() => setSel(new Set(roster.filter((w) => w.consent && w.bucket !== 'paid').map((w) => w.id)))}>Select everyone who owes</button>
+              <button className="btn outline sm" onClick={() => pick((w) => w.bucket === 'risk')}><span className="emp-dot bad" aria-hidden="true" />Owing 3+ months</button>
+              <button className="btn outline sm" onClick={() => pick((w) => w.bucket === 'risk' || w.bucket === 'late')}><span className="emp-dot warn" aria-hidden="true" /><span className="emp-dot bad" aria-hidden="true" style={{ marginLeft: -8 }} />Owing earlier months</button>
+              <button className="btn outline sm" onClick={() => pick((w) => w.bucket !== 'paid')}>Everyone who owes</button>
               {sel.size > 0 && <button className="btn ghost sm" onClick={() => setSel(new Set())}>Clear</button>}
             </div>
             <Table rows={list} selectable selected={sel} onSelect={setSel} isSelectable={(w) => w.consent} pageSize={10} columns={[
@@ -122,6 +134,7 @@ export default function Pay() {
               { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
               { key: 'paidThrough', label: 'Paid up to' },
               { key: 'owing', label: 'Owing', align: 'r', render: (w) => <b className="num">{rm(w.owing)}</b> },
+              { key: 'auto', label: 'Auto-pay', render: (w) => (st.mandate && st.mandate.workers.includes(w.id) ? <span className="pill ok dot">On</span> : <span className="pill grey">Off</span>) },
               { key: 'consent', label: 'Consent', render: (w) => (w.consent ? <Status tone="ok">Given</Status>
                 : <span className="row" style={{ gap: 6, justifyContent: 'flex-end' }}><Lock size={14} color="var(--ink3)" /><span className="small muted">Not given, so you cannot pay for them</span></span>) },
             ]} />
@@ -143,12 +156,23 @@ export default function Pay() {
           <Card title="How many months?" sub={`For each of the ${num(chosen.length)} selected workers. Payments clear the oldest unpaid month first.`}>
             <div className="emp-periods" role="radiogroup" aria-label="Period">
               {PERIODS.map((p) => (
-                <button key={p.m} className="option" role="radio" aria-checked={months === p.m} onClick={() => setMonths(p.m)}>
+                <button key={p.m} className="option" role="radio" aria-checked={months === p.m && other === ''} onClick={() => { setMonths(p.m); setOther('') }}>
                   <span className="radio" />
                   <span className="grow"><b>{p.label}</b><small>{p.note}</small></span>
                   <span className="price num">{rm(p.m * RATE, 2)}<small>per worker</small></span>
                 </button>
               ))}
+              <div className={'option emp-other' + (other !== '' ? ' on' : '')}>
+                <span className="radio" />
+                <span className="grow"><b>Another number of months</b><small>From 1 to 24 months</small></span>
+                <label className="emp-otherin">
+                  <span className="vh">Number of months</span>
+                  <input className="input num" type="number" min="1" max="24" inputMode="numeric" placeholder="e.g. 2" value={other}
+                    onChange={(e) => { const v = e.target.value; setOther(v); const n = Number(v); setMonths(Number.isInteger(n) && n >= 1 && n <= 24 ? n : 0) }} />
+                  <span className="small muted">months</span>
+                </label>
+              </div>
+              {other !== '' && months === 0 && <small className="emp-small-err" role="alert">Enter a whole number of months from 1 to 24.</small>}
             </div>
             {months > 0 && (
               <div style={{ marginTop: 18 }}>

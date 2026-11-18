@@ -2,6 +2,7 @@
 // the home screen and the language step of sign-up. Every other screen is in
 // English in the prototype; the real build moves all copy into these files.
 // Placeholders: {m} a month, {d} a date.
+import { more } from './i18n-more.js'
 
 export const dict = {
   en: {
@@ -136,4 +137,6 @@ export const langName = {
   ms: 'Bahasa Melayu', en: 'English', id: 'Bahasa Indonesia', fil: 'Filipino', bn: 'Bengali', ne: 'Nepali',
 }
 
-export const fill = (s, vars) => s.replace(/\{(\w)\}/g, (_, k) => vars[k] ?? '')
+for (const k of Object.keys(dict)) Object.assign(dict[k], more[k])
+
+export const fill = (s = '', vars = {}) => s.replace(/\{(\w)\}/g, (_, k) => vars[k] ?? '')
