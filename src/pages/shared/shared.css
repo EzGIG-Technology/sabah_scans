@@ -168,7 +168,7 @@
   .gv-kpis > .card.hero { grid-column: 1 / -1; grid-row: auto; }
   .feed .gv-feed-it { flex-wrap: wrap; row-gap: 4px; }
   .feed .gv-feed-it > div:nth-child(2) { flex: 1 1 calc(100% - 50px); }
-  .feed .gv-feed-it .amt { width: 100%; margin-left: 46px; text-align: left; display: flex; gap: 8px; align-items: baseline; }
+  .feed .gv-feed-it .amt { width: calc(100% - 46px); margin-left: 46px; text-align: left; display: flex; gap: 8px; align-items: baseline; }
   .feed .gv-feed-it .amt span { display: inline !important; }
 }
 

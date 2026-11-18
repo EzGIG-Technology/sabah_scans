@@ -21,19 +21,25 @@ npm run build      # production build in dist/
 
 ## Routes
 
-| Route | Screen |
+| Route | Screens |
 |---|---|
-| `/` | Public page |
-| `/login` | Sign in, with a tab for each portal |
-| `/worker/start` | Worker sign-up: language, rules, passport, face check, record |
-| `/worker` … | Home, pay, receipt, receipts, perks, notices, help, SCANS card, privacy |
-| `/employer` … | Overview, workers, pay for workers, monthly auto-pay, statements, company |
-| `/state` … | Collection, districts, employers and workers, notices, complaints, reports |
-| `/merchant` … | Overview, offers, outlets |
-| `/admin` … | Operations, waiting for review, worker records, audit log |
+| `/` | Public page: hero, portal cards, how a contribution moves, commitments, FAQ |
+| `/login` | Sign in to any portal (sample accounts filled in, 2-step code for officials) |
+| `/worker/start` | Worker sign-up: language, rules and consent, passport scan, face check, record match (with failure paths) |
+| `/worker` … | Home, pay (with failed-payment path), receipt, receipts, perks with show-code sheet, notices, help, SCANS card, privacy, offline state, six languages on home and nav |
+| `/employer/register` | Employer sign-up: SSM and eNORES check, person in charge, documents, review |
+| `/employer` … | Overview with compliance score, workers and profiles, four-step bulk payment (FPX, failure path), monthly auto-pay with the s.113(4) permit gate, statements, settings |
+| `/merchant/register` | Merchant sign-up: company, person in charge, outlets, documents, review |
+| `/merchant` … | Overview, offer management with a four-step new-offer flow, confirm a redemption at the counter, outlets and staff, reports, settings |
+| `/state` … | Overview, districts, FWECF account and settlements, workers and employers (read-only, lookups logged), notice approval, complaints, reports |
+| `/admin` … | Microtek command centre, approvals, worker master list and profile tabs, employers, merchant onboarding and offer review, global announcements, reports centre, admin users and roles, audit log, connected systems |
+
+Actions carry across portals within one browser session (for example, a Microtek announcement waits for State approval and the State's decision shows back in the Microtek console). A reload resets the sample data.
 
 ## Where things live
 
-- `src/styles/app.css` holds the design tokens (colours from the SCANS mark, one typeface, one radius) and every shared style.
-- `src/components/ui.jsx` holds the app shell, tables, tabs, drawer, charts and the Sabah district tile map.
-- `public/` holds the logo files. Put generated photographs, partner logos and illustrations here.
+- `src/styles/app.css`: design tokens and shared styles in the Sabah GO look (Poppins, light blue ground, white cards with soft shadows, navy to cyan gradient).
+- `src/components/ui.jsx`: app shell, cards, tables with paging, tabs, stepper, drawer, modal, charts and the Sabah district map.
+- `src/data/demo.js`: all shared sample data, derived so totals agree across portals.
+- `src/pages/<portal>/`: one folder per portal; `src/pages/shared/` holds the record screens and session store used by both government consoles.
+- `public/img/`: photographs, the MOF Sabah crest and payment marks (reused from Sabah GO).
