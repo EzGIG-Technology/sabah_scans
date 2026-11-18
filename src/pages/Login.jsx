@@ -48,7 +48,7 @@ export default function Login() {
         <div className="lp-wrap">
           <nav className="lp-nav" aria-label="Site">
             <Link to="/" className="lp-chip" aria-label="SCANS home">
-              <Logo width={118} />
+              <Logo width={176} />
               <span className="sep" aria-hidden="true" />
               <span className="txt"><b>Contribution system</b><small>Kerajaan Negeri Sabah</small></span>
             </Link>

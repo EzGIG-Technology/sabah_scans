@@ -32,7 +32,7 @@ export default function WorkerHome() {
     <div className="wk-page has-nav">
       <section className="wk-hero photo">
         <div className="wk-hero-top">
-          <span className="wk-logochip"><Logo width={92} /></span>
+          <span className="wk-logochip"><Logo width={112} /></span>
           <div className="wk-hero-ic">
             <button type="button" className="wk-ib glass" aria-label={t.search} onClick={() => setSearchOpen(true)}><Search aria-hidden="true" /></button>
             <Link to="/worker/notices" className="wk-ib glass" aria-label={t.notices + ', 2 new'}><Bell aria-hidden="true" /><i className="dot" /></Link>

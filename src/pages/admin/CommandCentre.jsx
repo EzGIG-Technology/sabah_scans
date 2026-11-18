@@ -71,7 +71,7 @@ export default function CommandCentre() {
 
       <div className="grid g-main">
         <Card title="Collection" sub={per.label} action={<span className="pill info num">{rm(per.total)}</span>}>
-          <BarChart data={per.data} height={250} format={shortAxis} highlight={period === 'month' ? per.data.length - 1 : undefined} colors={['#1460E0']} />
+          <BarChart data={per.data} height={250} format={shortAxis} highlight={period === 'month' ? per.data.length - 1 : undefined} colors={['#1D66B8']} />
         </Card>
         <Card title="How workers paid" sub={`Payment channel, ${per.sub}`}>
           <Donut data={channelData} center={short(per.total)} centerSub={per.sub} size={170} />

@@ -30,7 +30,7 @@ export function MethodMark({ m }) {
 }
 const GROUPS = ['E-wallet', 'Bank', 'Cash', 'Card']
 const GROUP_LABEL = { 'E-wallet': 'E-wallets', Bank: 'Bank and DuitNow', Cash: 'Cash', Card: 'Cards' }
-const markFor = (name) => METHODS.find((m) => m.name === name) || (name === 'Employer bulk payment' ? { tile: { t: 'BP', bg: '#0B2F7A' } } : {})
+const markFor = (name) => METHODS.find((m) => m.name === name) || (name === 'Employer bulk payment' ? { tile: { t: 'BP', bg: '#13407A' } } : {})
 
 const NEW_ID = 'RCP-2706-121907'
 const COUNTER = 'SCN 2706 4721 8'

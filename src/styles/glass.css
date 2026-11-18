@@ -9,25 +9,25 @@
   --glass: rgba(255, 255, 255, .58);
   --glassEdge: rgba(255, 255, 255, .78);
   --glassBlur: blur(22px) saturate(180%);
-  --glassShadow: 0 1px 0 rgba(255, 255, 255, .85) inset, 0 10px 30px rgba(16, 56, 140, .10), 0 2px 6px rgba(16, 56, 140, .05);
-  --glassShadow2: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 22px 48px rgba(16, 56, 140, .18), 0 4px 12px rgba(16, 56, 140, .07);
+  --glassShadow: 0 1px 0 rgba(255, 255, 255, .85) inset, 0 10px 30px rgba(11, 37, 69, .10), 0 2px 6px rgba(11, 37, 69, .05);
+  --glassShadow2: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 22px 48px rgba(11, 37, 69, .18), 0 4px 12px rgba(11, 37, 69, .07);
   --out: cubic-bezier(.16, 1, .3, 1);
   --spring: cubic-bezier(.22, 1.2, .36, 1);
 }
 
 /* ---------- living backdrop (rendered once by <Ambient/>) ---------- */
-body { background: linear-gradient(160deg, #EEF4FF 0%, #E4EEFF 45%, #EAF6FF 100%) fixed; }
+body { background: linear-gradient(160deg, #EEF2F7 0%, #E7EDF5 45%, #EDF3F8 100%) fixed; }
 .solo { background: transparent; }
 .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .ambient i { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
-.ambient i:nth-child(1) { width: 46vmax; height: 46vmax; left: -12vmax; top: -14vmax; background: radial-gradient(circle, rgba(34, 181, 240, .5), rgba(34, 181, 240, 0) 68%); animation: orbA 34s ease-in-out infinite alternate; }
-.ambient i:nth-child(2) { width: 52vmax; height: 52vmax; right: -16vmax; top: 8vmax; background: radial-gradient(circle, rgba(20, 96, 224, .34), rgba(20, 96, 224, 0) 68%); animation: orbB 42s ease-in-out infinite alternate; }
-.ambient i:nth-child(3) { width: 40vmax; height: 40vmax; left: 22vw; bottom: -18vmax; background: radial-gradient(circle, rgba(124, 92, 255, .2), rgba(124, 92, 255, 0) 68%); animation: orbC 38s ease-in-out infinite alternate; }
+.ambient i:nth-child(1) { width: 46vmax; height: 46vmax; left: -12vmax; top: -14vmax; background: radial-gradient(circle, rgba(77, 154, 211, .5), rgba(77, 154, 211, 0) 68%); animation: orbA 34s ease-in-out infinite alternate; }
+.ambient i:nth-child(2) { width: 52vmax; height: 52vmax; right: -16vmax; top: 8vmax; background: radial-gradient(circle, rgba(29, 102, 184, .34), rgba(29, 102, 184, 0) 68%); animation: orbB 42s ease-in-out infinite alternate; }
+.ambient i:nth-child(3) { width: 40vmax; height: 40vmax; left: 22vw; bottom: -18vmax; background: radial-gradient(circle, rgba(210, 59, 59, .2), rgba(210, 59, 59, 0) 68%); animation: orbC 38s ease-in-out infinite alternate; }
 .ambient i:nth-child(4) { width: 30vmax; height: 30vmax; right: 18vw; bottom: -6vmax; background: radial-gradient(circle, rgba(0, 200, 170, .18), rgba(0, 200, 170, 0) 68%); animation: orbA 46s ease-in-out infinite alternate-reverse; }
 .ambient svg { position: absolute; left: -10%; bottom: -2%; width: 120%; height: 55%; }
 .ambient svg path { fill: none; stroke-linecap: round; }
-.ambient svg .s1 { stroke: #1460E0; stroke-width: 2; opacity: .14; stroke-dasharray: 1400 600; animation: flow 26s linear infinite; }
-.ambient svg .s2 { stroke: #22B5F0; stroke-width: 46; opacity: .06; animation: sway 30s ease-in-out infinite alternate; }
+.ambient svg .s1 { stroke: #1D66B8; stroke-width: 2; opacity: .14; stroke-dasharray: 1400 600; animation: flow 26s linear infinite; }
+.ambient svg .s2 { stroke: #4D9AD3; stroke-width: 46; opacity: .06; animation: sway 30s ease-in-out infinite alternate; }
 @keyframes orbA { 50% { transform: translate(8vw, 6vh) scale(1.12); } 100% { transform: translate(3vw, 14vh) scale(.94); } }
 @keyframes orbB { 50% { transform: translate(-9vw, 10vh) scale(.9); } 100% { transform: translate(-4vw, -6vh) scale(1.1); } }
 @keyframes orbC { 100% { transform: translate(-12vw, -10vh) scale(1.18); } }
@@ -43,7 +43,7 @@ body { background: linear-gradient(160deg, #EEF4FF 0%, #E4EEFF 45%, #EAF6FF 100%
   backdrop-filter: var(--glassBlur); -webkit-backdrop-filter: var(--glassBlur);
 }
 :is(.shell, .solo) .card.tint { background: rgba(255, 255, 255, .4); border: 1px solid rgba(255, 255, 255, .6); }
-.card.hero { background: linear-gradient(135deg, rgba(11, 47, 122, .93) 0%, rgba(20, 96, 224, .89) 55%, rgba(34, 181, 240, .86) 100%); box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 16px 36px rgba(20, 96, 224, .32); }
+.card.hero { background: linear-gradient(135deg, rgba(19, 64, 122, .93) 0%, rgba(29, 102, 184, .89) 55%, rgba(77, 154, 211, .86) 100%); box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 16px 36px rgba(29, 102, 184, .32); }
 .shell .side { background: rgba(255, 255, 255, .62); border: 1px solid var(--glassEdge); box-shadow: var(--glassShadow); backdrop-filter: var(--glassBlur); -webkit-backdrop-filter: var(--glassBlur); }
 .shell .side .me { background: rgba(255, 255, 255, .55); border: 1px solid rgba(255, 255, 255, .7); }
 .shell .side nav a:hover { background: rgba(255, 255, 255, .7); }
@@ -53,11 +53,11 @@ body { background: linear-gradient(160deg, #EEF4FF 0%, #E4EEFF 45%, #EAF6FF 100%
 .shell .seg, .shell .chip { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 
 /* overlays: frosted drawer and dialog over a blurred scrim */
-.scrim { background: rgba(10, 36, 99, .22); backdrop-filter: blur(6px) saturate(120%); -webkit-backdrop-filter: blur(6px) saturate(120%); }
+.scrim { background: rgba(11, 37, 69, .22); backdrop-filter: blur(6px) saturate(120%); -webkit-backdrop-filter: blur(6px) saturate(120%); }
 .drawer, .modal { background: rgba(255, 255, 255, .82); border: 1px solid var(--glassEdge); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
 .drawer { animation: drawerIn .5s var(--out); }
 .modal { animation: modalIn .45s var(--spring); }
-.toast { background: rgba(10, 36, 99, .84); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); border: 1px solid rgba(255, 255, 255, .18); }
+.toast { background: rgba(11, 37, 69, .84); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); border: 1px solid rgba(255, 255, 255, .18); }
 @keyframes drawerIn { from { transform: translateX(48px); opacity: 0; } }
 @keyframes modalIn { from { transform: translateY(14px) scale(.94); opacity: 0; } }
 
@@ -104,7 +104,7 @@ svg.chart:not(:has(.bar-rect)) { animation: wipe 1.4s var(--out) .15s backwards;
 .bar > span { animation: fillX 1.1s var(--out) .2s backwards; transform-origin: 0 50%; }
 @keyframes fillX { from { transform: scaleX(0); } }
 .feed.fresh .it:first-child { animation: feedIn .7s var(--out); }
-@keyframes feedIn { from { opacity: 0; transform: translateY(-12px); background: rgba(34, 181, 240, .16); } }
+@keyframes feedIn { from { opacity: 0; transform: translateY(-12px); background: rgba(77, 154, 211, .16); } }
 .topbar .live .dot { position: relative; }
 .topbar .live .dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ring 2s var(--out) infinite; }
 @keyframes ring { from { transform: scale(1); opacity: .7; } to { transform: scale(2.8); opacity: 0; } }

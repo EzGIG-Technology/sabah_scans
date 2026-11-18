@@ -1,0 +1,119 @@
+/* =====================================================================
+   SCANS brand layer
+   Loaded last. Gives SCANS its own identity on top of the shared
+   Sabah GO-style system: colours from the SCANS mark (navy letters,
+   sky tile, red ribbon), Plus Jakarta Sans, a deep navy sidebar that
+   carries the logo, tighter corners and a ribbon accent.
+   ===================================================================== */
+:root {
+  --navy: #0B2545;
+  --navy2: #13407A;
+  --blue: #1D66B8;
+  --blue2: #3B86D1;
+  --cyan: #4D9AD3;
+  --sky: #E7F0F9;
+  --sky2: #D0E2F4;
+  --ground: #F2F5F9;
+  --surface2: #F2F5F9;
+  --line: #E1E8F0;
+  --line2: #EDF1F6;
+  --ink: #0B1F33;
+  --ink2: #44566B;
+  --ink3: #6B7C8F;
+  --ribbon: #D23B3B;
+  --side: #0B2545;
+  --side2: #102F57;
+
+  --r: 14px;
+  --r-sm: 10px;
+  --shadow: 0 1px 2px rgba(11, 37, 69, .06), 0 8px 24px rgba(11, 37, 69, .07);
+  --shadow2: 0 2px 4px rgba(11, 37, 69, .08), 0 18px 40px rgba(11, 37, 69, .14);
+  --grad: linear-gradient(140deg, #0B2545 0%, #13407A 48%, #2E78C4 100%);
+  --gradNavy: linear-gradient(160deg, #0B2545 0%, #13407A 70%, #1D66B8 100%);
+  --gradBtn: linear-gradient(180deg, #2A74C6 0%, #1A5DAA 100%);
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+body { font-family: var(--font); background: linear-gradient(170deg, #EEF2F7 0%, #E9EEF5 50%, #EFF3F8 100%) fixed; }
+h1, h2, h3, h4 { letter-spacing: -.02em; }
+
+/* Calmer backdrop in SCANS colours */
+.ambient i:nth-child(1) { background: radial-gradient(circle, rgba(77, 154, 211, .34), rgba(77, 154, 211, 0) 68%); }
+.ambient i:nth-child(2) { background: radial-gradient(circle, rgba(19, 64, 122, .22), rgba(19, 64, 122, 0) 68%); }
+.ambient i:nth-child(3) { background: radial-gradient(circle, rgba(210, 59, 59, .08), rgba(210, 59, 59, 0) 68%); }
+.ambient i:nth-child(4) { background: radial-gradient(circle, rgba(29, 102, 184, .12), rgba(29, 102, 184, 0) 68%); }
+
+/* ---------- Sidebar: deep navy, logo on top, ribbon accent ---------- */
+.shell .side {
+  background: linear-gradient(180deg, var(--side) 0%, var(--side2) 100%);
+  border: 0; border-radius: 18px; box-shadow: 0 18px 40px rgba(11, 37, 69, .28);
+  backdrop-filter: none; -webkit-backdrop-filter: none; color: #fff;
+}
+.shell .side::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--ribbon) 0 34%, #fff 34% 40%, var(--cyan) 40% 100%); }
+.side .brand { padding: 18px 18px 12px; justify-content: center; border-bottom: 1px solid rgba(255, 255, 255, .08); margin-bottom: 4px; }
+.side .brand img { width: 190px; max-width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .18)); }
+.side .portal { background: rgba(255, 255, 255, .07); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); margin: 10px 12px 4px; }
+.side .portal .crest { background: #fff; }
+.side .group { color: rgba(255, 255, 255, .5); }
+.side nav a { color: rgba(255, 255, 255, .78); position: relative; }
+.shell .side nav a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.side nav a.active, .shell .side nav a.active { background: #fff; color: var(--navy); box-shadow: 0 6px 16px rgba(0, 0, 0, .18); }
+.side nav a.active::before { content: ''; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 4px; border-radius: 0 4px 4px 0; background: var(--cyan); }
+.side nav a .count { background: rgba(255, 255, 255, .14); color: #fff; }
+.side nav a.active .count { background: var(--sky); color: var(--blue); }
+.shell .side .me { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); }
+.side .me b { color: #fff; }
+.side .me small, .side .powered { color: rgba(255, 255, 255, .55); }
+.side .me .btn.ghost { color: rgba(255, 255, 255, .8); }
+.side .me .btn.ghost:hover { background: rgba(255, 255, 255, .1); }
+.side .me .avatar.grad { background: linear-gradient(140deg, var(--cyan), var(--blue)); }
+.side nav { scrollbar-color: rgba(255, 255, 255, .2) transparent; }
+
+/* ---------- Top bar: solid white with a fine rule ---------- */
+.shell .topbar { background: rgba(255, 255, 255, .9); border: 1px solid #fff; box-shadow: var(--shadow); border-radius: 16px; }
+.topbar .title b { font-weight: 700; }
+
+/* ---------- Cards, hero and buttons ---------- */
+.card.hero {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .045) 0 2px, transparent 2px 14px),
+    linear-gradient(140deg, #0B2545 0%, #13407A 50%, #2E78C4 100%);
+  box-shadow: 0 16px 34px rgba(11, 37, 69, .28);
+  position: relative; overflow: hidden;
+}
+.card.hero::after { content: ''; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; border: 18px solid rgba(77, 154, 211, .22); pointer-events: none; }
+.kpi .k-ic { border-radius: 10px; }
+.kpi .k-val { letter-spacing: -.025em; }
+.btn { border-radius: 10px; }
+.btn.lg { border-radius: 12px; }
+.btn.primary { box-shadow: 0 6px 16px rgba(29, 102, 184, .26), inset 0 1px 0 rgba(255, 255, 255, .18); }
+.seg { border-radius: 12px; }
+.seg button { border-radius: 9px; }
+.pill { border-radius: 8px; }
+.chip { border-radius: 9px; }
+.tabs button[aria-selected='true']::after { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+.input, .select { border-radius: 10px; }
+.option { border-radius: 12px; }
+table.data th:first-child { border-radius: 10px 0 0 10px; }
+table.data th:last-child { border-radius: 0 10px 10px 0; }
+
+/* ---------- Public site: square logo plate instead of a pill ---------- */
+.lp-chip { border-radius: 16px; padding: 10px 18px 10px 14px; box-shadow: 0 10px 28px rgba(0, 0, 0, .22); }
+.lp-chip img { width: 176px; }
+.lp-chip .crest { width: 34px; height: 34px; object-fit: contain; }
+
+/* Compact logo in the top bar when the sidebar is hidden */
+.topbar .top-logo { display: none; flex: none; }
+.topbar .top-logo img { width: 92px; height: auto; }
+
+@media (max-width: 960px) {
+  .shell .side { background: linear-gradient(180deg, var(--side) 0%, var(--side2) 100%); }
+  .topbar .top-logo { display: block; padding-right: 10px; border-right: 1px solid var(--line); }
+}
+@media (max-width: 420px) {
+  .topbar .top-logo img { width: 74px; }
+  .topbar .title small { display: none; }
+}
+@media (max-width: 640px) {
+  .lp-chip img { width: 128px; }
+  .lp-chip .txt { display: none; }
+}

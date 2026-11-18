@@ -17,7 +17,7 @@
 .st-range-btn b { font-size: 14px; font-weight: 600; }
 .st-range-pop {
   position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; width: 290px; max-width: calc(100vw - 48px);
-  background: #fff; border-radius: 16px; padding: 8px; box-shadow: 0 18px 50px rgba(16, 56, 140, .18); border: 1px solid var(--line2);
+  background: #fff; border-radius: 16px; padding: 8px; box-shadow: 0 18px 50px rgba(11, 37, 69, .18); border: 1px solid var(--line2);
 }
 .st-range-pop button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 0; border-radius: 10px; background: transparent; text-align: left; cursor: pointer; color: var(--ink); }
 .st-range-pop button:hover, .st-range-pop button[aria-pressed='true'] { background: var(--sky); }

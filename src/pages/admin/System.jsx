@@ -44,7 +44,7 @@ export default function Systems() {
 
       <div className="ad-two">
         <Card title="Requests today" sub="By hour, all apps and dashboards">
-          <BarChart data={requestsToday} height={220} format={shortAxis} colors={['#1460E0']} />
+          <BarChart data={requestsToday} height={220} format={shortAxis} colors={['#1D66B8']} />
         </Card>
         <Card flush title="Access by role" sub="Each party sees only what its role needs. 2-step sign-in is required for every web user.">
           <Table rows={accessByRole} rowKey={(r) => r.portal} columns={[

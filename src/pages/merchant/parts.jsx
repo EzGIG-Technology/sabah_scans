@@ -53,7 +53,7 @@ export function PerkPhone({ offer }) {
           <p className="mx-ph-note"><Lock size={11} aria-hidden="true" /> The shop sees your SCANS ID ending only. It counts as used after the shop confirms.</p>
         </div>
         <div className="mx-ph-card dim">
-          <span className="mono" style={{ background: '#1460E0' }} aria-hidden="true">CD</span>
+          <span className="mono" style={{ background: '#1D66B8' }} aria-hidden="true">CD</span>
           <div className="grow"><small>CelcomDigi</small><b>10GB extra data</b><span>Ends 31 Jul 2027</span></div>
         </div>
       </div>

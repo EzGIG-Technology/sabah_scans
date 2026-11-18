@@ -19,7 +19,7 @@ export function initials(name = '') {
 }
 
 /* Coloured monogram used for merchants and companies (no third-party logos in the prototype). */
-const monoColours = ['#1460E0', '#0E8F57', '#7B4DE3', '#D42253', '#B85407', '#0B2F7A', '#14B8A6', '#22B5F0']
+const monoColours = ['#1D66B8', '#0E8F57', '#7B4DE3', '#D42253', '#B85407', '#13407A', '#14B8A6', '#4D9AD3']
 export function Mono({ name, color, size }) {
   const c = color || monoColours[[...name].reduce((s, ch) => s + ch.charCodeAt(0), 0) % monoColours.length]
   return <span className={'mono' + (size === 'lg' ? ' lg' : '')} style={{ background: c }} aria-hidden="true">{initials(name)}</span>
@@ -68,7 +68,7 @@ export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', 
   return (
     <div className="shell">
       <aside className={'side' + (open ? ' open' : '')} aria-label="Main navigation">
-        <Link to="/" className="brand" aria-label="SCANS home"><Logo width={128} /></Link>
+        <Link to="/" className="brand" aria-label="SCANS home"><Logo light width={190} /></Link>
         <div className="portal">
           <span className="crest">{portal.crest ? <img src={portal.crest} alt="" /> : portal.mark || initials(portal.name)}</span>
           <div style={{ minWidth: 0 }}><b>{portal.name}</b><small>{portal.sub}</small></div>
@@ -102,6 +102,7 @@ export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', 
           <button className="iconbtn menu-btn" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(!open)}>
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
+          <Link to="/" className="top-logo" aria-label="SCANS home"><Logo width={92} /></Link>
           <div className="title">
             {kicker && <small>{kicker}</small>}
             <b>{title}</b>
@@ -440,7 +441,7 @@ export function Modal({ title, onClose, children, actions }) {
 /* =====================================================================
    Charts (SVG, no chart library)
    ===================================================================== */
-export const PAL = ['#1460E0', '#22B5F0', '#0B2F7A', '#14B8A6', '#7B4DE3', '#FF8A1F', '#F0436A', '#FFC531']
+export const PAL = ['#1D66B8', '#4D9AD3', '#13407A', '#14B8A6', '#7B4DE3', '#FF8A1F', '#F0436A', '#FFC531']
 
 function niceMax(v) {
   if (v <= 0) return 1
@@ -515,7 +516,7 @@ export function HBarChart({ data, format = num, max: mx }) {
 
 /* Line / area chart: points [{ label, value }] or multiple series [{ name, color, points }] */
 export function LineChart({ data, series, height = 220, format = shortNum, area = true }) {
-  const all = series || [{ name: 'v', color: '#1460E0', points: data }]
+  const all = series || [{ name: 'v', color: '#1D66B8', points: data }]
   const labels = all[0].points.map((p) => p.label)
   const W = 640, H = height, L = 44, B = 26, T = 12, R = 10
   const max = niceMax(Math.max(...all.flatMap((s) => s.points.map((p) => p.value))) * 1.08)

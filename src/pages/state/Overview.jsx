@@ -88,12 +88,12 @@ export default function Overview() {
 
       <div className="grid g-main">
         <Card title="Collected each month" sub="2027, split between the State (70%) and the operator (30%)">
-          <BarChart data={monthlySplit} series={['State share (70%)', 'Operator (30%)']} colors={['#1460E0', '#22B5F0']} height={250} format={axisRm} />
+          <BarChart data={monthlySplit} series={['State share (70%)', 'Operator (30%)']} colors={['#1D66B8', '#4D9AD3']} height={250} format={axisRm} />
         </Card>
         <Card title="Where the money goes" sub="January to June 2027">
           <SplitBar parts={[
-            { label: 'Kerajaan Negeri Sabah', share: STATE_SHARE, text: rm(stateYtd), color: '#1460E0' },
-            { label: 'Operator, Microtek', share: 1 - STATE_SHARE, text: rm(operatorYtd), color: '#22B5F0' },
+            { label: 'Kerajaan Negeri Sabah', share: STATE_SHARE, text: rm(stateYtd), color: '#1D66B8' },
+            { label: 'Operator, Microtek', share: 1 - STATE_SHARE, text: rm(operatorYtd), color: '#4D9AD3' },
           ]} />
           <p className="small muted" style={{ marginTop: 16 }}>Payments go from the licensed acquirer straight into the FWECF account held by Jabatan Kewangan Negeri Sabah. SCANS never holds funds.</p>
         </Card>

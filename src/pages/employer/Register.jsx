@@ -213,7 +213,7 @@ export default function Register() {
   return (
     <div className="solo emp-solo">
       <header className="solo-top">
-        <Link to="/" aria-label="SCANS home"><Logo width={120} /></Link>
+        <Link to="/" aria-label="SCANS home"><Logo width={160} /></Link>
         <div className="row" style={{ gap: 14 }}>
           <span className="who">Employer sign-up</span>
           <Link to="/login" className="btn outline sm">Sign in</Link>

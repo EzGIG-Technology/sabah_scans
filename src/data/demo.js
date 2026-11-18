@@ -370,13 +370,13 @@ export const recentTxns = Array.from({ length: 8 }, (_, i) => ({ ...makeTxn(1000
 /* ---------- Merchants ---------- */
 export const merchants = [
   { id: 'mer-711', name: '7-Eleven Sabah', company: '7-Eleven Malaysia Sdn Bhd', ssm: '198401015607', category: 'Convenience store', outlets: 46, offers: 4, redemptions: 15234, joined: '12 Jan 2027', status: 'Active', color: '#0E8F57', contact: 'Tan Mei Ling', email: 'partners@7eleven.example.my' },
-  { id: 'mer-cd', name: 'CelcomDigi', company: 'CelcomDigi Berhad', ssm: '199701009694', category: 'Telco', outlets: 18, offers: 2, redemptions: 6420, joined: '20 Jan 2027', status: 'Active', color: '#1460E0', contact: 'Hafiz Osman', email: 'b2b@celcomdigi.example.my' },
+  { id: 'mer-cd', name: 'CelcomDigi', company: 'CelcomDigi Berhad', ssm: '199701009694', category: 'Telco', outlets: 18, offers: 2, redemptions: 6420, joined: '20 Jan 2027', status: 'Active', color: '#1D66B8', contact: 'Hafiz Osman', email: 'b2b@celcomdigi.example.my' },
   { id: 'mer-grab', name: 'Grab', company: 'MyTeksi Sdn Bhd', ssm: '201201007917', category: 'Transport and food', outlets: 1, offers: 1, redemptions: 3102, joined: '3 Feb 2027', status: 'Active', color: '#17B26A', contact: 'Priya Nair', email: 'partners@grab.example.my' },
   { id: 'mer-servay', name: 'Pasaraya Servay', company: 'Servay Hypermarket Sdn Bhd', ssm: '198701004422', category: 'Supermarket', outlets: 12, offers: 1, redemptions: 1904, joined: '15 Feb 2027', status: 'Active', color: '#D42253', contact: 'Jessica Wong', email: 'marketing@servay.example.my' },
   { id: 'mer-kmb', name: 'Klinik Mesra Borneo', company: 'Klinik Mesra Borneo Sdn Bhd', ssm: '201501022881', category: 'Clinic', outlets: 7, offers: 1, redemptions: 611, joined: '2 Mar 2027', status: 'Active', color: '#7B4DE3', contact: 'Dr Lim Kok Wai', email: 'admin@kmb.example.my' },
   { id: 'mer-ws', name: 'Watsons Sabah', company: 'Watsons Personal Care Stores Sdn Bhd', ssm: '199401012345', category: 'Pharmacy', outlets: 9, offers: 1, redemptions: 880, joined: '18 Mar 2027', status: 'Active', color: '#14B8A6', contact: 'Nadia Karim', email: 'partners@watsons.example.my' },
   { id: 'mer-99', name: '99 Speedmart', company: '99 Speed Mart Sdn Bhd', ssm: '200101006655', category: 'Convenience store', outlets: 38, offers: 0, redemptions: 0, joined: '—', status: 'Pending', color: '#B85407', contact: 'Lee Chong Wei', email: 'bd@99speedmart.example.my' },
-  { id: 'mer-ahseng', name: 'Kedai Runcit Ah Seng', company: 'Kedai Runcit Ah Seng', ssm: '202203011122', category: 'Grocery', outlets: 2, offers: 0, redemptions: 0, joined: '—', status: 'Pending', color: '#0B2F7A', contact: 'Ah Seng', email: 'ahseng.tawau@example.my' },
+  { id: 'mer-ahseng', name: 'Kedai Runcit Ah Seng', company: 'Kedai Runcit Ah Seng', ssm: '202203011122', category: 'Grocery', outlets: 2, offers: 0, redemptions: 0, joined: '—', status: 'Pending', color: '#13407A', contact: 'Ah Seng', email: 'ahseng.tawau@example.my' },
 ]
 
 // Merchant sign-up applications waiting on Microtek

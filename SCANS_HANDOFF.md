@@ -109,26 +109,26 @@ Every registered foreign worker in Sabah (130,391 on 31 Dec 2025) pays a contrib
 
 ## 5. Design system
 
-**Updated November 2026:** the product owner asked for SCANS to share the look of the **Sabah GO** platform (repository `EzGIG-Technology/sabah_go`). This replaces the earlier "folder tab" system and its house rules (no gradients, no shadows, 4px radius, Archivo). The content rules in section 4 still apply in full.
+**History:** the first prototype used a "folder tab" system (Archivo, no shadows, 4px corners). In November 2026 the product owner asked for the look of the **Sabah GO** platform (repository `EzGIG-Technology/sabah_go`), and then for SCANS to keep its own identity rather than copy Sabah GO exactly. The current system is the result. The content rules in section 4 still apply in full.
 
-**Look:** Poppins, a light blue page ground, white cards with soft blue shadows, 18px corners, a floating white sidebar with a gradient portal badge, a sticky frosted top bar (title, live clock, sample-data tag, search, notifications), and the navy to cyan gradient on hero cards, primary buttons and the active nav item. Photographs of Sabah on the public page and portal cards.
+**Identity:** colours come from the SCANS mark (navy letters, sky tile, red ribbon). Plus Jakarta Sans throughout. A deep navy sidebar carries the light SCANS logo at full width with a thin ribbon stripe (red, white, sky) along its top edge; on phones the logo moves into the top bar. On the public site the logo sits on a white plate next to the MOF Sabah crest. Cards are white or frosted glass over a calm backdrop, 14px corners, hero cards use a navy gradient with a fine diagonal line texture and a sky ring. Motion is light and switches off with `prefers-reduced-motion`.
 
-**Colours** (tokens at the top of `src/styles/app.css`, in step with Sabah GO):
+**Where the styles live:** `src/styles/app.css` (base tokens and components), `src/styles/glass.css` (frosted surfaces, backdrop and motion, shared idea with Sabah GO), `src/styles/brand.css` (SCANS identity, loaded last: palette, sidebar, logo placement, corners, hero texture). Change the brand in `brand.css` first.
 
 | Token | Hex | Use |
 |---|---|---|
-| `--navy` / `--navy2` | `#0A2463` / `#0B2F7A` | Headings on dark, navy fills |
-| `--blue` / `--blue2` | `#1460E0` / `#1E7BF2` | Primary, links, active states, first chart series |
-| `--cyan` | `#22B5F0` | Gradient end, second chart series |
-| `--sky` / `--sky2` | `#E8F2FF` / `#D6E8FF` | Selected states, icon tiles, soft buttons |
-| `--ground` | `#F3F7FD` | Page background |
-| `--ink` / `--ink2` / `--ink3` | `#0E1B3D` / `#4A5878` / `#6E7B96` | Text, secondary text, labels |
+| `--navy` / `--navy2` | `#0B2545` / `#13407A` | Sidebar, hero cards, headings on dark |
+| `--blue` / `--blue2` | `#1D66B8` / `#3B86D1` | Primary buttons, links, active states, first chart series |
+| `--cyan` (SCANS sky) | `#4D9AD3` | Second chart series, active-nav marker, accents |
+| `--ribbon` | `#D23B3B` | Ribbon stripe only (never for status) |
+| `--sky` / `--sky2` | `#E7F0F9` / `#D0E2F4` | Selected states, icon tiles, soft buttons |
+| `--ground` | `#F2F5F9` | Page background |
+| `--ink` / `--ink2` / `--ink3` | `#0B1F33` / `#44566B` / `#6B7C8F` | Text, secondary text, labels |
 | `--ok` / `--warn` / `--bad` (+ `Bg`, `Fill`) | green / orange / pink-red | Paid, 1 month owing, 3+ months owing and errors |
-| `--grad` | navy → blue → cyan | Hero cards, portal badge, worker app header |
 
-**Rules that still hold:** sentence case, plain verbs, errors say what happened and what to do, no emoji, tabular numbers, every figure reconciles across portals, no horizontal scroll at 390px, sidebar becomes an overlay below 960px, tables stack into records below 720px, `prefers-reduced-motion` respected.
+**Rules that still hold:** sentence case, plain verbs, errors say what happened and what to do, no emoji, tabular numbers, every figure reconciles across portals, no horizontal scroll at 390px, sidebar becomes an overlay below 960px, tables stack into records below 720px.
 
-**Shared components** (`src/components/ui.jsx`): `AppShell` (grouped nav, portal badge, top bar), `PageHead`, `Card`, `Kpi`, `Status`/`Pill`, `Callout`, `Empty`, `Skeleton`, `Seg`, `Tabs`, `SearchInput`, `Select`, `Field`, `Switch`, `Stepper`, `Table` (paging, row click, selection, stacked on phones), `Drawer`, `Modal`, charts (`BarChart`, `HBarChart`, `LineChart`, `Sparkline`, `Donut`, `MeterRows`, `SplitBar`), `SabahMap` (simplified coastline with a bubble per district, coloured by share not yet paid), `Mono` (letter tile for partners until real logos arrive), `useToast`, `useLiveFeed`.
+**Shared components** (`src/components/ui.jsx`): `AppShell` (navy sidebar with logo, portal badge, grouped nav, top bar with clock, search, notifications and a phone logo), `PageHead`, `Card`, `Kpi`, `Status`/`Pill`, `Callout`, `Empty`, `Skeleton`, `Seg`, `Tabs`, `SearchInput`, `Select`, `Field`, `Switch`, `Stepper`, `Table`, `Drawer`, `Modal`, charts (`BarChart`, `HBarChart`, `LineChart`, `Sparkline`, `Donut`, `MeterRows`, `SplitBar`), `SabahMap`, `Mono`, `useToast`, `useLiveFeed`. `src/components/motion.jsx` renders the backdrop and page entrances.
 
 **Images** in `public/img/` are reused from Sabah GO (same owner): hero and portal photographs, the MOF Sabah crest and payment marks (FPX, DuitNow, Visa, Mastercard). Plantation and worker photography is still needed (section 10, item 7).
 

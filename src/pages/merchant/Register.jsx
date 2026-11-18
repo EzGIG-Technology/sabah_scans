@@ -85,7 +85,7 @@ export default function Register() {
   return (
     <div className="solo mx-solo">
       <header className="solo-top">
-        <Link to="/" aria-label="SCANS home"><Logo width={120} /></Link>
+        <Link to="/" aria-label="SCANS home"><Logo width={160} /></Link>
         <span className="mx-solo-tag">Merchant partner sign-up</span>
         <Link to="/login?portal=merchant" className="btn ghost sm">Sign in</Link>
       </header>

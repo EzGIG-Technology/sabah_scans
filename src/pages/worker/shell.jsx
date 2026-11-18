@@ -245,10 +245,10 @@ export function QR({ seed = 'scans', size = 200, label = 'Your SCANS code' }) {
     h = (h * 1103515245 + 12345) >>> 0
     if (h % 100 < 47) cells.push([x, y])
   }
-  const F = ({ x, y }) => <g><rect x={x} y={y} width="7" height="7" rx="1.6" fill="#0A2463" /><rect x={x + 1} y={y + 1} width="5" height="5" rx="1" fill="#fff" /><rect x={x + 2} y={y + 2} width="3" height="3" rx=".8" fill="#1460E0" /></g>
+  const F = ({ x, y }) => <g><rect x={x} y={y} width="7" height="7" rx="1.6" fill="#0B2545" /><rect x={x + 1} y={y + 1} width="5" height="5" rx="1" fill="#fff" /><rect x={x + 2} y={y + 2} width="3" height="3" rx=".8" fill="#1D66B8" /></g>
   return (
     <svg viewBox={`-1 -1 ${n + 2} ${n + 2}`} width={size} height={size} className="wk-qr" role="img" aria-label={label}>
-      {cells.map(([x, y]) => <rect key={x + '-' + y} x={x} y={y} width="1" height="1" rx=".25" fill="#0A2463" />)}
+      {cells.map(([x, y]) => <rect key={x + '-' + y} x={x} y={y} width="1" height="1" rx=".25" fill="#0B2545" />)}
       <F x={0} y={0} /><F x={n - 7} y={0} /><F x={0} y={n - 7} />
     </svg>
   )

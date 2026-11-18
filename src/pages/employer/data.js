@@ -166,7 +166,7 @@ export function historyFor(w, batches) {
 
 export const allBatches = (s) => [...s.batches.map((b) => ({ ...b, session: true })), ...employerBatches]
 
-const BANK_COLOURS = ['#E0A800', '#C8102E', '#D42253', '#1460E0', '#0B2F7A', '#0E8F57', '#B85407', '#7B4DE3']
+const BANK_COLOURS = ['#E0A800', '#C8102E', '#D42253', '#1D66B8', '#13407A', '#0E8F57', '#B85407', '#7B4DE3']
 export const banks = fpxBanks.map((name, i) => ({ name, color: BANK_COLOURS[i % BANK_COLOURS.length] }))
 
 /* ---------- Reports: month-by-month figures that end at today's live counts ---------- */

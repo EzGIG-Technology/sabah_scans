@@ -32,7 +32,7 @@ export const permitsEndingSoon = Math.round(soonShare * REGISTERED)
 // Approval rate by method. The weighted mix equals paymentSuccess (98.6%) in shared/data.js.
 const SUCCESS = [0.984, 0.997, 0.981, 0.993, 0.962, 0.978]
 const CONFIRM = ['4 s', 'At the counter', '6 s', 'Same day', '18 s', '5 s']
-export const METHOD_COLORS = ['#1460E0', '#22B5F0', '#0B2F7A', '#14B8A6', '#7B4DE3', '#FF8A1F']
+export const METHOD_COLORS = ['#1D66B8', '#4D9AD3', '#13407A', '#14B8A6', '#7B4DE3', '#FF8A1F']
 export function paymentMethods(total) {
   const rows = channels.map((c, i) => {
     const collected = Math.round((total * c.share) / RATE) * RATE
@@ -155,7 +155,7 @@ export const helpTopics = [
   { label: 'Employer paying for me', value: 118 }, { label: 'Changing phone or language', value: 87 }, { label: 'Notices', value: 39 },
 ]
 export const helpLangs = [
-  { label: 'Bahasa Indonesia', value: 498, color: '#1460E0' }, { label: 'Filipino', value: 287, color: '#22B5F0' }, { label: 'Bahasa Melayu', value: 104, color: '#0B2F7A' },
+  { label: 'Bahasa Indonesia', value: 498, color: '#1D66B8' }, { label: 'Filipino', value: 287, color: '#4D9AD3' }, { label: 'Bahasa Melayu', value: 104, color: '#13407A' },
   { label: 'English', value: 72, color: '#14B8A6' }, { label: 'Bengali', value: 41, color: '#7B4DE3' }, { label: 'Nepali', value: 31, color: '#FF8A1F' },
 ]
 export const helpTotal = helpTopics.reduce((s, x) => s + x.value, 0)

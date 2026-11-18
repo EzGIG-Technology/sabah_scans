@@ -10,6 +10,7 @@ import MerchantApp from './pages/merchant/Merchant.jsx'
 import Ambient from './components/motion.jsx'
 // Glass and motion layer loads last so it sits over every portal's own styles.
 import './styles/glass.css'
+import './styles/brand.css'
 
 function NotFound() {
   return (

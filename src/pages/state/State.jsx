@@ -103,7 +103,7 @@ function Districts() {
     <>
       <PageHead title="Districts" sub="June 2027. Sample split of the 130,391 registered workers for this prototype. Choose a district to look up its workers." />
       <Card title="Paid and not yet paid" sub="Workers by district, June 2027">
-        <BarChart data={rows.map((d) => ({ label: d.name.replace('Kota Kinabalu', 'KK'), values: [d.paid, d.overdue] }))} series={['Paid', 'Not yet paid']} colors={['#1460E0', '#FF8A1F']} height={240} format={axisRm} />
+        <BarChart data={rows.map((d) => ({ label: d.name.replace('Kota Kinabalu', 'KK'), values: [d.paid, d.overdue] }))} series={['Paid', 'Not yet paid']} colors={['#1D66B8', '#FF8A1F']} height={240} format={axisRm} />
       </Card>
       <Card flush>
         <div style={{ padding: '6px 14px 14px' }}>
@@ -165,7 +165,7 @@ function Finance() {
       </Callout>
       <div className="grid g-main">
         <Card title="Daily settlement" sub="Credited to the FWECF account each night, June 2027">
-          <BarChart data={settlements.map((s, i) => ({ label: String(i + 1), values: [s.state, s.operator] }))} series={['State share (70%)', 'Operator (30%)']} colors={['#1460E0', '#22B5F0']} height={240} format={axisRm} />
+          <BarChart data={settlements.map((s, i) => ({ label: String(i + 1), values: [s.state, s.operator] }))} series={['State share (70%)', 'Operator (30%)']} colors={['#1D66B8', '#4D9AD3']} height={240} format={axisRm} />
         </Card>
         <Card title="Statements and extracts" sub={month}>
           <div className="gv-attn">
@@ -178,8 +178,8 @@ function Finance() {
           </div>
           <div className="gv-sub" style={{ marginTop: 18 }}>Since January</div>
           <SplitBar parts={[
-            { label: 'State', share: STATE_SHARE, text: rmM(stateYtd), color: '#1460E0' },
-            { label: 'Operator', share: 1 - STATE_SHARE, text: rmM(operatorYtd), color: '#22B5F0' },
+            { label: 'State', share: STATE_SHARE, text: rmM(stateYtd), color: '#1D66B8' },
+            { label: 'Operator', share: 1 - STATE_SHARE, text: rmM(operatorYtd), color: '#4D9AD3' },
           ]} />
         </Card>
       </div>

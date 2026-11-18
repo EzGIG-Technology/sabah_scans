@@ -62,7 +62,7 @@
 /* Specimen documents */
 .gv-doc { position: relative; border-radius: 16px; padding: 18px; color: #fff; overflow: hidden; min-height: 210px; display: flex; flex-direction: column; gap: 10px; }
 .gv-doc.passport { background: linear-gradient(140deg, #6B1A2B, #9C2A3F 60%, #B8475A); }
-.gv-doc.plks { background: linear-gradient(140deg, #0B2F7A, #1460E0 60%, #22B5F0); }
+.gv-doc.plks { background: linear-gradient(140deg, #13407A, #1D66B8 60%, #4D9AD3); }
 .gv-doc .spec { position: absolute; inset: 0; display: grid; place-items: center; font-size: 42px; font-weight: 800; letter-spacing: .12em; color: rgba(255, 255, 255, .09); transform: rotate(-18deg); pointer-events: none; }
 .gv-doc .top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; opacity: .9; font-weight: 600; }
 .gv-doc .body { display: flex; gap: 14px; align-items: flex-start; }

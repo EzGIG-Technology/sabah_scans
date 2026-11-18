@@ -10,7 +10,7 @@ import { EmpShell, WStatus, Who } from './shell.jsx'
 import { COMPANY, DEMO_TODAY, CUR, useRoster, summarise, useEmp, setEmp, allBatches, complianceTrend, appUsersByMonth, juneSplit, SEED_EXPORTS } from './data.js'
 
 const TABS = ['Contribution', 'Workers', 'Payments', 'App use']
-const C = { paid: '#17B26A', due: '#1460E0', late: '#FF8A1F', risk: '#F0436A' }
+const C = { paid: '#17B26A', due: '#1D66B8', late: '#FF8A1F', risk: '#F0436A' }
 
 /* Adds an export to this visit's "Recent downloads" list. Every export is also written to the audit log. */
 function useExport() {
@@ -170,7 +170,7 @@ function AppUse({ s }) {
       </div>
       <Card title="App use each month" sub="Workers who opened the app, and perks confirmed by shops">
         <LineChart height={240} format={(v) => num(Math.round(v))} series={[
-          { name: 'Workers using the app', color: '#1460E0', points: appUsersByMonth },
+          { name: 'Workers using the app', color: '#1D66B8', points: appUsersByMonth },
           { name: 'Perks used', color: '#14B8A6', points: perksRedemptionsByMonth },
         ]} />
       </Card>

@@ -13,7 +13,7 @@ const USED = [
   { id: 'u1', merchant: '7-Eleven Sabah', title: 'RM3 off a RM30 prepaid reload', at: '7-Eleven Fajar Centre, Lahad Datu', when: '12 May 2027, 18:20', saved: 3 },
 ]
 const STUB = { o1: ['RM3', 'off'], o2: ['10GB', 'extra'], o3: ['5%', 'off'], o4: ['RM20', 'visit'] }
-const STUB_C = { '7-Eleven Sabah': '#0E8F57', CelcomDigi: '#1460E0', 'Pasaraya Servay': '#D42253', 'Klinik Mesra Borneo': '#7B4DE3' }
+const STUB_C = { '7-Eleven Sabah': '#0E8F57', CelcomDigi: '#1D66B8', 'Pasaraya Servay': '#D42253', 'Klinik Mesra Borneo': '#7B4DE3' }
 const CODE_SECS = 300
 
 function Stub({ o }) {

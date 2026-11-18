@@ -32,7 +32,7 @@ export const paymentSuccess = 0.986
 export const uptime30 = 0.9997
 
 /* ---------- Payment channels with colours ---------- */
-export const CH_COLORS = ['#1460E0', '#22B5F0', '#0B2F7A', '#14B8A6', '#7B4DE3', '#FF8A1F']
+export const CH_COLORS = ['#1D66B8', '#4D9AD3', '#13407A', '#14B8A6', '#7B4DE3', '#FF8A1F']
 export const channelData = channels.map((c, i) => ({ label: c.name, value: c.share, color: CH_COLORS[i] }))
 
 /* ---------- Daily settlement into the FWECF account ---------- */

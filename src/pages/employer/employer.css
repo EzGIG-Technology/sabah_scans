@@ -87,7 +87,7 @@
 @keyframes emp-spin { to { transform: rotate(360deg); } }
 .emp-badge { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #0E9F6E, #17B26A); box-shadow: 0 14px 30px rgba(23, 178, 106, .3); }
 .emp-badge.bad { background: linear-gradient(135deg, #D42253, #F0436A); box-shadow: 0 14px 30px rgba(212, 34, 83, .25); }
-.emp-badge.info { background: var(--grad); box-shadow: 0 14px 30px rgba(20, 96, 224, .28); }
+.emp-badge.info { background: var(--grad); box-shadow: 0 14px 30px rgba(29, 102, 184, .28); }
 .emp-badge svg { width: 34px; height: 34px; }
 
 /* Receipt hero */
@@ -218,7 +218,7 @@ button.emp-tile[aria-pressed="true"] { border-color: var(--blue); background: va
 .emp-dot.bad { background: var(--bad); }
 .emp-dot.warn { background: var(--warnFill); }
 .emp-other { cursor: default; flex-wrap: wrap; }
-.emp-other.on { border-color: var(--blue); background: var(--sky); box-shadow: 0 0 0 3px rgba(20, 96, 224, .1); }
+.emp-other.on { border-color: var(--blue); background: var(--sky); box-shadow: 0 0 0 3px rgba(29, 102, 184, .1); }
 .emp-other.on .radio { border-color: var(--blue); }
 .emp-other.on .radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); }
 .emp-otherin { display: inline-flex; align-items: center; gap: 8px; }

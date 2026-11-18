@@ -25,9 +25,9 @@ export default function Settlement() {
   const open = breaks.filter((b) => b.status === 'Open')
   const mx = d.gross || 1
   const wf = [
-    ['Paid by workers and employers', 0, d.gross, '#1460E0'],
-    ['Credited to the FWECF account', 0, d.credited, '#22B5F0'],
-    ['State share (70%), stays in the account', 0, d.state, '#0B2F7A'],
+    ['Paid by workers and employers', 0, d.gross, '#1D66B8'],
+    ['Credited to the FWECF account', 0, d.credited, '#4D9AD3'],
+    ['State share (70%), stays in the account', 0, d.state, '#13407A'],
     ['Operator share (30%), invoiced monthly', d.state, d.operator, '#7B4DE3'],
   ]
   const doResolve = () => {
