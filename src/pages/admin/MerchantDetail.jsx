@@ -1,14 +1,15 @@
-// One merchant: analytics, offers (edit, deactivate with a remark) and outlets.
+// One merchant: analytics, offers (edit, deactivate and reactivate with a reason) and outlets.
+// The offers tab follows the MicroPay guide (Nov 2026): active offers with a Deactivate button.
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { MapPin, Store, Receipt, Users, Tag, CalendarDays, PencilLine, Power, Download, Ban } from 'lucide-react'
+import { MapPin, Store, Receipt, Users, Tag, CalendarDays, PencilLine, Power, Download, Ban, RotateCcw } from 'lucide-react'
 import {
   PageHead, Card, Kpi, Status, Pill, Callout, Empty, Seg, Tabs, Field, Switch, Table, Drawer, Modal, Mono, LineChart, HBarChart, Donut, useToast,
 } from '../../components/ui.jsx'
 import { merchants, num, pct } from '../../data/demo.js'
 import { merchantDetail } from '../shared/data.js'
 import { logEvent } from '../shared/store.js'
-import { BASE, ROLE_APPLIED, ANALYTIC_PERIODS, merchantAnalytics } from './data.js'
+import { BASE, ROLE_APPLIED, ANALYTIC_PERIODS, merchantAnalytics, offerType, offerDesc } from './data.js'
 import { useAdmin, setOfferOff } from './store.js'
 import { useMerchantState } from './Merchants.jsx'
 
@@ -26,13 +27,18 @@ export default function MerchantDetail() {
   const [edit, setEdit] = useState(null)
   const [deact, setDeact] = useState(null)
   const [remark, setRemark] = useState('')
+  const [react, setReact] = useState(null)
   useEffect(() => { if (base) logEvent('Viewed merchant', base.name) }, [id])
   if (!base) return <><PageHead title="Merchant not found" back={BASE + '/merchants'} /><Card><Empty title="No merchant with this ID">Go back to the merchant directory.</Empty></Card></>
   const m = merchantDetail(base)
   const s = st(m)
   const key = (o) => `${m.id}:${o.id}`
-  const statusOf = (o) => (off[key(o)] != null ? 'Paused' : o.status)
+  const isOff = (o) => off[key(o)] != null
+  const statusOf = (o) => (isOff(o) ? 'Deactivated' : o.status)
   const live = offers.filter((o) => statusOf(o) === 'Live')
+  // Active offers: live ones and ones Microtek deactivated (so they can be reactivated). The rest are listed below.
+  const current = offers.filter((o) => o.status === 'Live' || isOff(o))
+  const others = offers.filter((o) => !current.includes(o))
   const A = merchantAnalytics(m, offers, period)
   const change = A.prev ? (A.uses - A.prev) / A.prev : null
 
@@ -44,14 +50,42 @@ export default function MerchantDetail() {
   }
   const doDeact = () => {
     setOfferOff(key(deact), remark.trim())
-    logEvent('Deactivated merchant offer', `${m.name} · ${deact.title} · ${remark.trim()}`)
+    logEvent('Deactivated merchant offer', `${m.name} · ${deact.title} · Reason: ${remark.trim()}`)
     toast(`${deact.title} deactivated. Workers no longer see it.`)
     setDeact(null); setRemark('')
   }
-  const reactivate = (o) => {
-    setOfferOff(key(o), null)
-    logEvent('Reactivated merchant offer', `${m.name} · ${o.title}`)
-    toast(`${o.title} is live again`)
+  const reactivate = () => {
+    setOfferOff(key(react), null)
+    logEvent('Reactivated merchant offer', `${m.name} · ${react.title}`)
+    toast(`${react.title} is active again. Workers can see it now.`)
+    setReact(null)
+  }
+  const offerRow = (o) => {
+    const stt = statusOf(o)
+    const type = offerType(o)
+    return (
+      <div className={'ad-orow' + (isOff(o) ? ' off' : '')} key={o.id}>
+        <span className="ic"><Tag aria-hidden="true" /></span>
+        <div className="t">
+          <b>{o.title}</b>
+          <span className="tags">
+            {stt === 'Live' ? <Status tone="ok">Active</Status> : stt === 'Deactivated' ? <Status tone="bad">Deactivated</Status> : <Status>{stt}</Status>}
+            <Pill tone={type === 'Discount' ? 'info' : type === 'Voucher' ? 'purple' : type === 'Free item' ? 'ok' : 'warn'}>{type}</Pill>
+          </span>
+          <p>{offerDesc(o)}</p>
+          <div className="m">
+            <span><CalendarDays aria-hidden="true" /> {o.ends && o.ends !== '—' ? `Valid until ${o.ends}` : 'No end date set'}</span>
+            <span><Users aria-hidden="true" /> {num(o.redemptions)} redemption{o.redemptions === 1 ? '' : 's'}</span>
+          </div>
+          {isOff(o) && <p className="ad-reason"><b>Reason:</b> {off[key(o)]}</p>}
+        </div>
+        <div className="a">
+          <button className="btn sm outline" onClick={() => setEdit(o)}><PencilLine /> Edit</button>
+          {stt === 'Live' && <button className="btn sm danger" onClick={() => { setDeact(o); setRemark('') }}><Power /> Deactivate</button>}
+          {isOff(o) && <button className="btn sm success" onClick={() => setReact(o)}><RotateCcw /> Reactivate</button>}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -63,13 +97,16 @@ export default function MerchantDetail() {
         <div className="gv-head-card">
           <Mono name={m.name} color={m.color} size="lg" />
           <div className="grow"><h2>{m.name}</h2><div className="meta"><span>{m.company}</span><span>SSM {m.ssm}</span><span>{m.category}</span><span>{ROLE_APPLIED[m.id]}</span></div></div>
-          <Status>{s.status}</Status>
+          <div className="ad-head-chips">
+            <button className="pill info ad-chip" onClick={() => setTab('offers')}>{live.length} active offer{live.length === 1 ? '' : 's'}</button>
+            <Status>{s.status}</Status>
+          </div>
         </div>
         {s.reason && <Callout tone="bad" icon={Ban} style={{ marginTop: 14 }}>Suspended: {s.reason}. Offers are hidden from workers until reinstated.</Callout>}
       </Card>
 
       <Card>
-        <Tabs items={[{ value: 'analytics', label: 'Analytics' }, { value: 'offers', label: 'Offers', count: offers.length }, { value: 'outlets', label: 'Outlets and contact', count: m.outlets }]} value={tab} onChange={setTab} label="Merchant" />
+        <Tabs items={[{ value: 'analytics', label: 'Analytics' }, { value: 'offers', label: 'Offers', count: live.length }, { value: 'outlets', label: 'Outlets and contact', count: m.outlets }]} value={tab} onChange={setTab} label="Merchant" />
         <div style={{ paddingTop: 16 }} className="stack">
           {tab === 'analytics' && (m.redemptions === 0 ? <Empty title="No uses yet">This merchant has not gone live. Figures appear after the first confirmed use.</Empty> : (
             <>
@@ -80,7 +117,7 @@ export default function MerchantDetail() {
               <div className="grid g-4 keep2">
                 <Kpi icon={Users} label="Workers who used a perk" value={num(A.workersUsed)} note="Counted once each" />
                 <Kpi icon={Receipt} tone="ok" label="Confirmed uses" value={num(A.uses)} delta={change != null ? (change >= 0 ? '+' : '') + pct(change) : null} down={change != null && change < 0} note={change != null ? 'against the period before' : 'Since go-live'} />
-                <Kpi icon={Store} tone="purple" label="Live offers" value={num(live.length)} />
+                <Kpi icon={Store} tone="purple" label="Active offers" value={num(live.length)} />
                 <Kpi icon={MapPin} label="Outlets" value={num(m.outlets)} note={`Joined ${m.joined}`} />
               </div>
               <div className="ad-two" style={{ gridTemplateColumns: 'minmax(0,1fr)' }}>
@@ -105,33 +142,16 @@ export default function MerchantDetail() {
 
           {tab === 'offers' && (
             <>
-              <div className="row between" style={{ flexWrap: 'wrap', gap: 8 }}>
-                <span className="small muted">Edits and deactivations are logged and the merchant is told.</span>
-                <Pill tone="info">{live.length} live offer{live.length === 1 ? '' : 's'}</Pill>
+              <div>
+                <h3 className="gv-sub" style={{ margin: 0 }}>Active offers</h3>
+                <p className="small muted" style={{ marginTop: 2 }}>Deactivating needs a reason. The merchant sees it and it is kept in the audit log.</p>
               </div>
-              {offers.length === 0 ? <Empty title="No offers yet">Offers the merchant submits appear here after review.</Empty> : (
-                <div>
-                  {offers.map((o) => {
-                    const stt = statusOf(o)
-                    return (
-                      <div className="ad-orow" key={o.id}>
-                        <span className="ic"><Tag aria-hidden="true" /></span>
-                        <div className="t">
-                          <b>{o.title}</b>
-                          <span className="tags"><Status>{stt}</Status>{o.category && <Pill tone="grey">{o.category}</Pill>}</span>
-                          <p>{o.discount && o.discount !== '—' ? `${o.discount} · ` : ''}{o.limit} · {o.outlets}</p>
-                          <div className="m"><span><CalendarDays aria-hidden="true" /> Ends {o.ends}</span><span><Users aria-hidden="true" /> {num(o.redemptions)} confirmed uses</span></div>
-                          {off[key(o)] && <p style={{ color: 'var(--bad)', marginTop: 6 }}>Deactivated: {off[key(o)]}</p>}
-                        </div>
-                        <div className="a">
-                          <button className="btn sm outline" onClick={() => setEdit(o)}><PencilLine /> Edit</button>
-                          {stt === 'Live' && <button className="btn sm danger" onClick={() => { setDeact(o); setRemark('') }}><Power /> Deactivate</button>}
-                          {off[key(o)] != null && <button className="btn sm success" onClick={() => reactivate(o)}><Power /> Reactivate</button>}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+              {current.length === 0 ? <Empty title="No active offers">Offers the merchant submits appear here after review.</Empty> : <div>{current.map(offerRow)}</div>}
+              {others.length > 0 && (
+                <>
+                  <h3 className="gv-sub" style={{ margin: '8px 0 0' }}>Other offers</h3>
+                  <div>{others.map(offerRow)}</div>
+                </>
               )}
             </>
           )}
@@ -162,9 +182,16 @@ export default function MerchantDetail() {
       </Card>
       {edit && <EditOffer o={edit} onClose={() => setEdit(null)} onSave={save} />}
       {deact && (
-        <Modal title="Deactivate offer" onClose={() => setDeact(null)} actions={<><button className="btn outline" onClick={() => setDeact(null)}>Cancel</button><button className="btn danger" disabled={remark.trim().length < 5} onClick={doDeact}><Power /> Deactivate offer</button></>}>
-          <p className="ink2" style={{ marginBottom: 14 }}>{deact.title} is hidden from workers straight away. Uses already confirmed stay counted.</p>
-          <Field label="Reason" hint="Kept with the offer and sent to the merchant."><input className="input" autoFocus value={remark} onChange={(e) => setRemark(e.target.value)} placeholder="For example: outlet list out of date" /></Field>
+        <Modal title="Deactivate offer" onClose={() => setDeact(null)} actions={<><button className="btn outline" onClick={() => setDeact(null)}>Cancel</button><button className="btn danger" disabled={!remark.trim()} onClick={doDeact}><Power /> Deactivate offer</button></>}>
+          <p className="ink2" style={{ marginBottom: 8 }}>Give a reason for deactivating this offer. The merchant sees this reason and it is kept in the audit log.</p>
+          <p className="small muted" style={{ marginBottom: 14 }}><b style={{ color: 'var(--ink)' }}>{deact.title}</b> is hidden from workers straight away. Redemptions already confirmed stay counted.</p>
+          <Field label="Reason"><textarea className="input" autoFocus required aria-required="true" value={remark} onChange={(e) => setRemark(e.target.value)} placeholder="For example: the outlet list is out of date" /></Field>
+        </Modal>
+      )}
+      {react && (
+        <Modal title="Reactivate offer" onClose={() => setReact(null)} actions={<><button className="btn outline" onClick={() => setReact(null)}>Cancel</button><button className="btn success" onClick={reactivate}><RotateCcw /> Reactivate offer</button></>}>
+          <p className="ink2" style={{ marginBottom: 12 }}><b>{react.title}</b> goes back into the worker app straight away. The merchant is told and the change is kept in the audit log.</p>
+          <div className="gv-kv-card small"><span className="muted">Deactivated because:</span> {off[key(react)]}</div>
         </Modal>
       )}
     </>

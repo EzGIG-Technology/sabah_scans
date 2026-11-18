@@ -84,8 +84,8 @@ export function EmployerList({ base, canRegister = false }) {
           <div className="gv-emp-filters" id="emp-filters">
             <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
             <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((x) => x.name)]} />
-            <Select label="Paid for June" value={status} onChange={setStatus} options={[{ value: 'All', label: 'Any payment status' }, ...STATUSES]} />
-            <Select label="Compliance score" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any compliance score' }, { value: '80', label: 'Under 80%' }, { value: '50', label: 'Under 50%' }]} />
+            <Select label="Paid for June" value={status} onChange={setStatus} options={[{ value: 'All', label: 'Any payment' }, ...STATUSES]} />
+            <Select label="Compliance score" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any compliance' }, { value: '80', label: 'Under 80%' }, { value: '50', label: 'Under 50%' }]} />
             <Select label="Portal status" value={portal} onChange={setPortal} options={[{ value: 'All', label: 'Any portal status' }, 'Active', 'Inactive', 'Invited']} />
             <button className="btn ghost" disabled={!activeFilters && !q} onClick={clear}>Clear filters</button>
           </div>
