@@ -17,7 +17,7 @@ const HOW = {
   merchant: { idLabel: 'Work email', id: 'partners@7eleven.example.my', user: 'Tan Mei Ling, 7-Eleven Sabah',
     codeTo: 'We sent a 6-digit code by SMS to +60 12-•••• 8810.', note: 'Merchant partners are approved by Microtek before they can sign in.' },
   admin: { idLabel: 'Microtek email', id: 'faizal@microtek.example.my', user: 'Faizal Rahman, Microtek operations',
-    codeTo: 'Two-step sign-in is required for every operator account. Enter the code from your security key app.', note: 'Operator accounts can only sign in from approved devices.' },
+    codeTo: 'Required for every operator account. Enter the code from your authenticator app.', note: 'Operator accounts can only sign in from approved devices.' },
 }
 
 export default function Login() {

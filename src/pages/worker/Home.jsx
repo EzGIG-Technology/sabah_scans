@@ -69,7 +69,7 @@ export default function WorkerHome() {
           <div className="row">
             <span className="wk-ico"><CalendarClock aria-hidden="true" /></span>
             <div className="grow"><span className="muted small">{t.permit}</span><b>{w.permitExpiry}</b></div>
-            <span className="pill ok dot">{PERMIT_DAYS} days left</span>
+            <span className="pill ok dot">{tf('daysLeft', { n: PERMIT_DAYS })}</span>
           </div>
           <div className="bar" aria-hidden="true"><span style={{ width: Math.min(100, (PERMIT_DAYS / 730) * 100) + '%' }} /></div>
           <p className="small muted">{t.permitNote}</p>

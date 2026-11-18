@@ -70,7 +70,7 @@ export default function Landing() {
           </nav>
           <div className="lp-hero">
             <div className="lp-hero-copy">
-              <h1>RM100 a month. <span>One record for every worker.</span></h1>
+              <h1>RM100 a month. <span>One record per worker.</span></h1>
               <p>SCANS runs the Foreign Worker Economic Contribution Fund for Kerajaan Negeri Sabah: one record for each registered foreign worker, what they pay, the receipts they keep and the notices the State sends them in their own language.</p>
               <div className="lp-actions">
                 <Link to="/login" className="btn white lg"><Lock aria-hidden="true" /> Sign in to a portal</Link>

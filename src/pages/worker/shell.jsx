@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Home, Gift, Bell, User, Wallet, ArrowLeft, WifiOff, CheckCircle2, X, ArrowUpRight } from 'lucide-react'
+import { Home, Gift, Bell, User, Wallet, ArrowLeft, WifiOff, CheckCircle2, X } from 'lucide-react'
 import { Logo } from '../../components/ui.jsx'
 import { demoWorker as w, languages } from '../../data/demo.js'
 import { dict, fill } from './i18n.js'
@@ -243,8 +243,4 @@ export function QR({ seed = 'scans', size = 200, label = 'Your SCANS code' }) {
       <F x={0} y={0} /><F x={n - 7} y={0} /><F x={0} y={n - 7} />
     </svg>
   )
-}
-
-export function ExternalNote({ children }) {
-  return <p className="wk-ext"><ArrowUpRight aria-hidden="true" />{children}</p>
 }

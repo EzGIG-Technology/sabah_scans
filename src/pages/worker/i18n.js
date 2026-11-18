@@ -5,6 +5,7 @@
 
 export const dict = {
   en: {
+    daysLeft: '{n} days left',
     home: 'Home', perks: 'Perks', pay: 'Pay', notices: 'Notices', me: 'Me',
     hello: 'Good morning',
     dueFor: 'Due for {m}',
@@ -24,6 +25,7 @@ export const dict = {
     continue: 'Continue',
   },
   ms: {
+    daysLeft: '{n} hari lagi',
     home: 'Utama', perks: 'Ganjaran', pay: 'Bayar', notices: 'Notis', me: 'Saya',
     hello: 'Selamat pagi',
     dueFor: 'Perlu dibayar untuk {m}',
@@ -43,6 +45,7 @@ export const dict = {
     continue: 'Teruskan',
   },
   id: {
+    daysLeft: '{n} hari lagi',
     home: 'Beranda', perks: 'Promo', pay: 'Bayar', notices: 'Info', me: 'Saya',
     hello: 'Selamat pagi',
     dueFor: 'Tagihan untuk {m}',
@@ -62,6 +65,7 @@ export const dict = {
     continue: 'Lanjut',
   },
   fil: {
+    daysLeft: '{n} araw pa',
     home: 'Home', perks: 'Perks', pay: 'Magbayad', notices: 'Abiso', me: 'Ako',
     hello: 'Magandang umaga',
     dueFor: 'Babayaran para sa {m}',
@@ -81,6 +85,7 @@ export const dict = {
     continue: 'Magpatuloy',
   },
   bn: {
+    daysLeft: 'আর {n} দিন',
     home: 'হোম', perks: 'সুবিধা', pay: 'পরিশোধ', notices: 'নোটিশ', me: 'আমি',
     hello: 'শুভ সকাল',
     dueFor: '{m} মাসের জন্য প্রদেয়',
@@ -100,6 +105,7 @@ export const dict = {
     continue: 'চালিয়ে যান',
   },
   ne: {
+    daysLeft: '{n} दिन बाँकी',
     home: 'होम', perks: 'सुविधा', pay: 'भुक्तानी', notices: 'सूचना', me: 'म',
     hello: 'शुभ प्रभात',
     dueFor: '{m} को लागि तिर्नुपर्ने',
