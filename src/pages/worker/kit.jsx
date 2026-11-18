@@ -20,7 +20,7 @@ export function Busy({ label, sub }) {
 }
 
 // Ring that shows how many days are left of a span, for example a permit.
-export function DaysRing({ days, of = 730, size = 76, label }) {
+export function DaysRing({ days, of = 730, size = 76, label, unit = 'days' }) {
   const r = 32, c = 2 * Math.PI * r
   const f = Math.max(0, Math.min(1, days / of))
   return (
@@ -29,7 +29,7 @@ export function DaysRing({ days, of = 730, size = 76, label }) {
         <circle cx="38" cy="38" r={r} className="bg" />
         <circle cx="38" cy="38" r={r} className="fg" strokeDasharray={c} strokeDashoffset={c * (1 - f)} />
       </svg>
-      <span className="v"><b className="num">{days}</b><small>days</small></span>
+      <span className="v"><b className="num">{days}</b><small>{unit}</small></span>
     </span>
   )
 }

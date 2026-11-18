@@ -1,23 +1,33 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, Wallet, Receipt, Gift, LifeBuoy, ChevronRight, CheckCircle2, Building2, Megaphone, ShieldAlert, Scale, QrCode, Search, IdCard, HelpCircle, Sparkles, ShieldCheck, Maximize2 } from 'lucide-react'
+import { Bell, Wallet, Receipt, Gift, LifeBuoy, ChevronRight, CheckCircle2, Building2, Megaphone, ShieldAlert, Scale, QrCode, Search, IdCard, HelpCircle, Sparkles, ShieldCheck, Info, MapPin, Clock, AlertCircle } from 'lucide-react'
 import { Logo, initials } from '../../components/ui.jsx'
 import { demoWorker as w, notices, workerPayments, rm, daysFromDemo } from '../../data/demo.js'
 import { useWk, useTone, QR, Sheet } from './shell.jsx'
-import { DaysRing, CopyId } from './kit.jsx'
+import { DaysRing } from './kit.jsx'
+import { monthName, period, DUE_IDX } from './account.js'
 
 export const kindIcon = { Payment: Wallet, Rights: Scale, Safety: ShieldAlert, Receipt: Receipt }
 export const kindTone = { Payment: 'c-blue', Rights: 'c-purple', Safety: 'c-orange', Receipt: 'c-green' }
 
 // Permit expiry 14 Mar 2028, counted from the demo day. Information only.
 const PERMIT_DAYS = daysFromDemo(2028, 2, 14)
+// The State notice teased in the SCANS info card (JTK Sabah, rest days).
+const INFO_NOTICE = notices.find((n) => n.id === 'n2') || notices[0]
+
+const STATUS = {
+  ok: { key: 'statusOk', icon: CheckCircle2 },
+  due: { key: 'statusDue', icon: Clock },
+  over: { key: 'statusOver', icon: AlertCircle },
+}
 
 export default function WorkerHome() {
   useTone('light')
-  const { t, tf, offline } = useWk()
-  const [cardOpen, setCardOpen] = useState(false)
+  const { t, tf, offline, acct, lang } = useWk()
   const [searchOpen, setSearchOpen] = useState(false)
-  const first = w.name.split(' ')[0]
+  const st = STATUS[acct.status]
+  const owedLabel = acct.owed ? period(acct.first, DUE_IDX, lang) : ''
+  const paidThrough = monthName(acct.paidIdx, lang)
   const actions = [
     { to: '/worker/pay', label: t.pay, icon: Wallet, c: 'c-blue' },
     { to: '/worker/history', label: t.receipts, icon: Receipt, c: 'c-green' },
@@ -36,23 +46,31 @@ export default function WorkerHome() {
           <div className="wk-hero-ic">
             <button type="button" className="wk-ib glass" aria-label={t.search} onClick={() => setSearchOpen(true)}><Search aria-hidden="true" /></button>
             <Link to="/worker/notices" className="wk-ib glass" aria-label={t.notices + ', 2 new'}><Bell aria-hidden="true" /><i className="dot" /></Link>
-            <Link to="/worker/me" className="wk-av" aria-label={t.me}>{initials(w.name)}</Link>
           </div>
         </div>
-        <p className="wk-hi">{t.hello},</p>
-        <h1 className="wk-name">{first}</h1>
-        <div className="wk-due">
-          <span className="lbl">{tf('dueFor', { m: w.due.month })}</span>
+
+        <div className="wk-prof">
+          <Link to="/worker/me" className="wk-prof-av" aria-label={t.me}>
+            <span className="wk-av xl">{initials(w.name)}</span>
+            <span className={'wk-stbadge ' + acct.status}><st.icon aria-hidden="true" />{t[st.key]}</span>
+          </Link>
+          <h1 className="wk-prof-name">{w.name}</h1>
+          <p className="wk-prof-line"><MapPin aria-hidden="true" />{w.nationality}</p>
+          <p className="wk-prof-line"><Building2 aria-hidden="true" />{w.employer}</p>
+        </div>
+
+        <div className={'wk-due' + (acct.status === 'over' ? ' over' : '')}>
+          <span className="lbl">{acct.owed ? tf('dueFor', { m: owedLabel }) : t.nothingDue}</span>
           <div className="mid">
-            <b className="amt num">RM{w.due.amount}</b>
-            <Link to="/worker/pay" className="btn white lg">{t.payNow}</Link>
+            <b className="amt num">RM{acct.amount.toLocaleString('en-MY')}</b>
+            <Link to="/worker/pay" className="btn white lg">{acct.owed ? t.payNow : t.payAhead}</Link>
           </div>
-          <span className="sub">{tf('payBy', { d: w.due.dueDate })}</span>
+          <span className="sub">{acct.owed ? tf('payBy', { d: w.due.dueDate }) : tf('noArrears', { m: paidThrough })}</span>
         </div>
         <div className="wk-hero-foot">
-          <span><CheckCircle2 aria-hidden="true" /> {t.paidUp} <b>{w.paidThrough}</b></span>
+          <span><CheckCircle2 aria-hidden="true" /> {t.paidUp} <b>{paidThrough}</b></span>
           <span className="sep" aria-hidden="true" />
-          <span>{t.nothingElse}</span>
+          <span>{acct.owed > 1 ? tf('owing', { n: acct.owed }) : t.nothingElse}</span>
         </div>
       </section>
 
@@ -68,29 +86,46 @@ export default function WorkerHome() {
         ))}
       </section>
 
-      <button type="button" className="wk-cardmini" onClick={() => setCardOpen(true)}>
-        <span className="qrbox"><QR seed="card" size={54} label="" /></span>
-        <span className="grow"><b>{t.card}</b><small>{t.cardSub}</small><small className="num">{w.scansId}</small></span>
-        <span className="wk-expand"><Maximize2 aria-hidden="true" />{t.showCard}</span>
-      </button>
-
       <section className="wk-sec">
-        <div className="wk-card wk-permit ring">
-          <DaysRing days={PERMIT_DAYS} label={tf('daysLeft', { n: PERMIT_DAYS })} />
-          <div className="grow">
-            <span className="muted small">{t.permit}</span>
-            <b>{w.permitExpiry}</b>
-            <small className="num muted">{w.plks}</small>
-            <p className="small muted">{t.permitNote}</p>
+        <div className="wk-card wk-permit2">
+          <div className="top">
+            <DaysRing days={PERMIT_DAYS} size={84} unit={t.days} label={tf('daysLeft', { n: PERMIT_DAYS })} />
+            <dl className="grow">
+              <dt className="ttl">{t.permitTitle}</dt>
+              <div><dt>{t.plksNo}</dt><dd className="num">{w.plks}</dd></div>
+              <div><dt>{t.expiry}</dt><dd>{w.permitExpiry}</dd></div>
+            </dl>
           </div>
+          <p className="note"><Info aria-hidden="true" />{t.permitInfo}</p>
         </div>
       </section>
 
       <section className="wk-sec">
-        <div className="wk-card wk-emp">
-          <span className="wk-mono">{initials(w.employer)}</span>
-          <div className="grow"><span className="muted small">{t.employer}</span><b>{w.employer}</b><small>{w.role} · {w.site}</small></div>
-        </div>
+        <Link to="/worker/card" className="wk-scard" aria-label={t.card + '. ' + t.cardLine + ' ' + t.expand}>
+          <div className="body">
+            <div className="grow">
+              <Logo width={118} />
+              <small className="num id">{w.scansId}</small>
+              <p>{t.cardLine}</p>
+            </div>
+            <span className="qr"><QR seed="card" size={96} label="" /></span>
+          </div>
+          <div className="foot">
+            <span><ShieldCheck aria-hidden="true" />{t.paidUp} {paidThrough}</span>
+            <span className="go">{t.expand}<ChevronRight aria-hidden="true" /></span>
+          </div>
+        </Link>
+      </section>
+
+      <section className="wk-sec">
+        <article className="wk-info">
+          <span className="ph" style={{ backgroundImage: 'url(/img/helpdesk.jpg)' }} role="img" aria-label="A SCANS helpdesk officer" />
+          <div className="tx">
+            <h2>{t.scansInfo}</h2>
+            <p>{t.infoText}</p>
+            <Link to={'/worker/notices/' + INFO_NOTICE.id} className="more" aria-label={t.readMore + ': ' + INFO_NOTICE.title}>{t.readMore} <ChevronRight aria-hidden="true" /></Link>
+          </div>
+        </article>
       </section>
 
       <section className="wk-sec">
@@ -131,32 +166,7 @@ export default function WorkerHome() {
         </div>
       </section>
 
-      <section className="wk-sec">
-        <Link to="/worker/faq" className="wk-about small">
-          <span className="ph" style={{ backgroundImage: 'url(/img/portal-worker.jpg)' }} />
-          <span className="tx"><b>About SCANS</b><small>Why the State collects RM100 a month and where it goes.</small><span className="more">Read more <ChevronRight aria-hidden="true" /></span></span>
-        </Link>
-      </section>
-
       <p className="wk-fine"><Building2 aria-hidden="true" />Run for Kerajaan Negeri Sabah. Your money goes to the State’s FWECF account.</p>
-      {cardOpen && (
-        <Sheet title={t.card} onClose={() => setCardOpen(false)}>
-          <div className="wk-code">
-            <small>{t.card}</small>
-            <h2>{w.name}</h2>
-            <div className="qr"><QR seed="card" size={200} label={'SCANS code for ' + w.name + '. Shows contribution status only.'} /></div>
-            <p className="wk-verified"><ShieldCheck aria-hidden="true" /> Contribution recorded · checked today 08:12</p>
-            <dl className="wk-pass-grid">
-              <div><dt>SCANS ID</dt><dd className="num">{w.scansId} <CopyId value={w.scansId} label="Copy SCANS ID" /></dd></div>
-              <div><dt>{t.paidUp}</dt><dd>{w.paidThrough}</dd></div>
-              <div><dt>Earlier months owing</dt><dd>None</dd></div>
-              <div><dt>PLKS number</dt><dd className="num">{w.plks}</dd></div>
-            </dl>
-            <p className="wk-note"><ShieldCheck aria-hidden="true" />Shows contribution status only. Not an immigration document.</p>
-            <Link to="/worker/card" className="btn primary lg block">Open the full card</Link>
-          </div>
-        </Sheet>
-      )}
       {searchOpen && <SearchSheet onClose={() => setSearchOpen(false)} />}
     </div>
   )

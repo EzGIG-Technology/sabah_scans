@@ -1,15 +1,33 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Check, CheckCircle2, X, Download, Share2, Store, Clock, WifiOff, LifeBuoy, RotateCcw, ShieldCheck, Lock, Receipt as ReceiptIcon, ChevronRight, Building2, Info } from 'lucide-react'
+import { Check, CheckCircle2, X, Download, Share2, Store, Clock, WifiOff, LifeBuoy, RotateCcw, ShieldCheck, Lock, Receipt as ReceiptIcon, ChevronRight, Building2, Info, AlertCircle } from 'lucide-react'
 import { Logo } from '../../components/ui.jsx'
 import { demoWorker as w, workerPayments, RATE, rm } from '../../data/demo.js'
 import { useWk, useTone, TopBar } from './shell.jsx'
+import { PLAN_DEFS, planFor, monthName, period, DUE_IDX } from './account.js'
 
-export const PLANS = [
-  { id: 'm', name: 'One month', label: 'June 2027', months: 1, upTo: 'June 2027' },
-  { id: 'q', name: 'Three months', label: 'June to August 2027', months: 3, upTo: 'August 2027' },
-  { id: 'y', name: 'One year', label: 'June 2027 to May 2028', months: 12, upTo: 'May 2028' },
-]
+// A payment period always starts at the first month not yet paid, so arrears
+// are cleared first. English labels go on the summary and the receipt.
+export function buildPlan(id, acct, lang = 'en') {
+  const d = planFor(id)
+  const last = acct.first + d.months - 1
+  return {
+    ...d,
+    total: d.months * RATE,
+    label: period(acct.first, last, 'en'),
+    localLabel: period(acct.first, last, lang),
+    upTo: monthName(last),
+    stillOwed: Math.max(0, acct.owed - d.months),
+  }
+}
+const ENGLISH_NAME = { m: 'Monthly', q: '3 months', h: '6 months', y: 'Annually' }
+// Smallest period that clears what is owed, or the worker's usual one if longer.
+const coverPlan = (owed, saved) => {
+  const s = planFor(saved)
+  if (s.months >= owed) return s.id
+  return (PLAN_DEFS.find((p) => p.months >= owed) || PLAN_DEFS[PLAN_DEFS.length - 1]).id
+}
+const savedPlan = () => { try { return localStorage.getItem('scans-plan') || 'm' } catch { return 'm' } }
 
 // Payment marks: real images where we have them, a lettered tile otherwise.
 export const METHODS = [
@@ -38,25 +56,38 @@ const COUNTER = 'SCN 2706 4721 8'
 export default function Pay() {
   const loc = useLocation()
   const nav = useNavigate()
-  const { offline } = useWk()
-  const [plan, setPlan] = useState(() => { try { return localStorage.getItem('scans-plan') || 'm' } catch { return 'm' } })
+  const { offline, acct, setPaidIdx, t, tf, lang } = useWk()
+  const demo = new URLSearchParams(loc.search).get('demo')
+  const [plan, setPlan] = useState(() => coverPlan(demo === 'arrears' ? 3 : acct.owed, savedPlan()))
   const [method, setMethod] = useState('tng')
-  const [fail, setFail] = useState(new URLSearchParams(loc.search).get('demo') === 'fail')
+  const [fail, setFail] = useState(demo === 'fail')
   const [phase, setPhase] = useState('choose') // choose | cash | processing | success | failed
-  useEffect(() => { setPhase('choose'); setFail(new URLSearchParams(loc.search).get('demo') === 'fail') }, [loc.search])
+  const [done, setDone] = useState(null) // what was paid, kept for the success screen and receipt
+  useEffect(() => {
+    const d = new URLSearchParams(loc.search).get('demo')
+    setPhase('choose'); setFail(d === 'fail')
+    if (d === 'arrears') setPlan(coverPlan(3, savedPlan()))
+  }, [loc.search])
 
-  const p = PLANS.find((x) => x.id === plan)
+  const p = buildPlan(plan, acct, lang)
   const m = METHODS.find((x) => x.id === method)
-  const total = p.months * RATE
+  const total = p.total
   useTone(phase === 'success' ? 'light' : 'dark')
+
+  const receiptState = { total, months: p.label, method: m.name, upTo: p.upTo, plan: ENGLISH_NAME[p.id] }
 
   useEffect(() => {
     if (phase !== 'processing') return
-    const id = setTimeout(() => { setPhase(fail ? 'failed' : 'success'); setFail(false) }, 1900)
+    const id = setTimeout(() => {
+      if (fail) { setPhase('failed'); setFail(false); return }
+      setDone(receiptState)
+      setPaidIdx(acct.first + p.months - 1)
+      setPhase('success')
+    }, 1900)
     return () => clearTimeout(id)
+    // receiptState is rebuilt every render; the timer only needs the phase.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, fail])
-
-  const receiptState = { total, months: p.label, method: m.name, upTo: p.upTo }
 
   if (phase === 'processing') return (
     <div className="wk-page wk-center">
@@ -67,23 +98,24 @@ export default function Pay() {
     </div>
   )
 
-  if (phase === 'success') return (
+  if (phase === 'success' && done) return (
     <div className="wk-page wk-success">
       <div className="wk-success-top">
         <div className="wk-done-mark"><Check aria-hidden="true" /></div>
         <h1>Payment received</h1>
-        <b className="num">{rm(total, 2)}</b>
-        <p>{p.label} · {m.name}</p>
+        <b className="num">{rm(done.total, 2)}</b>
+        <p>{done.months} · {done.method}</p>
       </div>
       <div className="wk-pad">
         <div className="wk-card wk-kv">
           <div><span>Receipt</span><b className="num">{NEW_ID}</b></div>
-          <div><span>Paid up to</span><b>{p.upTo}</b></div>
+          <div><span>Period</span><b>{done.plan} · {done.months}</b></div>
+          <div><span>Paid up to</span><b>{done.upTo}</b></div>
           <div><span>Date</span><b>4 Jun 2027, 08:41</b></div>
           <div><span>Sent to</span><b>Your phone by SMS</b></div>
         </div>
         <div className="wk-foot static">
-          <button type="button" className="btn primary lg block" onClick={() => nav('/worker/receipt/' + NEW_ID, { state: receiptState })}><ReceiptIcon aria-hidden="true" /> See receipt</button>
+          <button type="button" className="btn primary lg block" onClick={() => nav('/worker/receipt/' + NEW_ID, { state: done })}><ReceiptIcon aria-hidden="true" /> See receipt</button>
           <Link to="/worker" className="btn ghost block">Back to home</Link>
         </div>
       </div>
@@ -134,26 +166,36 @@ export default function Pay() {
     <div className="wk-page has-bar">
       <TopBar title="Pay contribution" sub={`${w.name} · ${w.scansId}`} />
       <div className="wk-pad">
-        <div className="wk-duecard">
-          <span className="lbl">Amount due</span>
-          <b className="num">{rm(w.due.amount)}</b>
-          <span className="sub">for {w.due.month} · pay by {w.due.dueDate}</span>
-          <span className="pill white"><CheckCircle2 aria-hidden="true" /> Nothing owing from earlier months</span>
-        </div>
+        <section className="wk-amtcard" aria-label={t.amountDue}>
+          <div className="strip"><Logo width={92} /><span className="num">{w.scansId}</span></div>
+          <div className="body">
+            <span className="cur" aria-hidden="true">RM</span>
+            <div className="grow">
+              <span className="lbl">{t.amountDue}</span>
+              <b className="num">RM{acct.amount.toLocaleString('en-MY')}</b>
+              <span className="sub">{acct.owed ? tf('forM', { m: period(acct.first, DUE_IDX, lang) }) : t.nothingDue}</span>
+              {acct.owed > 1 && <span className="wk-duepill over"><AlertCircle aria-hidden="true" />{tf('monthsDue', { n: acct.owed })}</span>}
+              {acct.owed === 1 && <span className="wk-duepill due"><Clock aria-hidden="true" />{t.oneMonthDue}</span>}
+              {acct.owed === 0 && <span className="wk-duepill ok"><CheckCircle2 aria-hidden="true" />{tf('noArrears', { m: monthName(acct.paidIdx, lang) })}</span>}
+            </div>
+          </div>
+        </section>
+        {acct.owed > 1 && <p className="wk-note"><Info aria-hidden="true" />Owing months never affect your permit or passport. Pay when you can; the oldest month is cleared first.</p>}
 
-        <h2 className="wk-h2">What are you paying for?</h2>
-        <div className="wk-plans" role="radiogroup" aria-label="Period">
-          {PLANS.map((x) => (
-            <button key={x.id} type="button" role="radio" aria-checked={plan === x.id} className="wk-plan" onClick={() => setPlan(x.id)}>
-              <span className="tick" aria-hidden="true"><Check /></span>
-              <span className="mo num">{x.months}</span>
-              <span className="unit">{x.months === 1 ? 'month' : 'months'}</span>
-              <b className="num">{rm(x.months * RATE)}</b>
-              <small>to {x.upTo.replace(' 20', ' ’')}</small>
-            </button>
-          ))}
+        <h2 className="wk-h2">{t.payFreq}</h2>
+        <div className="wk-freq" role="radiogroup" aria-label={t.payFreq}>
+          {PLAN_DEFS.map((d) => {
+            const x = buildPlan(d.id, acct, lang)
+            return (
+              <button key={x.id} type="button" role="radio" aria-checked={plan === x.id} className="wk-freq-opt" onClick={() => setPlan(x.id)}>
+                <span className="grow"><b>{t[x.key]}</b><small>{x.localLabel}</small></span>
+                <b className="amt num">{rm(x.total)}</b>
+                <span className="radio" aria-hidden="true" />
+              </button>
+            )
+          })}
         </div>
-        <p className="wk-hint">{p.label}. Paid up to {p.upTo} after this.</p>
+        <p className="wk-hint">{p.label}. Paid up to {p.upTo} after this.{p.stillOwed > 0 && ` ${p.stillOwed} ${p.stillOwed === 1 ? 'month' : 'months'} still owing after this.`}</p>
 
         <h2 className="wk-h2">How will you pay?</h2>
         {GROUPS.map((g) => (
@@ -174,7 +216,7 @@ export default function Pay() {
         <div className="wk-card wk-summary">
           <h3>Summary</h3>
           <div><span>Contribution · {p.months} × {rm(RATE)}</span><b className="num">{rm(total, 2)}</b></div>
-          <div><span>Period</span><b>{p.label}</b></div>
+          <div><span>Period</span><b>{ENGLISH_NAME[p.id]} · {p.label}</b></div>
           <div><span>Paid with</span><b>{m.name}</b></div>
           <div className="tot"><span>Total</span><b className="num">{rm(total, 2)}</b></div>
         </div>
@@ -188,7 +230,7 @@ export default function Pay() {
         <button type="button" className="wk-demo" aria-pressed={fail} onClick={() => setFail(!fail)}>Demo: {fail ? 'this payment will fail' : 'make this payment fail'}</button>
       </div>
       <div className="wk-paybar">
-        <div className="grow"><span>Total · {p.name.toLowerCase()}</span><b className="num">{rm(total, 2)}</b></div>
+        <div className="grow"><span>Total · {ENGLISH_NAME[p.id].toLowerCase()}</span><b className="num">{rm(total, 2)}</b></div>
         <button type="button" className="btn primary lg" disabled={offline} onClick={() => setPhase(method === 'cash' ? 'cash' : 'processing')}>
           {method === 'cash' ? 'Get counter code' : `Pay ${rm(total)}`}
         </button>
@@ -205,7 +247,7 @@ export function Receipt() {
   const known = workerPayments.find((x) => x.id === id)
   const s = known
     ? { total: known.amount, months: known.month, method: known.method, date: known.date, by: known.by }
-    : { total: 100, months: 'June 2027', method: 'Touch ’n Go eWallet', date: '4 Jun 2027, 08:41', by: w.name, ...(loc.state || {}) }
+    : { total: 100, months: 'June 2027', method: 'Touch ’n Go eWallet', date: '4 Jun 2027, 08:41', by: w.name, plan: 'Monthly', upTo: 'June 2027', ...(loc.state || {}) }
   const byEmployer = s.by && s.by !== w.name
   return (
     <div className="wk-page">
@@ -224,6 +266,8 @@ export function Receipt() {
           <dl>
             <div><dt>Name</dt><dd>{w.name}</dd></div>
             <div><dt>SCANS ID</dt><dd className="num">{w.scansId}</dd></div>
+            {s.plan && <div><dt>Period</dt><dd>{s.plan} · {s.months}</dd></div>}
+            {s.upTo && <div><dt>Paid up to</dt><dd>{s.upTo}</dd></div>}
             <div><dt>Paid with</dt><dd>{s.method}</dd></div>
             <div><dt>Paid by</dt><dd>{byEmployer ? s.by + ' (with your consent)' : 'You'}</dd></div>
             <div><dt>Date</dt><dd>{s.date}</dd></div>
@@ -248,14 +292,14 @@ export function Receipt() {
 
 /* ---------- Receipts list ---------- */
 export function History() {
-  const { t } = useWk()
+  const { t, acct } = useWk()
   const total = workerPayments.reduce((a, p) => a + p.amount, 0)
   return (
     <div className="wk-page has-nav">
       <TopBar title={t.receipts} />
       <div className="wk-pad">
         <div className="wk-sum">
-          <div><span>Paid up to</span><b>{w.paidThrough}</b></div>
+          <div><span>Paid up to</span><b>{acct.paidThrough}</b></div>
           <div><span>Paid in 2027</span><b className="num">{rm(total)}</b></div>
         </div>
         <div className="wk-list">

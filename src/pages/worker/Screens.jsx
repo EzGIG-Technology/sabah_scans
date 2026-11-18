@@ -22,7 +22,7 @@ function Stub({ o }) {
 }
 
 export function Perks() {
-  const { t, toast, offline } = useWk()
+  const { t, toast, offline, acct } = useWk()
   const [tab, setTab] = useState('all')
   const [open, setOpen] = useState(null)
   const [phase, setPhase] = useState('detail') // detail | code | done | expired
@@ -53,7 +53,7 @@ export function Perks() {
         <div className="wk-tier">
           <div className="row">
             <span className="wk-tier-ic"><ShieldCheck aria-hidden="true" /></span>
-            <div className="grow"><b>You are up to date</b><small>Paid up to {w.paidThrough}. All perks are open to you.</small></div>
+            <div className="grow"><b>{acct.owed > 1 ? 'Your perks stay open' : 'You are up to date'}</b><small>Paid up to {acct.paidThrough}. All perks are open to you.</small></div>
           </div>
           <div className="wk-tier-stats">
             <div><b className="num">{live.length}</b><span>Perks open</span></div>
@@ -298,7 +298,8 @@ export function Help() {
 }
 
 /* ---------- Me: profile with the SCANS card (Sabah GO profile pattern) ---------- */
-const PLAN_NAMES = { m: 'One month', q: 'Three months', y: 'One year' }
+const PLAN_NAMES = { m: 'Monthly', q: '3 months', h: '6 months', y: 'Annually' }
+const PLAN_PRICE = { m: 'RM100', q: 'RM300', h: 'RM600', y: 'RM1,200' }
 const readLS = (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } }
 const writeLS = (k, v) => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
 
@@ -311,7 +312,7 @@ function Row({ to, icon: Icon, c, title, sub, children, onClick }) {
 
 export function Me() {
   useTone('light')
-  const { lang, offline, setOffline, t, toast } = useWk()
+  const { lang, offline, setOffline, t, toast, acct } = useWk()
   const nav = useNavigate()
   const [langOpen, setLangOpen] = useState(false)
   const [planOpen, setPlanOpen] = useState(false)
@@ -332,7 +333,7 @@ export function Me() {
           <div className="grow">
             <h1>{w.name}</h1>
             <small>{w.nationality} · {w.role}</small>
-            <span className="pill white"><CheckCircle2 aria-hidden="true" /> Paid up to {w.paidThrough}</span>
+            <span className="pill white"><CheckCircle2 aria-hidden="true" /> Paid up to {acct.paidThrough}</span>
           </div>
         </div>
         <div className="wk-stats" role="list">
@@ -355,8 +356,8 @@ export function Me() {
         </Group>
 
         <Group title="Payments">
-          <Row to="/worker/history" icon={Receipt} c="c-green" title={t.receipts} sub={'Paid up to ' + w.paidThrough} />
-          <Row icon={CalendarDays} c="c-teal" title="Usual payment period" sub={PLAN_NAMES[plan] + ' · chosen first in Pay'} onClick={() => setPlanOpen(true)} />
+          <Row to="/worker/history" icon={Receipt} c="c-green" title={t.receipts} sub={'Paid up to ' + acct.paidThrough} />
+          <Row icon={CalendarDays} c="c-teal" title="Usual payment period" sub={(PLAN_NAMES[plan] || PLAN_NAMES.m) + ' · chosen first in Pay'} onClick={() => setPlanOpen(true)} />
           <Row icon={BellRing} c="c-orange" title="Payment reminders" sub="3 days before the 5th">{sw('remind', 'Payment reminders')}</Row>
         </Group>
 
@@ -388,7 +389,7 @@ export function Me() {
           <div className="wk-opts compact" role="radiogroup" aria-label="Usual payment period">
             {Object.entries(PLAN_NAMES).map(([k, v]) => (
               <button key={k} type="button" role="radio" aria-checked={plan === k} className="wk-opt" onClick={() => { setPlan(k); writeLS('scans-plan', k); setPlanOpen(false); toast('Saved') }}>
-                <span className="grow"><b>{v}</b><small>{k === 'm' ? 'RM100' : k === 'q' ? 'RM300' : 'RM1,200'}</small></span><span className="radio" aria-hidden="true" />
+                <span className="grow"><b>{v}</b><small>{PLAN_PRICE[k]}</small></span><span className="radio" aria-hidden="true" />
               </button>
             ))}
           </div>

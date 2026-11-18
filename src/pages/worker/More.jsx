@@ -6,6 +6,7 @@ import { demoWorker as w, employers, notices, daysFromDemo } from '../../data/de
 import { useWk, useTone, TopBar, QR } from './shell.jsx'
 import { CopyId, DaysRing } from './kit.jsx'
 import { langName } from './i18n.js'
+import { period, DUE_IDX } from './account.js'
 
 const PERMIT_DAYS = daysFromDemo(2028, 2, 14)
 const EMP = employers.find((e) => e.id === w.employerId)
@@ -16,7 +17,8 @@ const DOB = '12 Aug 1991'
    ===================================================================== */
 export function CardPass() {
   useTone('light')
-  const { toast, offline } = useWk()
+  const { toast, offline, acct } = useWk()
+  const owing = acct.owed > 1 ? (acct.owed - 1) + (acct.owed === 2 ? ' month' : ' months') + ' · ' + period(acct.first, DUE_IDX - 1) : 'None'
   return (
     <div className="wk-page wk-pass-page">
       <header className="wk-pass-head">
@@ -28,7 +30,7 @@ export function CardPass() {
             <span className="eyebrow">SCANS contribution card</span>
             <b>{w.name.toUpperCase()}</b>
             <span className="chips">
-              <span>{w.nationality}</span><span>{w.sector}</span><span>Paid to {w.paidThrough}</span>
+              <span>{w.nationality}</span><span>{w.sector}</span><span>Paid to {acct.paidThrough}</span>
             </span>
           </div>
           <div className="wk-pass-qr">
@@ -37,9 +39,9 @@ export function CardPass() {
           <p className="wk-verified"><ShieldCheck aria-hidden="true" /> Contribution recorded · checked today 08:12</p>
           <dl className="wk-pass-grid">
             <div><dt>SCANS ID</dt><dd className="num">{w.scansId} <CopyId value={w.scansId} label="Copy SCANS ID" /></dd></div>
-            <div><dt>Paid up to</dt><dd>{w.paidThrough}</dd></div>
-            <div><dt>Earlier months owing</dt><dd>None</dd></div>
-            <div><dt>Due now</dt><dd>{w.due.month} · RM{w.due.amount}</dd></div>
+            <div><dt>Paid up to</dt><dd>{acct.paidThrough}</dd></div>
+            <div><dt>Earlier months owing</dt><dd>{owing}</dd></div>
+            <div><dt>Due now</dt><dd>{acct.owed ? w.due.month + ' · RM100' : 'Nothing'}</dd></div>
           </dl>
         </article>
         <div className="wk-two">
@@ -69,7 +71,7 @@ function TopBarLight({ title, sub, back }) {
    /worker/details  Permit, personal and employer details (Figma "Permit details")
    ===================================================================== */
 export function Details() {
-  const { t } = useWk()
+  const { t, acct } = useWk()
   return (
     <div className="wk-page has-nav">
       <TopBar title={t.details} back="/worker/me" />
@@ -77,7 +79,7 @@ export function Details() {
         <div className="wk-card wk-det-status">
           <DaysRing days={PERMIT_DAYS} label={PERMIT_DAYS + ' days left on your work permit'} />
           <div className="grow">
-            <span className="pill ok dot">Contribution paid to {w.paidThrough}</span>
+            <span className={'pill dot ' + (acct.owed > 1 ? 'warn' : 'ok')}>Contribution paid to {acct.paidThrough}</span>
             <b>Work permit valid until {w.permitExpiry}</b>
             <small>For your information only. Paying late never affects your permit.</small>
           </div>

@@ -4,6 +4,7 @@ import { Home, Gift, Bell, User, Wallet, ArrowLeft, WifiOff, CheckCircle2, X } f
 import { Logo } from '../../components/ui.jsx'
 import { demoWorker as w, languages } from '../../data/demo.js'
 import { dict, fill } from './i18n.js'
+import { account, DEFAULT_PAID, ARREARS_PAID } from './account.js'
 
 /* =====================================================================
    App state: language, offline mode, in-app toast, status bar tone
@@ -13,6 +14,9 @@ export const useWk = () => useContext(Ctx)
 
 const read = (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } }
 const write = (k, v) => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
+// The demo account (arrears, payments made) lasts for this tab only.
+const readS = (k, d) => { try { return sessionStorage.getItem(k) ?? d } catch { return d } }
+const writeS = (k, v) => { try { sessionStorage.setItem(k, v) } catch { /* private mode */ } }
 
 // Bengali and Nepali need a font with those scripts; load it only when chosen.
 const SCRIPT_FONT = {
@@ -34,6 +38,8 @@ export function WorkerProvider({ children }) {
   const [offline, setOfflineState] = useState(() => read('scans-offline', '0') === '1')
   const [toastMsg, setToastMsg] = useState(null)
   const [tone, setTone] = useState('dark')
+  const [paidIdx, setPaidIdxState] = useState(() => { const n = Number(readS('scans-paid', DEFAULT_PAID)); return Number.isFinite(n) ? n : DEFAULT_PAID })
+  const setPaidIdx = useCallback((n) => { setPaidIdxState(n); writeS('scans-paid', String(n)) }, [])
   const timer = useRef(0)
   useScriptFont(lang)
   const setLang = (l) => { setLangState(l); write('scans-lang', l) }
@@ -46,7 +52,7 @@ export function WorkerProvider({ children }) {
   const t = dict[lang] || dict.en
   const tf = (key, vars) => fill(t[key], vars)
   return (
-    <Ctx.Provider value={{ lang, setLang, t, tf, offline, setOffline, toast, toastMsg, tone, setTone }}>
+    <Ctx.Provider value={{ lang, setLang, t, tf, offline, setOffline, toast, toastMsg, tone, setTone, acct: account(paidIdx), setPaidIdx }}>
       {children}
     </Ctx.Provider>
   )
@@ -76,6 +82,7 @@ const quick = [
   { group: 'Everyday', items: [
     ['Home', '/worker'],
     ['Pay', '/worker/pay'],
+    ['3 months due', '/worker/pay?demo=arrears'],
     ['Payment fails', '/worker/pay?demo=fail'],
     ['Receipt', '/worker/receipt/RCP-2705-118204'],
     ['Receipts', '/worker/history'],
@@ -168,11 +175,17 @@ function BottomNav() {
 
 export function Stage({ children }) {
   const loc = useLocation()
-  const { tone, offline, t, toastMsg, lang } = useWk()
+  const { tone, offline, t, toastMsg, lang, setPaidIdx } = useWk()
   const scroller = useRef(null)
   const [scrolled, setScrolled] = useState(false)
   const p = loc.pathname.replace(/\/$/, '')
   const flow = ['/worker/start', '/worker/welcome', '/worker/signin', '/worker/card', '/worker/assistant'].includes(p) || p.startsWith('/worker/pay') || p.startsWith('/worker/receipt')
+  // ?demo=arrears: owing April to June 2027. ?demo=due: back to June due.
+  useEffect(() => {
+    const d = new URLSearchParams(loc.search).get('demo')
+    if (d === 'arrears') setPaidIdx(ARREARS_PAID)
+    if (d === 'due') setPaidIdx(DEFAULT_PAID)
+  }, [loc.search, setPaidIdx])
   useEffect(() => {
     if (scroller.current) scroller.current.scrollTop = 0
     window.scrollTo(0, 0)
