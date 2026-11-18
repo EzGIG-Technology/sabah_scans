@@ -83,7 +83,7 @@ export default function AdminApp() {
         <Route index element={<CommandCentre />} />
         <Route path="workers" element={<WorkerList base={BASE} />} />
         <Route path="workers/:id" element={<WorkerProfile base={BASE} />} />
-        <Route path="employers" element={<EmployerList base={BASE} />} />
+        <Route path="employers" element={<EmployerList base={BASE} canRegister />} />
         <Route path="employers/:id" element={<EmployerProfile base={BASE} />} />
         <Route path="merchants" element={<Merchants />} />
         <Route path="merchants/applications/:id" element={<ApplicationPage />} />

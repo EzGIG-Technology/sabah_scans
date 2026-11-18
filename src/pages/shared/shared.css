@@ -180,3 +180,37 @@
 .gv-nowrap { white-space: nowrap; }
 @media (max-width: 720px) { .gv-nowrap { white-space: normal; } }
 @media (max-width: 640px) { .gv-filters > .chip { grid-column: 1 / -1; justify-content: center; } }
+
+/* Employer list (guide, Nov 2026) */
+.gv-emp-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.gv-emp-bar .total { font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--blue); white-space: nowrap; }
+.gv-emp-bar .searchbox { flex: 1 1 240px; max-width: 340px; }
+.gv-emp-bar .acts { margin-left: auto; display: flex; gap: 8px; }
+.gv-emp-bar .btn.on { box-shadow: inset 0 0 0 1px var(--blue); color: var(--blue); }
+.gv-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--blue); color: #fff; font-size: 11.5px; font-weight: 600; display: inline-grid; place-items: center; }
+.gv-emp-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line2); }
+.gv-emp-filters > label { min-width: 0 !important; }
+@media (max-width: 640px) {
+  .gv-emp-bar .searchbox { flex-basis: 100%; max-width: none; }
+  .gv-emp-bar .acts { margin-left: 0; width: 100%; }
+  .gv-emp-bar .acts .btn { flex: 1; justify-content: center; }
+  .gv-emp-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+.gv-score { display: flex; align-items: center; gap: 8px; min-width: 130px; }
+.gv-score b { width: 40px; font-size: 13px; font-weight: 600; }
+.gv-score .bar { flex: 1; min-width: 56px; height: 6px; }
+.gv-score.ok b { color: var(--ok); }
+.gv-score.ok .bar > span { background: var(--okFill); }
+.gv-score.warn b { color: var(--warn); }
+.gv-score.warn .bar > span { background: var(--warnFill); }
+.gv-score.bad b { color: var(--bad); }
+.gv-score.bad .bar > span { background: var(--badFill); }
+@media (max-width: 720px) { .gv-score { min-width: 0; width: 150px; } }
+
+/* SSM check in the new registration drawer */
+.gv-ssm { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.gv-ssm .field { flex: 1 1 220px; }
+.gv-ssm > .btn { margin-top: 24px; }
+@media (max-width: 520px) { .gv-ssm > .btn { margin-top: 0; width: 100%; justify-content: center; } }
+.gv-spin { animation: gv-spin 0.9s linear infinite; }
+@keyframes gv-spin { to { transform: rotate(360deg); } }

@@ -8,7 +8,7 @@ import {
   CalendarRange, ChevronDown, Check, Download, Receipt, RefreshCw, Pause, Play, Users, Wallet, CalendarDays, Clock3, MapPin,
 } from 'lucide-react'
 import {
-  PageHead, Card, Kpi, Seg, BarChart, HBarChart, Donut, MeterRows, SplitBar, SabahMap, DistrictDetail, Skeleton, useToast, useLiveFeed,
+  PageHead, Card, Kpi, Seg, BarChart, HBarChart, Donut, MeterRows, SplitBar, SabahMap, DistrictDetail, Skeleton, useToast, useLiveFeed, useLivePayments, AnimatedValue,
 } from '../../components/ui.jsx'
 import {
   REGISTERED, STATE_SHARE, districts, sectors, monthly, monthlySplit, ytd, stateYtd, operatorYtd, paidThisMonth, collectedThisMonth,
@@ -50,6 +50,10 @@ const PERIOD_TEXT = { today: 'today', week: 'in the last 7 days', month: 'for Ju
 
 export default function Overview() {
   const toast = useToast()
+  const liveAmt = useLivePayments() * 100
+  const monthNow = collectedThisMonth + liveAmt
+  const todayNow = collectionToday + liveAmt
+  const weekNow = week + liveAmt
   const go = useNavigate()
   return (
     <>
@@ -62,12 +66,12 @@ export default function Overview() {
       <div className="grid g-2 st-top">
         <Card className="st-periods" title="Collection" sub="Gross, before the 70:30 split">
           <div className="st-period-list">
-            <Kpi icon={Wallet} label="Monthly collection" value={rm(collectedThisMonth)}
-              delta={signed(delta(collectedThisMonth, may))} down={collectedThisMonth < may} note={`June contributions, against ${rm(may)} for May`} />
-            <Kpi icon={CalendarDays} label="Weekly collection" value={rm(week)}
+            <Kpi icon={Wallet} label="Monthly collection" value={rm(monthNow)}
+              delta={signed(delta(monthNow, may))} down={monthNow < may} note={`June contributions, against ${rm(may)} for May`} />
+            <Kpi icon={CalendarDays} label="Weekly collection" value={rm(weekNow)}
               delta={signed(delta(week, prevWeek))} down={week < prevWeek} note="11 to 17 June, against 4 to 10 June, which had the 5 June due date" />
-            <Kpi icon={Clock3} label="Daily collection" value={rm(collectionToday)}
-              delta={signed(delta(collectionToday, yesterday))} down={collectionToday < yesterday} note={`Today to 15:00, against ${rm(yesterday)} on 16 June`} />
+            <Kpi icon={Clock3} label="Daily collection" value={rm(todayNow)}
+              delta={signed(delta(todayNow, yesterday))} down={todayNow < yesterday} note={`Today so far, against ${rm(yesterday)} on 16 June`} />
           </div>
         </Card>
         <LiveTransactions />
@@ -75,7 +79,7 @@ export default function Overview() {
 
       <div className="grid g-2">
         <Card title="Payment channel" sub="How workers paid for June 2027">
-          <Donut data={channelData} center={rmM(collectedThisMonth)} centerSub="June" size={170} />
+          <Donut data={channelData} center={rmM(monthNow)} centerSub="June" size={170} />
         </Card>
         <Card title="Worker payment metrics" sub={`June 2027, all ${num(REGISTERED)} registered workers`}>
           <MeterRows big items={paymentMetrics.map((m) => ({ label: m.label, share: m.value / REGISTERED, text: num(m.value) + ' workers', color: m.color }))} />
@@ -118,6 +122,7 @@ function TotalCollection() {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const r = RANGES.find((x) => x.value === range)
+  const liveAmt = useLivePayments() * 100
   useEffect(() => {
     if (!open) return
     const click = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
@@ -148,7 +153,7 @@ function TotalCollection() {
       </div>
       <div className="st-total-fig" aria-live="polite">
         <span>Total collection</span>
-        <b className="num">{rm(r.total)}</b>
+        <b className="num"><AnimatedValue value={rm(r.total + liveAmt)} /></b>
         <small>{r.note}</small>
       </div>
     </div>
@@ -162,11 +167,12 @@ function LiveTransactions() {
   const go = useNavigate()
   const [paused, setPaused] = useState(false)
   const feed = useLiveFeed(SEED, liveTxn, paused ? 1e9 : 4000, 7)
+  const liveN = useLivePayments()
   const [, tick] = useState(0)
   useEffect(() => { const id = setInterval(() => tick((n) => n + 1), 5000); return () => clearInterval(id) }, [])
   return (
     <Card title={<span className="row" style={{ gap: 8 }}>Live transactions <span className={'pill ' + (paused ? 'grey' : 'ok') + ' dot st-live'}>{paused ? 'Paused' : 'Live'}</span></span>}
-      sub={`${num(collectionToday / 100)} transactions today`}
+      sub={`${num(collectionToday / 100 + liveN)} transactions today`}
       action={<button className="btn sm ghost" onClick={() => setPaused(!paused)} aria-pressed={paused}>{paused ? <><Play /> Resume</> : <><Pause /> Pause</>}</button>}>
       <div className={'feed st-feed' + (paused ? '' : ' fresh')} aria-live={paused ? 'off' : 'polite'}>
         {feed.map((t) => (

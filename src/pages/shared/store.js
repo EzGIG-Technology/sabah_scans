@@ -14,6 +14,8 @@ const state = {
   approvals: seedApprovals.filter((a) => a.type === 'Employer sign-up' || a.type === 'Record mismatch').map((a) => ({ ...a, status: 'Waiting' })),
   offerSubs: offerSubmissions.map((o) => ({ ...o })),
   merchantApps: merchantApplications.map((a) => ({ ...a })),
+  // Employers invited by Microtek from the employer list (New registration). Newest first.
+  invitedEmployers: [],
 }
 let actor = 'Faizal Rahman (Microtek)'
 const listeners = new Set()
@@ -88,4 +90,14 @@ export function updateOffer(id, patch) {
 export function updateApplication(id, patch) {
   state.merchantApps = state.merchantApps.map((a) => (a.id === id ? { ...a, ...patch } : a))
   emit()
+}
+
+/* ---------- Employer invitations ---------- */
+// SCANS employer IDs continue after the 4,821 employers already registered.
+let empSeq = 4822
+export function addInvitedEmployer(e) {
+  const scansId = 'SCN26E' + String(empSeq++).padStart(7, '0')
+  state.invitedEmployers = [{ id: 'inv-' + e.ssm, scansId, status: 'Invited', invitedAt: stamp(), ...e }, ...state.invitedEmployers]
+  emit()
+  return scansId
 }

@@ -1,66 +1,210 @@
 // Employer list and employer profile, shared by /admin and /state.
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Building2, Users, CheckCircle2, AlertTriangle, Download, Wallet, ShieldCheck, Send, Mail } from 'lucide-react'
-import { PageHead, Card, Kpi, Status, Pill, Callout, Empty, Tabs, SearchInput, Select, Table, Mono, Avatar, Modal, useToast } from '../../components/ui.jsx'
-import { employers, employerTotals, districts, sectors, REGISTERED, rm, num, pct } from '../../data/demo.js'
-import { employerDetail } from './data.js'
-import { logEvent } from './store.js'
+// The list follows the MicroPay guide (Nov 2026): totals bar, four KPI cards, compliance score and
+// portal status columns. Only the Microtek console can send a new registration invitation.
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import {
+  Building2, Users, CheckCircle2, Download, Wallet, ShieldCheck, Send, Mail, Plus, SlidersHorizontal, CalendarClock, MonitorOff, ShieldAlert, SearchCheck, Loader2,
+} from 'lucide-react'
+import { PageHead, Card, Kpi, Status, Pill, Callout, Empty, Tabs, SearchInput, Select, Table, Mono, Avatar, Modal, Drawer, Field, useToast } from '../../components/ui.jsx'
+import { employers, employerTotals, districts, sectors, rm, num, pct } from '../../data/demo.js'
+import { companyCompliance } from '../admin/data.js'
+import { employerDetail, employerScansId, employerPortal } from './data.js'
+import { logEvent, useStore, addInvitedEmployer } from './store.js'
 import './shared.css'
 
 const STATUSES = ['All paid', 'Partly paid', 'Behind']
 
-export function EmployerList({ base }) {
+// Registration and portal figures for all 4,821 employers (demo-only).
+// Active + pending renewal + inactive portal = 4,821. Non-compliance overlaps the three and
+// matches the "Under half paid" figure on the Microtek command centre.
+const EMP_KPI = { active: 4192, renewal: 341, inactive: 288, nonCompliant: companyCompliance.find((c) => c.label === 'Under half paid').value }
+
+// Compliance score = share of the employer's workers paid for June. Used for reminders only.
+const scoreTone = (p) => (p >= 80 ? 'ok' : p >= 50 ? 'warn' : 'bad')
+function Score({ e }) {
+  if (e.paid == null) return <span className="small muted">Not registered yet</span>
+  const p = Math.round((e.paid / e.workers) * 100)
+  const t = scoreTone(p)
+  return (
+    <div className={'gv-score ' + t} aria-label={`${p}% of workers paid`}>
+      <b className="num">{p}%</b>
+      <div className="bar"><span style={{ width: p + '%' }} /></div>
+    </div>
+  )
+}
+
+export function EmployerList({ base, canRegister = false }) {
   const go = useNavigate()
   const toast = useToast()
+  const invited = useStore((s) => s.invitedEmployers)
   const [q, setQ] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
   const [district, setDistrict] = useState('All')
   const [sector, setSector] = useState('All')
   const [status, setStatus] = useState('All')
   const [band, setBand] = useState('All')
-  const rows = useMemo(() => employers.filter((e) => {
+  const [portal, setPortal] = useState('All')
+  const [register, setRegister] = useState(false)
+  const all = useMemo(() => [...invited, ...employers].map((e) => ({ ...e, scansId: employerScansId(e), portal: employerPortal(e) })), [invited])
+  const rows = useMemo(() => all.filter((e) => {
     const t = q.trim().toLowerCase()
-    if (t && !(e.name.toLowerCase().includes(t) || e.ssm.includes(t))) return false
+    if (t && !(e.name.toLowerCase().includes(t) || e.ssm.includes(t) || e.scansId.toLowerCase().includes(t))) return false
     if (district !== 'All' && e.district !== district) return false
     if (sector !== 'All' && e.sector !== sector) return false
     if (status !== 'All' && e.status !== status) return false
-    if (band !== 'All' && !(e.paid / e.workers < Number(band) / 100)) return false
+    if (band !== 'All' && !(e.paid != null && e.paid / e.workers < Number(band) / 100)) return false
+    if (portal !== 'All' && e.portal !== portal) return false
     return true
-  }), [q, district, sector, status, band])
-  const shareAll = employers.reduce((s, e) => s + e.paid, 0) / employers.reduce((s, e) => s + e.workers, 0)
+  }).map((e, i) => ({ ...e, no: i + 1 })), [all, q, district, sector, status, band, portal])
+  const activeFilters = [district, sector, status, band, portal].filter((v) => v !== 'All').length
+  const clear = () => { setQ(''); setDistrict('All'); setSector('All'); setStatus('All'); setBand('All'); setPortal('All') }
+  const open = (e) => {
+    if (e.status === 'Invited') toast(`Invitation sent to ${e.pic}. The profile opens once the company completes registration.`)
+    else go(`${base}/employers/${e.id}`)
+  }
   return (
     <>
-      <PageHead title="Employers" sub={`${num(employerTotals.count)} employers registered in eNORES employ the ${num(REGISTERED)} workers on SCANS. This prototype shows ${employers.length} sample employers.`}>
-        <button className="btn outline" onClick={() => { logEvent('Exported employer list', `${rows.length} employers`); toast('Employer list exported. The export is in the audit log.') }}><Download /> Export</button>
+      <PageHead title="Employers" sub="Companies registered in SSM and eNORES that employ foreign workers in Sabah. Employers see contribution status only.">
+        {canRegister && <button className="btn primary" onClick={() => setRegister(true)}><Plus /> New registration</button>}
       </PageHead>
-      <div className="grid g-4 keep2">
-        <Kpi icon={Building2} label="Employers" value={num(employerTotals.count)} note="Synced from SSM and eNORES" />
-        <Kpi icon={Users} label="Workers" value={num(employerTotals.workers)} note={'Average ' + Math.round(employerTotals.workers / employerTotals.count) + ' per employer'} />
-        <Kpi icon={CheckCircle2} tone="ok" label="Sample paid for June" value={pct(shareAll)} note="Workers paid at sample employers" />
-        <Kpi icon={AlertTriangle} tone="bad" label="Behind" value={num(employers.filter((e) => e.status === 'Behind').length)} note="Sample employers under 60% paid" />
-      </div>
-      <Card title="Employer records" sub={`${rows.length} of ${employers.length} sample employers. Employers see contribution status only.`}
-        action={(q || district !== 'All' || sector !== 'All' || status !== 'All' || band !== 'All') ? <button className="link" onClick={() => { setQ(''); setDistrict('All'); setSector('All'); setStatus('All'); setBand('All') }}>Clear filters</button> : null}>
-        <div className="stack" style={{ gap: 14 }}>
-          <div className="gv-filters">
-            <SearchInput value={q} onChange={setQ} placeholder="Search company name or SSM number" />
-            <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
-            <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((s) => s.name)]} />
-            <Select label="Status" value={status} onChange={setStatus} options={[{ value: 'All', label: 'All statuses' }, ...STATUSES]} />
-            <Select label="Paid for June" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any paid share' }, { value: '90', label: 'Under 90% paid' }, { value: '80', label: 'Under 80% paid' }, { value: '70', label: 'Under 70% paid' }]} />
+      <Card>
+        <div className="gv-emp-bar">
+          <b className="total num">{num(employerTotals.count)} employers</b>
+          {invited.length > 0 && <Pill tone="info">{invited.length} invited</Pill>}
+          <SearchInput value={q} onChange={setQ} placeholder="Search name, SCANS ID or SSM number" />
+          <div className="acts">
+            <button className={'btn outline' + (showFilters ? ' on' : '')} aria-expanded={showFilters} aria-controls="emp-filters" onClick={() => setShowFilters(!showFilters)}>
+              <SlidersHorizontal /> Filter{activeFilters > 0 && <span className="gv-count">{activeFilters}</span>}
+            </button>
+            <button className="btn outline" onClick={() => { logEvent('Exported employer list', `${rows.length} employers`); toast('Employer list exported. The export is in the audit log.') }}><Download /> Export</button>
           </div>
-          <Table rows={rows} onRowClick={(e) => go(`${base}/employers/${e.id}`)} columns={[
-            { key: 'name', label: 'Company', render: (e) => <div className="who"><Mono name={e.name} /><div style={{ minWidth: 0 }}><b>{e.name}</b><small>SSM {e.ssm}</small></div></div> },
-            { key: 'district', label: 'District' },
-            { key: 'sector', label: 'Sector', render: (e) => <span className="pill grey">{e.sector}</span> },
-            { key: 'workers', label: 'Workers', align: 'r', render: (e) => num(e.workers) },
-            { key: 'paid', label: 'Paid for June', render: (e) => <div className="row" style={{ gap: 8, minWidth: 120 }}><div className="bar grow" style={{ minWidth: 50 }}><span style={{ width: pct(e.paid / e.workers) }} /></div><span className="num small">{pct(e.paid / e.workers)}</span></div> },
-            { key: 'owing', label: 'Owing', align: 'r', render: (e) => <span className="num">{rm((e.workers - e.paid) * 100)}</span> },
-            { key: 'status', label: 'Status', render: (e) => <Status>{e.status}</Status> },
-          ]} />
         </div>
+        {showFilters && (
+          <div className="gv-emp-filters" id="emp-filters">
+            <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
+            <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((x) => x.name)]} />
+            <Select label="Paid for June" value={status} onChange={setStatus} options={[{ value: 'All', label: 'Any payment status' }, ...STATUSES]} />
+            <Select label="Compliance score" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any compliance score' }, { value: '80', label: 'Under 80%' }, { value: '50', label: 'Under 50%' }]} />
+            <Select label="Portal status" value={portal} onChange={setPortal} options={[{ value: 'All', label: 'Any portal status' }, 'Active', 'Inactive', 'Invited']} />
+            <button className="btn ghost" disabled={!activeFilters && !q} onClick={clear}>Clear filters</button>
+          </div>
+        )}
       </Card>
+      <div className="grid g-4 keep2">
+        <Kpi icon={Building2} tone="ok" label="Active employers" value={num(EMP_KPI.active)} delta="+3.2%" note="since May" />
+        <Kpi icon={CalendarClock} tone="warn" label="Pending renewal" value={num(EMP_KPI.renewal)} note="Registration due within 60 days" />
+        <Kpi icon={MonitorOff} tone="purple" label="Inactive portal" value={num(EMP_KPI.inactive)} note="No sign-in for 90 days" />
+        <Kpi icon={ShieldAlert} tone="bad" label="Non-compliance" value={num(EMP_KPI.nonCompliant)} note="Under 50% of workers paid" />
+      </div>
+      <Card title="Employer records" sub={`${rows.length} of ${all.length} sample employers. Compliance score is the share of workers paid for June. It is used for reminders only and never affects permits.`}
+        action={(q || activeFilters) ? <button className="link" onClick={clear}>Clear filters</button> : null}>
+        <Table rows={rows} onRowClick={open} columns={[
+          { key: 'no', label: 'No.', render: (e) => <span className="muted num">{e.no}</span> },
+          { key: 'name', label: 'Company', render: (e) => <div className="who"><Mono name={e.name} /><div style={{ minWidth: 0 }}><b>{e.name}</b><small>{e.district}</small></div></div> },
+          { key: 'scansId', label: 'SCANS employer ID', render: (e) => <span className="mono-id">{e.scansId}</span> },
+          { key: 'ssm', label: 'SSM reg. no.', render: (e) => <span className="num">{e.ssm}</span> },
+          { key: 'sector', label: 'Sector', render: (e) => <span className="pill grey">{e.sector}</span> },
+          { key: 'workers', label: 'Total workers', align: 'r', render: (e) => <span className="num">{num(e.workers)}</span> },
+          { key: 'score', label: 'Compliance score', render: (e) => <Score e={e} /> },
+          { key: 'portal', label: 'Portal status', render: (e) => <Status tone={e.portal === 'Invited' ? 'info' : undefined}>{e.portal}</Status> },
+        ]} />
+      </Card>
+      {register && <NewRegistration onClose={() => setRegister(false)} />}
     </>
+  )
+}
+
+/* ---------- New registration (Microtek only) ---------- */
+// Sample SSM and eNORES look-up. 202001017721 is the sign-up waiting in Approvals.
+const SSM_KNOWN = { '202001017721': { name: 'Lahad Datu Oil Palm Mill Sdn Bhd', sector: 'Plantation', district: 'Lahad Datu', workers: 286 } }
+const SSM_SAMPLES = [
+  { name: 'Kunak Palm Oil Estates Sdn Bhd', sector: 'Plantation', district: 'Lahad Datu', workers: 518 },
+  { name: 'Papar Poultry Farm Sdn Bhd', sector: 'Agriculture', district: 'Beaufort', workers: 64 },
+  { name: 'Tuaran Building Works Sdn Bhd', sector: 'Construction', district: 'Kota Kinabalu', workers: 142 },
+  { name: 'Sandakan Bay Resort Sdn Bhd', sector: 'Services', district: 'Sandakan', workers: 87 },
+  { name: 'Tawau Quarry Industries Sdn Bhd', sector: 'Mining and quarrying', district: 'Tawau', workers: 39 },
+]
+const DIST_CODE = { 'Lahad Datu': 'LD', Sandakan: 'SDK', Tawau: 'TWU', Kudat: 'KDT', Keningau: 'KGU', 'Kota Kinabalu': 'KK', Semporna: 'SPN', Beaufort: 'BFT' }
+function lookUp(ssm) {
+  const hit = SSM_KNOWN[ssm] || SSM_SAMPLES[[...ssm].reduce((s, d) => s + Number(d), 0) % SSM_SAMPLES.length]
+  return { ...hit, enores: `JTKS-${DIST_CODE[hit.district]}-${ssm.slice(-6)}` }
+}
+
+function NewRegistration({ onClose }) {
+  const toast = useToast()
+  const invited = useStore((s) => s.invitedEmployers)
+  const [ssm, setSsm] = useState('')
+  const [check, setCheck] = useState(null) // null | 'checking' | { error } | company
+  const [pic, setPic] = useState({ name: '', email: '', phone: '' })
+  const [touched, setTouched] = useState({})
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const ssmOk = /^\d{12}$/.test(ssm)
+  const found = check && check !== 'checking' && !check.error ? check : null
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(pic.email.trim())
+  const phoneOk = pic.phone.replace(/\D/g, '').length >= 9
+  const nameOk = pic.name.trim().length >= 3
+  const ready = found && nameOk && emailOk && phoneOk
+
+  const runCheck = () => {
+    const dup = employers.find((e) => e.ssm === ssm) || invited.find((e) => e.ssm === ssm)
+    if (dup) { setCheck({ error: dup.status === 'Invited' ? `An invitation was already sent to ${dup.name}.` : `Already registered on SCANS as ${dup.name}.` }); return }
+    setCheck('checking')
+    timer.current = setTimeout(() => {
+      logEvent('Looked up SSM and eNORES record', 'SSM ' + ssm)
+      setCheck(lookUp(ssm))
+    }, 700)
+  }
+  const send = () => {
+    const id = addInvitedEmployer({ name: found.name, ssm, sector: found.sector, district: found.district, workers: found.workers, paid: null, enores: found.enores, pic: pic.name.trim(), email: pic.email.trim(), phone: pic.phone.trim() })
+    logEvent('Sent employer registration invitation', `${found.name} · SSM ${ssm} · ${id}`)
+    toast(`Invitation sent to ${pic.name.trim()}. ${found.name} is at the top of the list as Invited.`)
+    onClose()
+  }
+  const set = (k) => (e) => setPic({ ...pic, [k]: e.target.value })
+  const blur = (k) => () => setTouched({ ...touched, [k]: true })
+
+  return (
+    <Drawer title="New registration" sub="Invite an employer to register on SCANS" onClose={onClose}
+      footer={<><button className="btn outline" onClick={onClose}>Cancel</button><button className="btn primary" disabled={!ready} onClick={send}><Send /> Send invitation</button></>}>
+      <div className="stack" style={{ gap: 18 }}>
+        <div>
+          <div className="gv-sub">Company</div>
+          <div className="gv-ssm">
+            <Field label="SSM registration number" hint="12 digits, for example 202001017721" error={check && check.error ? check.error : (touched.ssm && ssm && !ssmOk ? 'Enter the 12-digit SSM number.' : null)}>
+              <input className="input" inputMode="numeric" autoFocus value={ssm} maxLength={12} placeholder="202001017721"
+                onChange={(e) => { setSsm(e.target.value.replace(/\D/g, '')); setCheck(null) }} onBlur={blur('ssm')}
+                onKeyDown={(e) => { if (e.key === 'Enter' && ssmOk && check !== 'checking') runCheck() }} />
+            </Field>
+            <button className="btn outline" disabled={!ssmOk || check === 'checking'} onClick={runCheck}>
+              {check === 'checking' ? <><Loader2 className="gv-spin" /> Checking</> : <><SearchCheck /> Check SSM and eNORES</>}
+            </button>
+          </div>
+        </div>
+        {found && (
+          <>
+            <Callout tone="ok" icon={CheckCircle2}>Found in SSM and eNORES. These details come from those records and cannot be changed here.</Callout>
+            <div className="form-grid">
+              <Field label="Company name" full><input className="input" readOnly value={found.name} /></Field>
+              <Field label="Sector"><input className="input" readOnly value={found.sector} /></Field>
+              <Field label="District"><input className="input" readOnly value={found.district} /></Field>
+              <Field label="Workers in eNORES"><input className="input" readOnly value={num(found.workers)} /></Field>
+              <Field label="eNORES employer code"><input className="input" readOnly value={found.enores} /></Field>
+            </div>
+            <div>
+              <div className="gv-sub">Person in charge</div>
+              <div className="form-grid">
+                <Field label="Full name" full error={touched.name && !nameOk ? 'Enter the full name.' : null}><input className="input" value={pic.name} onChange={set('name')} onBlur={blur('name')} autoComplete="off" /></Field>
+                <Field label="Email" error={touched.email && !emailOk ? 'Enter a valid email address.' : null}><input className="input" type="email" value={pic.email} onChange={set('email')} onBlur={blur('email')} placeholder="name@company.com.my" autoComplete="off" /></Field>
+                <Field label="Phone" error={touched.phone && !phoneOk ? 'Enter a phone number with at least 9 digits.' : null}><input className="input" type="tel" value={pic.phone} onChange={set('phone')} onBlur={blur('phone')} placeholder="+60 89-123 456" autoComplete="off" /></Field>
+              </div>
+            </div>
+          </>
+        )}
+        <Callout>The person in charge gets an email to set up the company account with 2-step sign-in. Employers see contribution status only, never wages, complaints or immigration details. Registering on SCANS is not an immigration check.</Callout>
+      </div>
+    </Drawer>
   )
 }
 
@@ -92,7 +236,7 @@ export function EmployerProfile({ base, readOnly }) {
           <Mono name={e.name} size="lg" />
           <div className="grow">
             <h2>{e.name}</h2>
-            <div className="meta"><span>SSM {e.ssm}</span><span>eNORES {e.enores}</span><span>{e.district}</span><span>{e.sector}</span></div>
+            <div className="meta"><span>{e.scansId}</span><span>SSM {e.ssm}</span><span>eNORES {e.enores}</span><span>{e.district}</span><span>{e.sector}</span></div>
           </div>
           <Status>{e.status}</Status>
         </div>

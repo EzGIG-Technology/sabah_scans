@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag, Hourglass, Trophy, ScanLine, Plus, CheckCircle2, Clock, ChevronRight, ShieldCheck, EyeOff, Check, X } from 'lucide-react'
-import { PageHead, Card, Kpi, BarChart, HBarChart, LineChart, Donut, Sparkline, Status, Seg } from '../../components/ui.jsx'
+import { PageHead, Card, Kpi, BarChart, HBarChart, LineChart, Donut, Sparkline, Status, Seg, useLivePayments } from '../../components/ui.jsx'
 import { merchantPeakHours, merchantRedeemers, num, pct } from '../../data/demo.js'
 import { MShell } from './shell.jsx'
 import { useMerchant } from './store.jsx'
@@ -14,6 +14,7 @@ export default function Overview() {
   const waiting = offers.filter((o) => o.status === 'Waiting for approval')
   const allTime = offers.reduce((s, o) => s + o.redemptions, 0)
   const june = offers.reduce((s, o) => s + (o.june || 0), 0)
+  const liveR = Math.floor(useLivePayments() / 3) // redemptions confirmed at counters since the page opened
   const top = [...offers].sort((a, b) => b.redemptions - a.redemptions)[0]
   const perf = [...live].sort((a, b) => b.june - a.june).map((o) => ({ label: o.title, value: o.june }))
   const peak = peakIndex(merchantPeakHours)
@@ -31,7 +32,7 @@ export default function Overview() {
       </PageHead>
 
       <div className="grid g-4">
-        <Kpi hero icon={CheckCircle2} label="Redemptions all time" value={num(allTime)} note={`${num(june)} in June so far`} delta={'+' + pct(june / may - 1, 0) + ' on May'}>
+        <Kpi hero icon={CheckCircle2} label="Redemptions all time" value={num(allTime + liveR)} note={`${num(june + liveR)} in June so far`} delta={'+' + pct(june / may - 1, 0) + ' on May'}>
           <div style={{ marginTop: 6 }}><Sparkline values={monthly.map((m) => m.value)} /></div>
         </Kpi>
         <Kpi icon={Tag} label="Active offers" value={num(live.length)} note={endingSoon ? `${endingSoon} ends on 30 Jun` : 'Live in the worker app'} />

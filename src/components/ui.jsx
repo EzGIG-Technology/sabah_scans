@@ -196,12 +196,78 @@ export function Card({ title, sub, action, children, className = '', flush, styl
   )
 }
 
+/* =====================================================================
+   Live numbers
+   AnimatedValue counts up to any number inside a string ("RM 7,845,500",
+   "60.2%", "RM 28.46m") on first show and glides to new values after.
+   useLivePayments() is one shared ticker for the whole app: the count of
+   sample payments that arrived since the page opened, so every card that
+   uses it moves in step.
+   ===================================================================== */
+const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const NUM_RE = /-?\d[\d,]*(?:\.\d+)?/
+export function AnimatedValue({ value, duration = 1100 }) {
+  const str = String(value)
+  const m = str.match(NUM_RE)
+  const target = m ? parseFloat(m[0].replace(/,/g, '')) : null
+  const dec = m && m[0].includes('.') ? m[0].split('.')[1].length : 0
+  const grouped = m ? m[0].includes(',') || Math.abs(target) >= 10000 : false
+  const [shown, setShown] = useState(() => (target == null || reduceMotion() ? target : 0))
+  const [bump, setBump] = useState(false)
+  const from = useRef(shown)
+  const first = useRef(true)
+  useEffect(() => {
+    if (target == null) return
+    if (reduceMotion()) { setShown(target); return }
+    const start = from.current ?? 0
+    if (start === target) return
+    if (!first.current && target > start) { setBump(true); setTimeout(() => setBump(false), 900) }
+    const len = first.current ? duration : 650
+    first.current = false
+    let raf, t0
+    const step = (t) => {
+      if (!t0) t0 = t
+      const k = Math.min(1, (t - t0) / len)
+      const e = 1 - Math.pow(1 - k, 3)
+      const v = start + (target - start) * e
+      from.current = v
+      setShown(v)
+      if (k < 1) raf = requestAnimationFrame(step)
+      else from.current = target
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [target])
+  if (target == null) return str
+  const txt = Number(shown).toLocaleString('en-MY', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: grouped })
+  return <span className={'live-num' + (bump ? ' bump' : '')}>{str.slice(0, m.index)}{txt}{str.slice(m.index + m[0].length)}</span>
+}
+
+let liveCount = 0
+let liveTimer = null
+const liveSubs = new Set()
+function liveStart() {
+  if (liveTimer || reduceMotion()) return
+  liveTimer = setInterval(() => {
+    liveCount += 1 + Math.floor(Math.random() * 3)
+    liveSubs.forEach((f) => f(liveCount))
+  }, 3000)
+}
+export function useLivePayments() {
+  const [n, setN] = useState(liveCount)
+  useEffect(() => {
+    liveSubs.add(setN); liveStart()
+    return () => { liveSubs.delete(setN); if (!liveSubs.size) { clearInterval(liveTimer); liveTimer = null } }
+  }, [])
+  return n
+}
+
 export function Kpi({ icon: Icon, label, value, note, delta, down, tone, hero, children }) {
   return (
     <div className={'card' + (hero ? ' hero' : '')}>
       <div className="kpi">
         <div className="k-top">{Icon && <span className={'k-ic ' + (tone || '')}><Icon aria-hidden="true" /></span>}<span>{label}</span></div>
-        <div className="k-val num">{value}</div>
+        <div className="k-val num">{typeof value === 'string' || typeof value === 'number' ? <AnimatedValue value={value} /> : value}</div>
         {(note || delta) && <div className="k-note">{delta && <span className={'delta' + (down ? ' down' : '')}>{delta}</span>}{note}</div>}
         {children}
       </div>

@@ -77,6 +77,13 @@ const ENORES = { 'emp-bpp': 'JTKS-LD-004812', 'emp-kae': 'JTKS-SDK-002291', 'emp
 const STREET = { 'Lahad Datu': 'Batu 12, Jalan Segama, 91100 Lahad Datu', Sandakan: 'Batu 8, Jalan Labuk, 90000 Sandakan', Tawau: 'Jalan Apas, 91000 Tawau', Kudat: 'Jalan Pantai, 89050 Kudat', Keningau: 'Jalan Apin-Apin, 89007 Keningau', 'Kota Kinabalu': 'Jalan Tun Fuad Stephens, 88000 Kota Kinabalu', Semporna: 'Jalan Kastam, 91308 Semporna', Beaufort: 'Jalan Padas, 89808 Beaufort' }
 const CONTACTS = ['Jennifer Liew', 'Tan Boon Huat', 'Rosnah Abdullah', 'Wong Kah Wai', 'Jainal Ahmad', 'Michelle Chin', 'Lo Siew Mei', 'Hamid Salleh', 'Peter Gimbang', 'Chong Li Ying']
 
+// SCANS employer ID, derived from the SSM number so it is stable across the demo (format SCN26E + 7 digits).
+export const employerScansId = (e) => e.scansId || 'SCN26E' + String(1000 + (parseInt(e.ssm.slice(-5), 10) * 37) % 3800).padStart(7, '0')
+// Employer portal status: Inactive when no one from the company has signed in for 90 days (sample).
+const PORTAL_INACTIVE = { 'emp-kaf': '2 Mar 2027', 'emp-ssp': '14 Feb 2027' }
+export const employerPortal = (e) => (e.status === 'Invited' ? 'Invited' : PORTAL_INACTIVE[e.id] ? 'Inactive' : 'Active')
+export const employerLastSignIn = (e) => PORTAL_INACTIVE[e.id] || null
+
 export function employerDetail(e) {
   const i = employers.findIndex((x) => x.id === e.id)
   const owing = (e.workers - e.paid) * RATE
@@ -85,6 +92,8 @@ export function employerDetail(e) {
   return {
     ...e,
     enores: ENORES[e.id] || 'JTKS-' + e.ssm.slice(-6),
+    scansId: employerScansId(e),
+    portal: employerPortal(e),
     address: STREET[e.district],
     registered: ['2014', '2009', '1997', '2012', '2018', '2016', '2005', '2019', '1999', '2007'][i] || '2015',
     contact: CONTACTS[i] || 'Company admin',

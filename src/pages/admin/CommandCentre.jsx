@@ -5,7 +5,7 @@ import {
   Wallet, CalendarDays, CreditCard, UserCheck, ChevronRight, ClipboardCheck, Megaphone, Scale, Plug, Users, Receipt,
   Building2, Smartphone, CalendarClock, Headset, Gauge,
 } from 'lucide-react'
-import { PageHead, Card, Kpi, Seg, BarChart, Donut, MeterRows, Sparkline, SabahMap, DistrictDetail, Status, useLiveFeed } from '../../components/ui.jsx'
+import { PageHead, Card, Kpi, Seg, BarChart, Donut, MeterRows, Sparkline, SabahMap, DistrictDetail, Status, useLiveFeed, useLivePayments } from '../../components/ui.jsx'
 import { REGISTERED, monthly, collectionToday, collectionMonth, paidThisMonth, paymentMetrics, recentTxns, makeTxn, districts, employerTotals, rm, num, pct } from '../../data/demo.js'
 import { hourlyToday, last7, last30, week, month30, paymentSuccess, uptime30, channelData, systems } from '../shared/data.js'
 import { BASE, short, shortAxis, ms, companyCompliance, companiesActive, appUsers, permitsEndingSoon, paymentMethods } from './data.js'
@@ -24,16 +24,21 @@ export default function CommandCentre() {
   const [mapFilter, setMapFilter] = useState('all')
   const [sel, setSel] = useState('lahaddatu')
   const feed = useLiveFeed(SEED, liveTxn, 4000, 7)
+  const live = useLivePayments()
+  const liveAmt = live * 100
+  const monthNow = collectionMonth + liveAmt
+  const todayNow = collectionToday + liveAmt
+  const paidNow = paidThisMonth + live
   const q = useQueue()
   const breaks = useAdmin((s) => s.breaks)
   const tickets = useAdmin((s) => s.tickets)
   const openBreaks = breaks.filter((b) => b.status === 'Open')
   const late = tickets.filter((t) => t.status !== 'Resolved' && t.age > t.target)
   const per = {
-    today: { label: 'Today, by hour to 15:00', data: hourlyToday, total: collectionToday, sub: 'today' },
+    today: { label: 'Today, by hour to 15:00', data: hourlyToday, total: todayNow, sub: 'today' },
     '7d': { label: 'Last 7 days', data: last7, total: week, sub: '7 days' },
     '30d': { label: 'Last 30 days, 18 May to 17 June', data: last30, total: month30, sub: '30 days' },
-    month: { label: 'Each month in 2027', data: monthly.map((m) => ({ label: m.m, value: m.v })), total: collectionMonth, sub: 'June' },
+    month: { label: 'Each month in 2027', data: monthly.map((m) => ({ label: m.m, value: m.v })), total: monthNow, sub: 'June' },
   }[period]
   const methods = paymentMethods(per.total)
   const byType = q.waiting.reduce((m, i) => ({ ...m, [i.type]: (m[i.type] || 0) + 1 }), {})
@@ -46,16 +51,16 @@ export default function CommandCentre() {
       </PageHead>
 
       <div className="grid g-4 keep2 gv-kpis">
-        <Kpi hero icon={Wallet} label="Collected this month" value={rm(collectionMonth)} note={`${num(paidThisMonth)} workers paid for June`}>
-          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>State 70% <b>{rm(collectionMonth * 0.7)}</b></span><span>Operator 30% <b>{rm(collectionMonth * 0.3)}</b></span></div>
+        <Kpi hero icon={Wallet} label="Collected this month" value={rm(monthNow)} note={`${num(paidNow)} workers paid for June`}>
+          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>State 70% <b>{rm(Math.round(monthNow * 0.7))}</b></span><span>Operator 30% <b>{rm(monthNow - Math.round(monthNow * 0.7))}</b></span></div>
           <div className="gv-hero-spark"><Sparkline values={monthly.map((m) => m.v)} /></div>
           <div className="gv-hero-split"><span>January to June 2027</span></div>
         </Kpi>
-        <Kpi icon={CalendarDays} label="Today" value={rm(collectionToday)} note={`${num(collectionToday / 100)} payments to 15:00 · ${rm(week)} in 7 days`} />
+        <Kpi icon={CalendarDays} label="Today" value={rm(todayNow)} note={`${num(todayNow / 100)} payments so far · ${rm(week)} in 7 days`} />
         <Kpi icon={CreditCard} tone="ok" label="Payment success" value={pct(paymentSuccess, 1)} note="Approved of all attempts today" />
         <Kpi icon={Building2} label="Employers registered" value={num(employerTotals.count)} note={`${num(companiesActive)} active in June`} />
         <Kpi icon={Users} label="Workers registered" value={num(REGISTERED)} note="31 Dec 2025, from SWIMS and eNORES" />
-        <Kpi icon={UserCheck} tone="purple" label="Workers paying" value={pct(paidThisMonth / REGISTERED, 1)} note={`${num(paidThisMonth)} of ${num(REGISTERED)}`} />
+        <Kpi icon={UserCheck} tone="purple" label="Workers paying" value={pct(paidNow / REGISTERED, 2)} note={`${num(paidNow)} of ${num(REGISTERED)}`} />
         <Kpi icon={Smartphone} tone="ok" label="Using the SCANS app" value={num(appUsers)} note={`${pct(appUsers / REGISTERED)} of registered workers`} />
       </div>
 
@@ -80,7 +85,7 @@ export default function CommandCentre() {
 
       <div className="grid g-main">
         <Card title={<span className="row" style={{ gap: 8 }}><span className="gv-legend-dot" style={{ background: 'var(--okFill)', boxShadow: '0 0 0 4px var(--okBg)' }} />Live transactions</span>}
-          sub={`${num(collectionToday / 100)} payments today · updates every few seconds`} action={<Link className="link" to={BASE + '/workers'}>Worker records <ChevronRight size={14} /></Link>}>
+          sub={`${num(todayNow / 100)} payments today · updates every few seconds`} action={<Link className="link" to={BASE + '/workers'}>Worker records <ChevronRight size={14} /></Link>}>
           <div className="feed fresh" aria-live="polite">
             {feed.map((t) => (
               <div key={t.id} className="it gv-feed-it" role="link" tabIndex={0} onClick={() => go(`${BASE}/workers/${t.scansId}`)} onKeyDown={(e) => e.key === 'Enter' && go(`${BASE}/workers/${t.scansId}`)}>

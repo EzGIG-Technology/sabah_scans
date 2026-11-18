@@ -117,3 +117,11 @@ table.data th:last-child { border-radius: 0 10px 10px 0; }
   .lp-chip img { width: 128px; }
   .lp-chip .txt { display: none; }
 }
+
+/* Live numbers: a short green glow when a figure goes up */
+.live-num { display: inline-block; border-radius: 6px; transition: background-color .9s, box-shadow .9s; }
+.live-num.bump { background-color: rgba(23, 178, 106, .14); box-shadow: 0 0 0 4px rgba(23, 178, 106, .14); }
+.card.hero .live-num.bump { background-color: rgba(255, 255, 255, .16); box-shadow: 0 0 0 4px rgba(255, 255, 255, .16); }
+.live-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ok); }
+.live-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--okFill); animation: livePulse 1.6s ease-out infinite; }
+@keyframes livePulse { 0% { box-shadow: 0 0 0 0 rgba(23, 178, 106, .5); } 100% { box-shadow: 0 0 0 8px rgba(23, 178, 106, 0); } }
