@@ -7,8 +7,9 @@ import { COMPANY, useRoster, summarise, paidPerMonth, useEmp, allBatches } from 
 
 function Score({ s }) {
   const share = s.rate
-  const standing = share >= 0.8 ? 'Good standing' : share >= 0.5 ? 'Caution' : 'Critical'
-  const tone = share >= 0.8 ? 'ok' : share >= 0.5 ? 'warn' : 'bad'
+  // Same scale as the State and Microtek map: good 90% and over, caution 50% to 89%, critical under 50%.
+  const standing = share >= 0.9 ? 'Good standing' : share >= 0.5 ? 'Caution' : 'Critical'
+  const tone = share >= 0.9 ? 'ok' : share >= 0.5 ? 'warn' : 'bad'
   return (
     <Card>
       <div className="emp-score">
@@ -22,14 +23,14 @@ function Score({ s }) {
             <span className="emp-big num" style={{ color: `var(--${tone})` }}>{pct(share, 1)}</span>
             <span className="muted">{num(s.paid)} of {num(s.total)} workers</span>
           </div>
-          <div className="emp-zones" role="img" aria-label={`Score ${pct(share, 1)}. Critical under 50%, caution 50 to 79%, good 80% and over.`}>
+          <div className="emp-zones" role="img" aria-label={`Score ${pct(share, 1)}. Critical under 50%, caution 50 to 89%, good 90% and over.`}>
             <div className="track" />
             <div className="fill" style={{ width: share * 100 + '%' }}><span style={{ width: 100 / share + '%' }} /></div>
-            <span className="tick" style={{ left: '50%' }} /><span className="tick" style={{ left: '80%' }} />
+            <span className="tick" style={{ left: '50%' }} /><span className="tick" style={{ left: '90%' }} />
             <span className="knob" style={{ left: share * 100 + '%' }} />
             <span className="lbl l" style={{ color: 'var(--bad)' }}>Critical under 50%</span>
-            <span className="lbl mid" style={{ left: '65%', color: 'var(--warn)' }}>Caution 50 to 79%</span>
-            <span className="lbl r" style={{ color: 'var(--ok)' }}>Good 80% and over</span>
+            <span className="lbl mid" style={{ left: '70%', color: 'var(--warn)' }}>Caution 50 to 89%</span>
+            <span className="lbl r" style={{ color: 'var(--ok)' }}>Good 90% and over</span>
           </div>
           <p className="small muted">Updated 06:00 today from payments received by the State. The score is for your information. It does not affect any worker’s permit.</p>
         </div>

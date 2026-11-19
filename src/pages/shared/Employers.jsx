@@ -21,7 +21,8 @@ const STATUSES = ['All paid', 'Partly paid', 'Behind']
 const EMP_KPI = { active: 4192, renewal: 341, inactive: 288, nonCompliant: companyCompliance.find((c) => c.label === 'Under half paid').value }
 
 // Compliance score = share of the employer's workers paid for December. Used for reminders only.
-const scoreTone = (p) => (p >= 80 ? 'ok' : p >= 50 ? 'warn' : 'bad')
+// Same scale as the map: good 90% and over, caution 50% to 89%, critical under 50%.
+const scoreTone = (p) => (p >= 90 ? 'ok' : p >= 50 ? 'warn' : 'bad')
 function Score({ e }) {
   if (e.paid == null) return <span className="small muted">Not registered yet</span>
   const p = Math.round((e.paid / e.workers) * 100)
@@ -85,7 +86,7 @@ export function EmployerList({ base, canRegister = false }) {
             <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
             <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((x) => x.name)]} />
             <Select label="Paid for December" value={status} onChange={setStatus} options={[{ value: 'All', label: 'Any payment' }, ...STATUSES]} />
-            <Select label="Compliance score" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any compliance' }, { value: '80', label: 'Under 80%' }, { value: '50', label: 'Under 50%' }]} />
+            <Select label="Compliance score" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any compliance' }, { value: '90', label: 'Under 90%' }, { value: '50', label: 'Under 50%' }]} />
             <Select label="Portal status" value={portal} onChange={setPortal} options={[{ value: 'All', label: 'Any portal status' }, 'Active', 'Inactive', 'Invited']} />
             <button className="btn ghost" disabled={!activeFilters && !q} onClick={clear}>Clear filters</button>
           </div>

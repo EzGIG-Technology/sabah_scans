@@ -134,7 +134,7 @@ export default function Landing() {
         </div>
 
         <section className="lp-band">
-          <div className="lp-band-img" style={{ backgroundImage: 'url(/img/helpdesk.jpg)' }} aria-hidden="true" />
+          <div className="lp-band-img" style={{ backgroundImage: 'url(/img/portal-merchant.jpg)', backgroundPosition: '46% center' }} aria-hidden="true" />
           <div className="lp-band-copy">
             <h2>Built for the worker first</h2>
             <p>A phone app in six languages that works on slow connections. Status, the SCANS card and receipts still show offline. A complaint can be written in any language and can be kept from the employer.</p>
