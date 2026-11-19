@@ -10,8 +10,8 @@ import { NoticeView, ChannelIcons, AudiencePill, CHANNELS } from '../shared/Noti
 import { AUDIENCE_SIZE } from '../shared/data.js'
 
 const TEMPLATES = [
-  { key: 'closure', name: 'Office closed for a day', title: 'JIM Sandakan office closed on 24 June', message: 'The Jabatan Imigresen office in Sandakan is closed on Thursday 24 June 2027 for building work. Appointments for that day move to Friday 25 June at the same time.' },
-  { key: 'hours', name: 'New counter hours', title: 'New counter hours at JIM Tawau', message: 'From 1 July 2027 the counter at JIM Tawau is open 8:00 to 16:00, Monday to Friday. Bring your passport and appointment slip.' },
+  { key: 'closure', name: 'Office closed for a day', title: 'JIM Sandakan office closed on 23 December', message: 'The Jabatan Imigresen office in Sandakan is closed on Thursday 23 December 2027 for building work. Appointments for that day move to Monday 27 December at the same time.' },
+  { key: 'hours', name: 'New counter hours', title: 'New counter hours at JIM Tawau', message: 'From 1 January 2028 the counter at JIM Tawau is open 8:00 to 16:00, Monday to Friday. Bring your passport and appointment slip.' },
   { key: 'moved', name: 'Counter has moved', title: 'JIM Lahad Datu counter has moved', message: 'The JIM counter in Lahad Datu has moved to the ground floor of Wisma Persekutuan. Opening hours stay the same.' },
 ]
 
@@ -84,7 +84,7 @@ function Composer({ onClose, onSubmit }) {
   const [aud, setAud] = useState('district')
   const [district, setDistrict] = useState('Sandakan')
   const [ch, setCh] = useState(['App', 'SMS'])
-  const [date, setDate] = useState('2027-06-21')
+  const [date, setDate] = useState('2027-12-21')
   const [tried, setTried] = useState(false)
   const choose = (k) => { setTpl(k); const t = TEMPLATES.find((x) => x.key === k); if (t) { setTitle(t.title); setMessage(t.message) } }
   const reach = { all: REGISTERED, district: (districts.find((d) => d.name === district) || {}).workers, employers: AUDIENCE_SIZE.employers }[aud]
@@ -133,7 +133,7 @@ function Composer({ onClose, onSubmit }) {
         {tried && !ch.length && <small className="error">Choose at least one channel.</small>}
       </div>
       <Field label={<><CalendarClock size={15} style={{ display: 'inline', verticalAlign: -3, marginRight: 4 }} />Send on</>} hint="If the State approves it later than this, it goes out as soon as it is approved.">
-        <input type="date" className="input" value={date} min="2027-06-17" onChange={(e) => setDate(e.target.value || '2027-06-21')} />
+        <input type="date" className="input" value={date} min="2027-12-17" onChange={(e) => setDate(e.target.value || '2027-12-21')} />
       </Field>
       <p className="small muted"><Languages size={14} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />Translated into Bahasa Melayu, English, Bahasa Indonesia, Filipino, Bengali and Nepali. The State checks the translations before approving.</p>
     </Drawer>

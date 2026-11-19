@@ -62,7 +62,7 @@ function Company() {
       </Card>
       <div className="stack">
         <LogoCard />
-        <Card title="Partner agreement" sub="Signed 12 Jan 2027 with Microtek for Kerajaan Negeri Sabah">
+        <Card title="Partner agreement" sub="Signed 12 Jul 2027 with Microtek for Kerajaan Negeri Sabah">
           <ul className="mx-cansee">
             <li><Lock aria-hidden="true" className="yes" />You never see worker records, only a masked SCANS ID and "up to date"</li>
             <li><ShieldCheck aria-hidden="true" className="yes" />Microtek approves every new or changed offer</li>
@@ -86,7 +86,7 @@ function Company() {
             <Field label="What it should say" error={tried && !value.trim() ? 'Enter the correct detail.' : undefined}>
               <input className="input" value={value} onChange={(e) => setValue(e.target.value)} placeholder={details.find((d) => d[0] === field)[1]} />
             </Field>
-            <Field label="Why (optional)"><textarea className="input" style={{ minHeight: 80 }} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="For example: we moved our head office in May 2027" /></Field>
+            <Field label="Why (optional)"><textarea className="input" style={{ minHeight: 80 }} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="For example: we moved our head office in November 2027" /></Field>
           </div>
         </Modal>
       )}
@@ -253,7 +253,7 @@ function Documents() {
           <dl className="kv">
             <div><dt>Signed</dt><dd>{agreement.uploaded}</dd></div>
             <div><dt>Ends</dt><dd>{agreement.expires} <span className="pill info" style={{ marginLeft: 6 }}>{agreement.daysLeft} days left</span></dd></div>
-            <div><dt>Renewal opens</dt><dd>12 Nov 2027</dd></div>
+            <div><dt>Renewal opens</dt><dd>12 May 2028</dd></div>
             <div><dt>File</dt><dd className="mx-ellipsis">{agreement.file}</dd></div>
           </dl>
           <Callout icon={CalendarClock} style={{ marginTop: 14 }}>You can upload renewal documents from 60 days before the agreement ends. We remind you by email before then.</Callout>

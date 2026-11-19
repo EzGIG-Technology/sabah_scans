@@ -19,7 +19,7 @@ export default function Systems() {
     setTimeout(() => { setChecking(null); logEvent('Checked connection', s.name); toast(`${s.name}: connection checked, ${s.state === 'Degraded' ? 'still slower than usual' : 'working'}`) }, 700)
   }
   const watch = services.filter((s) => s.watch)
-  const today = audit.filter((a) => a.at.startsWith('17 Jun 2027')).slice(0, 8)
+  const today = audit.filter((a) => a.at.startsWith('17 Dec 2027')).slice(0, 8)
   return (
     <>
       <PageHead title="System health" sub="Platform services, connected systems and who can sign in. SCANS is hosted in Malaysia." />

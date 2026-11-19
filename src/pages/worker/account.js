@@ -1,28 +1,29 @@
 import { RATE } from '../../data/demo.js'
 
-/* The demo worker's contribution account, counted in months from January 2027.
-   Default: paid up to May 2027 with June 2027 due (demoWorker in demo.js).
-   ?demo=arrears: paid up to March 2027, owing April to June 2027.
+/* The demo worker's contribution account, counted in months from July 2027.
+   Default: paid up to November 2027 with December 2027 due (demoWorker in demo.js).
+   ?demo=arrears: paid up to September 2027, owing October to December 2027.
    Paying moves the paid-up month forward. Owing months never touch the permit. */
 
 const BASE_Y = 2027
-export const DUE_IDX = 5 // June 2027, the demo month
-export const DEFAULT_PAID = 4 // May 2027
-export const ARREARS_PAID = 2 // March 2027
+const BASE_M = 6 // index 0 is July 2027, the launch month
+export const DUE_IDX = 5 // December 2027, the demo month
+export const DEFAULT_PAID = 4 // Nov 2027
+export const ARREARS_PAID = 2 // September 2027
 
 const EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const mod = (i) => ((i % 12) + 12) % 12
-const year = (i) => BASE_Y + Math.floor(i / 12)
-const dateOf = (i) => new Date(Date.UTC(BASE_Y, i, 1))
+const mod = (i) => (((i + BASE_M) % 12) + 12) % 12
+const year = (i) => BASE_Y + Math.floor((i + BASE_M) / 12)
+const dateOf = (i) => new Date(Date.UTC(BASE_Y, i + BASE_M, 1))
 const fmt = (lang) => new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
-// "June 2027" in English; the phone's own month names in the other languages.
+// "December 2027" in English; the phone's own month names in the other languages.
 export function monthName(i, lang = 'en') {
   if (lang !== 'en') { try { return fmt(lang).format(dateOf(i)) } catch { /* fall back to English */ } }
   return EN[mod(i)] + ' ' + year(i)
 }
 
-// "April to June 2027", or a localised range such as "April–Jun 2027".
+// "October to December 2027", or a localised range such as "October–Dec 2027".
 export function period(a, b, lang = 'en') {
   if (a === b) return monthName(a, lang)
   if (lang !== 'en') { try { return fmt(lang).formatRange(dateOf(a), dateOf(b)) } catch { /* fall back */ } }

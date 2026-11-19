@@ -10,7 +10,7 @@ import { period, DUE_IDX } from './account.js'
 
 const PERMIT_DAYS = daysFromDemo(2028, 2, 14)
 const EMP = employers.find((e) => e.id === w.employerId)
-const DOB = '12 Aug 1991'
+const DOB = '12 Feb 1991'
 
 /* =====================================================================
    /worker/card  The SCANS card as a full-screen pass
@@ -183,7 +183,7 @@ export function Faq() {
    a worker's status, permit or payment. Answers here are scripted.
    ===================================================================== */
 const SUGGEST = [
-  { id: 'due', icon: Receipt, t: 'Explain my June payment', s: 'What I owe and by when' },
+  { id: 'due', icon: Receipt, t: 'Explain my December payment', s: 'What I owe and by when' },
   { id: 'cash', icon: Store, t: 'How do I pay at 7-Eleven?', s: 'Cash with a counter code' },
   { id: 'employer', icon: Building2, t: 'What can my employer see?', s: 'And when they can pay for me' },
   { id: 'permit', icon: CalendarClock, t: 'Does paying late affect my permit?', s: 'In plain words' },
@@ -192,7 +192,7 @@ const SUGGEST = [
 ]
 
 const ANSWERS = {
-  due: { a: `Your June 2027 contribution is RM${w.due.amount}, due by ${w.due.dueDate}. You have paid up to ${w.paidThrough} and owe nothing from earlier months. You can pay in the app, with cash at any 7-Eleven, or your employer can pay if you agree.`, go: [['Go to Pay', '/worker/pay']] },
+  due: { a: `Your December 2027 contribution is RM${w.due.amount}, due by ${w.due.dueDate}. You have paid up to ${w.paidThrough} and owe nothing from earlier months. You can pay in the app, with cash at any 7-Eleven, or your employer can pay if you agree.`, go: [['Go to Pay', '/worker/pay']] },
   cash: { a: 'In Pay, choose “Cash at 7-Eleven” and tap “Get counter code”. Show the code at any 7-Eleven in Sabah and pay the cashier. Keep the printed slip. Your receipt appears in the app within a minute.', go: [['Go to Pay', '/worker/pay']] },
   employer: { a: 'Your employer sees only whether you have paid. They cannot see your complaints, your perks or your passport. They can pay for you only if you agree, and can take it from your wages only with a written permit from JTK Sabah.', go: [['How we use your information', '/worker/privacy']] },
   permit: { a: 'No. Paying late never affects your permit, your passport or your travel. SCANS cannot cancel permits or keep passports. If you are late you get reminders, that is all.', go: [['See my details', '/worker/details']] },

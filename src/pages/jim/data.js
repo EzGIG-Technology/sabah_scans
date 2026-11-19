@@ -36,8 +36,8 @@ const scale = REGISTERED / workers.length
 export const permitsWithin = (days) => Math.round(workers.filter((w) => w.permitDays >= 0 && w.permitDays <= days).length * scale)
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const expiryByMonth = Array.from({ length: 12 }, (_, i) => {
-  const m = (6 + i) % 12
-  const y = 2027 + Math.floor((6 + i) / 12)
+  const m = i % 12 // twelve months from January 2028, the month after the demo month
+  const y = 2028 + Math.floor(i / 12)
   const key = `${MON[m]} ${y}`
   const n = workers.filter((w) => w.permitExpiry.endsWith(key)).length
   return { label: MON[m], full: key, value: Math.round(n * scale) }
@@ -95,19 +95,19 @@ const SEED = PICK.map((wi, i) => {
     field: k.field, scans: w[k.key], jim: k.jim(w), source: k.source, why: k.why || null, age: AGES[i],
     status: !decided ? 'Waiting' : i === 11 ? 'Sent to Microtek' : 'Confirmed',
     decision: !decided ? null : i === 11 ? 'JIM value is correct' : 'SCANS value is correct',
-    remark: !decided ? '' : i === 11 ? 'Renewed passport seen at the KK counter on 14 Jun.' : 'Checked against the permit file.',
-    by: decided ? 'Nur Syafiqah Abdullah (JIM Sabah)' : null, at: decided ? '15 Jun 2027 10:12' : null,
+    remark: !decided ? '' : i === 11 ? 'Renewed passport seen at the KK counter on 14 Dec.' : 'Checked against the permit file.',
+    by: decided ? 'Nur Syafiqah Abdullah (JIM Sabah)' : null, at: decided ? '15 Dec 2027 10:12' : null,
   }
 })
 
 /* ---------- JIM data link runs ---------- */
 const RUNS = [
-  { id: 'SY-0617-06', at: '17 Jun 2027 06:00', kind: 'Scheduled', received: 1412, updated: 386, failed: 0, took: '4 min 12 s', status: 'Completed' },
-  { id: 'SY-0616-18', at: '16 Jun 2027 18:00', kind: 'Scheduled', received: 1088, updated: 241, failed: 2, took: '3 min 47 s', status: 'Completed with 2 errors' },
-  { id: 'SY-0616-11', at: '16 Jun 2027 11:20', kind: 'Run by an officer', received: 214, updated: 37, failed: 0, took: '52 s', status: 'Completed' },
-  { id: 'SY-0616-06', at: '16 Jun 2027 06:00', kind: 'Scheduled', received: 1530, updated: 402, failed: 0, took: '4 min 31 s', status: 'Completed' },
-  { id: 'SY-0615-18', at: '15 Jun 2027 18:00', kind: 'Scheduled', received: 976, updated: 198, failed: 0, took: '3 min 05 s', status: 'Completed' },
-  { id: 'SY-0615-06', at: '15 Jun 2027 06:00', kind: 'Scheduled', received: 1477, updated: 371, failed: 1, took: '4 min 20 s', status: 'Completed with 1 error' },
+  { id: 'SY-1217-06', at: '17 Dec 2027 06:00', kind: 'Scheduled', received: 1412, updated: 386, failed: 0, took: '4 min 12 s', status: 'Completed' },
+  { id: 'SY-1216-18', at: '16 Dec 2027 18:00', kind: 'Scheduled', received: 1088, updated: 241, failed: 2, took: '3 min 47 s', status: 'Completed with 2 errors' },
+  { id: 'SY-1216-11', at: '16 Dec 2027 11:20', kind: 'Run by an officer', received: 214, updated: 37, failed: 0, took: '52 s', status: 'Completed' },
+  { id: 'SY-1216-06', at: '16 Dec 2027 06:00', kind: 'Scheduled', received: 1530, updated: 402, failed: 0, took: '4 min 31 s', status: 'Completed' },
+  { id: 'SY-1215-18', at: '15 Dec 2027 18:00', kind: 'Scheduled', received: 976, updated: 198, failed: 0, took: '3 min 05 s', status: 'Completed' },
+  { id: 'SY-1215-06', at: '15 Dec 2027 06:00', kind: 'Scheduled', received: 1477, updated: 371, failed: 1, took: '4 min 20 s', status: 'Completed with 1 error' },
 ]
 
 /* ---------- Small store so decisions and sync runs carry across pages in one session ---------- */
@@ -123,12 +123,12 @@ export function decideMatch(id, patch) {
 }
 let runSeq = 1
 export function addRun(run) {
-  state.runs = [{ id: 'SY-0617-M' + runSeq++, ...run }, ...state.runs]
+  state.runs = [{ id: 'SY-1217-M' + runSeq++, ...run }, ...state.runs]
   emit()
 }
 
-/* "17 Jun 2027 HH:MM" for the current time on the demo date. */
+/* "17 Dec 2027 HH:MM" for the current time on the demo date. */
 export function stampNow() {
   const d = new Date()
-  return '17 Jun 2027 ' + [d.getHours(), d.getMinutes()].map((n) => String(n).padStart(2, '0')).join(':')
+  return '17 Dec 2027 ' + [d.getHours(), d.getMinutes()].map((n) => String(n).padStart(2, '0')).join(':')
 }

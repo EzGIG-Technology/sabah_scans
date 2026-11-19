@@ -6,7 +6,7 @@ import { MShell } from './shell.jsx'
 import { useMerchant } from './store.jsx'
 import { offerMonthly, JUNE_TOTAL, MONTHLY, MERCHANT } from './data.js'
 
-const FULL = { Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April', May: 'May', Jun: 'June' }
+const FULL = { Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December' }
 
 export default function Reports() {
   const { offers, outlets, redemptions } = useMerchant()
@@ -22,7 +22,7 @@ export default function Reports() {
     offers: offers.filter((o) => offerMonthly(o)[i].value > 0).length,
     outlets: Math.min(outletsUsed, 30 + i * 3),
     status: i === monthly.length - 1 ? 'In progress' : 'Ready',
-    issued: i === monthly.length - 1 ? 'Ready on 1 Jul 2027' : `1 ${['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'][i]} 2027`,
+    issued: i === monthly.length - 1 ? 'Ready on 1 Jan 2028' : `1 ${['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'][i]} 2027`,
   })).reverse()
   const byOffer = offers.filter((o) => o.redemptions > 0).sort((a, b) => b.redemptions - a.redemptions)
   const donut = [...byOffer.slice(0, 5).map((o) => ({ label: o.title, value: o.redemptions })), { label: 'Other offers', value: byOffer.slice(5).reduce((s, o) => s + o.redemptions, 0) }].filter((d) => d.value > 0)
@@ -42,7 +42,7 @@ export default function Reports() {
       <div className="grid g-main">
         <Card title="Redemptions per month" sub="Confirmed at the counter, 2027">
           <BarChart data={monthly} highlight={monthly.length - 1} format={num} height={240} />
-          <p className="small muted" style={{ marginTop: 8 }}>June is up to 17 June. {num(monthly.reduce((s, m) => s + m.value, 0))} redemptions since you joined on {MERCHANT.joined}.</p>
+          <p className="small muted" style={{ marginTop: 8 }}>December is up to 17 December. {num(monthly.reduce((s, m) => s + m.value, 0))} redemptions since you joined on {MERCHANT.joined}.</p>
         </Card>
         <Card title="By offer" sub="Share of all redemptions since you joined">
           <Donut data={donut} center={num(offers.reduce((s, o) => s + o.redemptions, 0))} centerSub="redemptions" size={160} format={(v, t, i) => shares[i] + '%'} />
@@ -58,7 +58,7 @@ export default function Reports() {
           { key: 'status', label: 'Status', render: (s) => <Status tone={s.status === 'Ready' ? 'ok' : 'info'}>{s.status}</Status> },
           { key: 'dl', label: 'Download', align: 'r', render: (s) => s.status === 'Ready'
             ? <button className="btn sm outline" onClick={() => download(s)}><Download /> {fmt}</button>
-            : <span className="small muted row" style={{ gap: 6, justifyContent: 'flex-end' }}><CalendarClock size={14} /> 1 Jul</span> },
+            : <span className="small muted row" style={{ gap: 6, justifyContent: 'flex-end' }}><CalendarClock size={14} /> 1 Jan</span> },
         ]} />
       </Card>
 

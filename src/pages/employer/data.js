@@ -1,6 +1,6 @@
 // Employer portal data for Borneo Palm Plantations Sdn Bhd.
 // Built on src/data/demo.js. The sample roster holds every worker who has not
-// paid for June 2027 (41 of 412) plus the sample of paid workers from demo.js,
+// paid for December 2027 (41 of 412) plus the sample of paid workers from demo.js,
 // so the counts on every employer screen reconcile with employerSelf (412 / 371).
 import { useSyncExternalStore } from 'react'
 import { workers, employerSelf, employerBatches, paymentsFor, fpxBanks, RATE, statusFor } from '../../data/demo.js'
@@ -16,28 +16,28 @@ export const COMPANY = {
   site: 'Ladang Segama, Lahad Datu',
   appUsers: 363,
 }
-export const DEMO_TODAY = '17 Jun 2027'
-const TODAY = new Date(2027, 5, 17)
+export const DEMO_TODAY = '17 Dec 2027'
+const TODAY = new Date(2027, 11, 17)
 
-/* ---------- Months: index 0 = Jan 2027, 5 = Jun 2027 (the demo month) ---------- */
+/* ---------- Months: index 0 = Jul 2027, 5 = Dec 2027 (the demo month) ---------- */
 const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 export const CUR = 5
+const L = 6 // index 0 is July, the launch month
+const cal = (i) => ({ y: 2027 + Math.floor((i + L) / 12), m: (((i + L) % 12) + 12) % 12 })
 export const monthLabel = (i, long) => {
-  const y = 2027 + Math.floor(i / 12)
-  const m = ((i % 12) + 12) % 12
+  const { y, m } = cal(i)
   return `${long ? ML[m] : MS[m]} ${y}`
 }
 export function periodLabel(from, count) {
   const to = from + count - 1
   if (count === 1) return monthLabel(from, true)
-  const fy = 2027 + Math.floor(from / 12), ty = 2027 + Math.floor(to / 12)
-  const f = MS[((from % 12) + 12) % 12], t = MS[((to % 12) + 12) % 12]
-  return fy === ty ? `${f} to ${t} ${ty}` : `${f} ${fy} to ${t} ${ty}`
+  const a = cal(from), b = cal(to)
+  return a.y === b.y ? `${MS[a.m]} to ${MS[b.m]} ${b.y}` : `${MS[a.m]} ${a.y} to ${MS[b.m]} ${b.y}`
 }
 const idxOf = (s) => {
   const [m, y] = s.split(' ')
-  return (Number(y) - 2027) * 12 + MS.indexOf(m.slice(0, 3))
+  return (Number(y) - 2027) * 12 + MS.indexOf(m.slice(0, 3)) - L
 }
 export function parseDate(s) {
   const [d, m, y] = s.split(' ')
@@ -48,39 +48,39 @@ export const daysUntil = (s) => Math.round((parseDate(s) - TODAY) / 86400000)
 /* ---------- Extra sample records (unpaid workers not in the demo.js sample) ---------- */
 const EXTRA = [
   // name, nationality, role, paid up to (month index, -1 = nothing paid yet), consent, uses app, permit valid until
-  ['Ramon Castillo', 'Philippines', 'Harvester', 1, true, true, '19 Jul 2027'],
-  ['Imran Hossain', 'Bangladesh', 'Mill operator', 1, true, true, '28 Oct 2027'],
-  ['Wayan Sudarma', 'Indonesia', 'Harvester', 0, false, false, '6 Feb 2028'],
-  ['Maricel Reyes', 'Philippines', 'Weeding', 1, true, true, '9 Aug 2027'],
-  ['Rudi Purnomo', 'Indonesia', 'Fruit collector', -1, true, true, '22 Jan 2028'],
-  ['Arjun Nair', 'India', 'Mechanic', 1, true, true, '3 May 2028'],
-  ['Siti Rahayu', 'Indonesia', 'Nursery', 0, true, true, '11 Nov 2027'],
-  ['Jun Torres', 'Philippines', 'Tractor driver', 1, true, true, '27 Mar 2028'],
-  ['Budi Hidayat', 'Indonesia', 'Harvester', 3, true, true, '2 Jul 2027'],
-  ['Nasir Uddin', 'Bangladesh', 'Mill operator', 3, false, true, '14 Dec 2027'],
-  ['Grace Aquino', 'Philippines', 'Weeding', 3, true, true, '30 Apr 2028'],
-  ['Joko Saputra', 'Indonesia', 'Harvester', 3, true, true, '18 Sep 2027'],
-  ['Ayu Kartika', 'Indonesia', 'Nursery', 3, true, true, '7 Jan 2028'],
-  ['Arnel Santos', 'Philippines', 'Fruit collector', 3, false, false, '25 Feb 2028'],
-  ['Yusuf Saputra', 'Indonesia', 'Tractor driver', 3, true, true, '12 Jun 2028'],
-  ['Thant Zaw', 'Others', 'Harvester', 3, true, true, '4 Oct 2027'],
-  ['Rina Kusuma', 'Indonesia', 'Weeding', 3, true, true, '28 Jul 2027'],
-  ['Cristina Garcia', 'Philippines', 'Nursery', 3, true, true, '15 Mar 2028'],
-  ['Wayan Santoso', 'Indonesia', 'Harvester', 4, true, true, '21 Nov 2027'],
-  ['Rodel Mendoza', 'Philippines', 'Fruit collector', 4, true, true, '8 Aug 2028'],
-  ['Sohel Ahmed', 'Bangladesh', 'Mill operator', 4, false, false, '19 Jan 2028'],
-  ['Nur Fadilah', 'Indonesia', 'Harvester', 4, true, true, '2 Apr 2028'],
-  ['Jose Villanueva', 'Philippines', 'Tractor driver', 4, true, true, '13 Sep 2027'],
-  ['Dewi Saputra', 'Indonesia', 'Nursery', 4, true, true, '29 Dec 2027'],
-  ['Ravi Kumar', 'India', 'Mechanic', 4, true, true, '17 May 2028'],
-  ['Siti Aminah', 'Indonesia', 'Weeding', 4, true, true, '6 Oct 2027'],
-  ['Mario Ramos', 'Philippines', 'Harvester', 4, false, true, '24 Feb 2028'],
-  ['Agus Rahayu', 'Indonesia', 'Fruit collector', 4, true, true, '10 Jul 2028'],
-  ['Bishnu Thapa', 'Others', 'Harvester', 4, true, true, '1 Dec 2027'],
-  ['Ana Torres', 'Philippines', 'Weeding', 4, true, true, '18 Jan 2028'],
-  ['Hasan Pillai', 'India', 'Mill operator', 4, true, true, '5 Nov 2027'],
-  ['Maricel Santos', 'Philippines', 'Fruit collector', 4, true, true, '27 Sep 2028'],
-  ['Liza Mendoza', 'Philippines', 'Weeding', 4, true, true, '3 Sep 2027'],
+  ['Ramon Castillo', 'Philippines', 'Harvester', 1, true, true, '19 Jan 2028'],
+  ['Imran Hossain', 'Bangladesh', 'Mill operator', 1, true, true, '28 Apr 2028'],
+  ['Wayan Sudarma', 'Indonesia', 'Harvester', 0, false, false, '6 Aug 2028'],
+  ['Maricel Reyes', 'Philippines', 'Weeding', 1, true, true, '9 Feb 2028'],
+  ['Rudi Purnomo', 'Indonesia', 'Fruit collector', -1, true, true, '22 Jul 2028'],
+  ['Arjun Nair', 'India', 'Mechanic', 1, true, true, '3 Nov 2028'],
+  ['Siti Rahayu', 'Indonesia', 'Nursery', 0, true, true, '11 May 2028'],
+  ['Dec Torres', 'Philippines', 'Tractor driver', 1, true, true, '27 Sep 2028'],
+  ['Budi Hidayat', 'Indonesia', 'Harvester', 3, true, true, '2 Jan 2028'],
+  ['Nasir Uddin', 'Bangladesh', 'Mill operator', 3, false, true, '14 Jun 2028'],
+  ['Grace Aquino', 'Philippines', 'Weeding', 3, true, true, '30 Oct 2028'],
+  ['Joko Saputra', 'Indonesia', 'Harvester', 3, true, true, '18 Mar 2028'],
+  ['Ayu Kartika', 'Indonesia', 'Nursery', 3, true, true, '7 Jul 2028'],
+  ['Arnel Santos', 'Philippines', 'Fruit collector', 3, false, false, '25 Aug 2028'],
+  ['Yusuf Saputra', 'Indonesia', 'Tractor driver', 3, true, true, '12 Dec 2028'],
+  ['Thant Zaw', 'Others', 'Harvester', 3, true, true, '4 Apr 2028'],
+  ['Rina Kusuma', 'Indonesia', 'Weeding', 3, true, true, '28 Jan 2028'],
+  ['Cristina Garcia', 'Philippines', 'Nursery', 3, true, true, '15 Sep 2028'],
+  ['Wayan Santoso', 'Indonesia', 'Harvester', 4, true, true, '21 May 2028'],
+  ['Rodel Mendoza', 'Philippines', 'Fruit collector', 4, true, true, '8 Feb 2029'],
+  ['Sohel Ahmed', 'Bangladesh', 'Mill operator', 4, false, false, '19 Jul 2028'],
+  ['Nur Fadilah', 'Indonesia', 'Harvester', 4, true, true, '2 Oct 2028'],
+  ['Jose Villanueva', 'Philippines', 'Tractor driver', 4, true, true, '13 Mar 2028'],
+  ['Dewi Saputra', 'Indonesia', 'Nursery', 4, true, true, '29 Jun 2028'],
+  ['Ravi Kumar', 'India', 'Mechanic', 4, true, true, '17 Nov 2028'],
+  ['Siti Aminah', 'Indonesia', 'Weeding', 4, true, true, '6 Apr 2028'],
+  ['Mario Ramos', 'Philippines', 'Harvester', 4, false, true, '24 Aug 2028'],
+  ['Agus Rahayu', 'Indonesia', 'Fruit collector', 4, true, true, '10 Jan 2029'],
+  ['Bishnu Thapa', 'Others', 'Harvester', 4, true, true, '1 Jun 2028'],
+  ['Ana Torres', 'Philippines', 'Weeding', 4, true, true, '18 Jul 2028'],
+  ['Hasan Pillai', 'India', 'Mill operator', 4, true, true, '5 May 2028'],
+  ['Maricel Santos', 'Philippines', 'Fruit collector', 4, true, true, '27 Mar 2029'],
+  ['Liza Mendoza', 'Philippines', 'Weeding', 4, true, true, '3 Mar 2028'],
 ]
 
 const base = [
@@ -93,7 +93,7 @@ const base = [
   })),
 ]
 
-/* Status from the number of unpaid months (June included). Same labels as every other portal (statusFor in demo.js). */
+/* Status from the number of unpaid months (December included). Same labels as every other portal (statusFor in demo.js). */
 export function statusOf(paidIdx) {
   const owing = Math.max(0, CUR - paidIdx)
   const earlier = Math.max(0, owing - 1)
@@ -141,8 +141,8 @@ export function summarise(roster) {
 }
 
 export const paidPerMonth = (paid) => [
-  { label: 'Jan', value: 298 }, { label: 'Feb', value: 322 }, { label: 'Mar', value: 340 },
-  { label: 'Apr', value: 351 }, { label: 'May', value: 366 }, { label: 'Jun', value: paid },
+  { label: 'Jul', value: 298 }, { label: 'Aug', value: 322 }, { label: 'Sep', value: 340 },
+  { label: 'Oct', value: 351 }, { label: 'Nov', value: 366 }, { label: 'Dec', value: paid },
 ]
 
 /* Payment history: this session's batch receipts first, then the record. */
@@ -157,8 +157,8 @@ export function historyFor(w, batches) {
   for (let m = w.paidIdx - (state.paidAdd[w.id] || 0); m >= 0 && rows.length < 6; m--) {
     const method = methods[(m + w.name.length) % methods.length]
     rows.push({
-      id: `RCP-27${String(m + 1).padStart(2, '0')}-${String(200000 + ((w.name.length * 7919 + m * 104729) % 799999))}`,
-      month: monthLabel(m, true), amount: RATE, method, date: `${2 + ((m + w.name.length) % 4)} ${MS[m]} 2027`,
+      id: `RCP-27${String(m + L + 1).padStart(2, '0')}-${String(200000 + ((w.name.length * 7919 + m * 104729) % 799999))}`,
+      month: monthLabel(m, true), amount: RATE, method, date: `${2 + ((m + w.name.length) % 4)} ${MS[m + L]} 2027`,
       by: method === 'Employer bulk payment' ? COMPANY.name : w.name,
     })
   }
@@ -171,23 +171,23 @@ const BANK_COLOURS = ['#E0A800', '#C8102E', '#D42253', '#1D66B8', '#13407A', '#0
 export const banks = fpxBanks.map((name, i) => ({ name, color: BANK_COLOURS[i % BANK_COLOURS.length] }))
 
 /* ---------- Reports: month-by-month figures that end at today's live counts ---------- */
-/* Jan to May are fixed history; June comes from the live roster so every screen agrees. */
+/* Jul to Nov are fixed history; December comes from the live roster so every screen agrees. */
 const TREND = [
   // paid, june-style "this month not paid yet", owing 1-2 earlier months, owing 3+ months (sums to 412)
-  { label: 'Jan', paid: 298, due: 114, late: 0, risk: 0 },
-  { label: 'Feb', paid: 322, due: 58, late: 32, risk: 0 },
-  { label: 'Mar', paid: 340, due: 44, late: 28, risk: 0 },
-  { label: 'Apr', paid: 351, due: 33, late: 20, risk: 8 },
-  { label: 'May', paid: 366, due: 20, late: 14, risk: 12 },
+  { label: 'Jul', paid: 298, due: 114, late: 0, risk: 0 },
+  { label: 'Aug', paid: 322, due: 58, late: 32, risk: 0 },
+  { label: 'Sep', paid: 340, due: 44, late: 28, risk: 0 },
+  { label: 'Oct', paid: 351, due: 33, late: 20, risk: 8 },
+  { label: 'Nov', paid: 366, due: 20, late: 14, risk: 12 },
 ]
-export const complianceTrend = (s) => [...TREND, { label: 'Jun', paid: s.paid, due: s.due, late: s.late, risk: s.risk }]
+export const complianceTrend = (s) => [...TREND, { label: 'Dec', paid: s.paid, due: s.due, late: s.late, risk: s.risk }]
 
-/* Workers using the SCANS app each month (June = COMPANY.appUsers). */
+/* Workers using the SCANS app each month (December = COMPANY.appUsers). */
 export const appUsersByMonth = [
-  { label: 'Jan', value: 240 }, { label: 'Feb', value: 281 }, { label: 'Mar', value: 305 },
-  { label: 'Apr', value: 322 }, { label: 'May', value: 347 }, { label: 'Jun', value: 363 },
+  { label: 'Jul', value: 240 }, { label: 'Aug', value: 281 }, { label: 'Sep', value: 305 },
+  { label: 'Oct', value: 322 }, { label: 'Nov', value: 347 }, { label: 'Dec', value: 363 },
 ]
-/* Who paid June: the company's June batch (214 workers) plus batches made this visit; the rest paid themselves. */
+/* Who paid December: the company's December batch (214 workers) plus batches made this visit; the rest paid themselves. */
 export function juneSplit(roster, s, st) {
   const fromSession = roster.filter((w) => st.paidAdd[w.id] && w.paidIdx >= CUR).length
   const company = 214 + fromSession
@@ -195,8 +195,8 @@ export function juneSplit(roster, s, st) {
 }
 
 export const SEED_EXPORTS = [
-  { id: 'EXP-2706-031', name: 'Contribution status report, May 2027', date: '1 Jun 2027', format: 'PDF', size: '412 KB' },
-  { id: 'EXP-2705-022', name: 'Payment history report, Jan to Apr 2027', date: '8 May 2027', format: 'CSV', size: '96 KB' },
-  { id: 'EXP-2705-019', name: 'App use report, April 2027', date: '3 May 2027', format: 'PDF', size: '188 KB' },
+  { id: 'EXP-2712-031', name: 'Contribution status report, Nov 2027', date: '1 Dec 2027', format: 'PDF', size: '412 KB' },
+  { id: 'EXP-2711-022', name: 'Payment history report, Jul to Oct 2027', date: '8 Nov 2027', format: 'CSV', size: '96 KB' },
+  { id: 'EXP-2711-019', name: 'App use report, October 2027', date: '3 Nov 2027', format: 'PDF', size: '188 KB' },
 ]
 export const PIC_DEFAULT = { name: 'Jennifer Liew', role: 'HR manager', email: 'jennifer.liew@bpp.example.my', phone: '012-884 4410' }

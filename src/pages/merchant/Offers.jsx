@@ -119,7 +119,7 @@ function OfferTable({ rows }) {
    New / edit offer
    ===================================================================== */
 const STEPS = ['Details', 'Rules', 'Outlets', 'Preview']
-const blank = { title: '', category: 'Top-up', type: 'amount', value: '', minSpend: '', what: '', starts: '2027-07-01', ends: '2027-08-31', limit: 'One a month', terms: '', outletMode: 'all', districts: [], outletIds: [], maxUses: '', image: null, imageName: '' }
+const blank = { title: '', category: 'Top-up', type: 'amount', value: '', minSpend: '', what: '', starts: '2028-01-01', ends: '2028-02-29', limit: 'One a month', terms: '', outletMode: 'all', districts: [], outletIds: [], maxUses: '', image: null, imageName: '' }
 
 function formFromOffer(o) {
   return {
@@ -170,7 +170,7 @@ function OfferForm({ initial, mode, offer }) {
     if (f.type === 'percent' && Number(f.value) > 50) e.value = 'Percent off can be 50 or less.'
     if (f.type === 'free' && !f.value.trim()) e.value = 'Say what is free, for example 600ml water.'
     if (!f.starts) e.starts = 'Choose a start date.'
-    else if (f.starts < '2027-06-21') e.starts = 'Start on 21 Jun 2027 or later. Microtek needs up to 2 working days to check it.'
+    else if (f.starts < '2027-12-21') e.starts = 'Start on 21 Dec 2027 or later. Microtek needs up to 2 working days to check it.'
     if (!f.ends) e.ends = 'Choose an end date.'
     else if (f.starts && f.ends <= f.starts) e.ends = 'The end date must be after the start date.'
     if (f.maxUses && !(Number(f.maxUses) >= 1 && Number.isInteger(Number(f.maxUses)))) e.maxUses = 'Enter a whole number, for example 1000, or leave it empty.'
@@ -219,7 +219,7 @@ function OfferForm({ initial, mode, offer }) {
     const bad = [0, 1, 2].find((i) => !stepOk(i))
     if (bad != null) { setStep(bad); return }
     if (!ack) return
-    const ref = 'OS-2706-0' + (22 + Math.floor(Math.random() * 70))
+    const ref = 'OS-2712-0' + (22 + Math.floor(Math.random() * 70))
     if (mode === 'edit') {
       updateOffer(offer.id, { ...toOffer('Waiting for approval'), ref, changeOf: editingLive ? offer.status : null })
       toast('Sent to Microtek for approval')
@@ -467,7 +467,7 @@ export function OfferDetail() {
         <Kpi hero icon={Eye} label="Views" value={num(o.views)} note="Workers who opened the perk" />
         <Kpi icon={CheckCircle2} tone="ok" label="Redemptions" value={num(o.redemptions)} note="Confirmed at the counter" />
         <Kpi icon={Percent} tone="purple" label="Conversion" value={o.views ? pct(conv(o), 1) : '—'} note="Views that led to a use" />
-        <Kpi icon={CheckCircle2} label="This month" value={num(o.june || 0)} note={isLive ? `${num(week)} this week, 14 to 17 June` : '1 to 17 June 2027'} />
+        <Kpi icon={CheckCircle2} label="This month" value={num(o.june || 0)} note={isLive ? `${num(week)} this week, 13 to 17 December` : '1 to 17 December 2027'} />
       </div>
 
       <div className="grid g-main">

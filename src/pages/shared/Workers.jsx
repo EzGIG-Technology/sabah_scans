@@ -54,7 +54,7 @@ export function WorkerList({ base, readOnly }) {
     { key: 'nationality', label: 'Nationality', render: (w) => <span>{w.nationality}<small className="muted" style={{ display: 'block', fontSize: 12 }}>Passport {w.passport}</small></span> },
     { key: 'employer', label: 'Employer', render: (w) => <span>{shortEmp(w.employer)}<small className="muted" style={{ display: 'block', fontSize: 12 }}>{w.sector}</small></span> },
     { key: 'district', label: 'District' },
-    { key: 'status', label: 'June 2027', render: (w) => <Status>{w.status}</Status> },
+    { key: 'status', label: 'December 2027', render: (w) => <Status>{w.status}</Status> },
     { key: 'app', label: 'SCANS app', render: (w) => (w.appActive ? <Pill tone="info">Signed up</Pill> : <Pill tone="grey">Not yet</Pill>) },
     { key: 'arrears', label: 'Owing', align: 'r', render: (w) => <span className="num" style={{ fontWeight: w.arrears ? 600 : 400 }}>{rm(w.arrears)}</span> },
     { key: 'permit', label: 'Permit ends', render: (w) => <span className="num">{w.permitExpiry}<small className="muted" style={{ display: 'block', fontSize: 12 }}>{permitText(w)}</small></span> },
@@ -68,8 +68,8 @@ export function WorkerList({ base, readOnly }) {
       {readOnly && <Callout icon={ShieldCheck}>Each record you open is written to the audit log with your name and the time. Contribution status only: SCANS does not decide anyone’s immigration status.</Callout>}
       <div className="grid g-4 keep2">
         <Kpi icon={Users} label="Registered" value={num(REGISTERED)} note="Workers on SCANS" />
-        <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(paidThisMonth)} note={pct(paidThisMonth / REGISTERED) + ' of registered'} />
-        <Kpi icon={Clock} tone="warn" label="Not yet paid for June" value={num(REGISTERED - paidThisMonth)} note={`${num(dueThisMonth)} due this month · ${num(overdue1)} 1–2 months overdue`} />
+        <Kpi icon={CheckCircle2} tone="ok" label="Paid for December" value={num(paidThisMonth)} note={pct(paidThisMonth / REGISTERED) + ' of registered'} />
+        <Kpi icon={Clock} tone="warn" label="Not yet paid for December" value={num(REGISTERED - paidThisMonth)} note={`${num(dueThisMonth)} due this month · ${num(overdue1)} 1–2 months overdue`} />
         <Kpi icon={AlertTriangle} tone="bad" label="3+ months overdue" value={num(overdue3)} note="Never leads to permit action" />
       </div>
       <Card title="Worker records" sub={anyFilter ? `${num(rows.length)} of ${num(workers.length)} sample records match` : `Sample of ${num(workers.length)} records. Choose a row to open the profile.`}
@@ -135,7 +135,7 @@ export function WorkerProfile({ base, readOnly }) {
         {!readOnly && (
           <>
             <button className="btn outline" onClick={() => setCorrect(true)}><PencilLine /> Open record correction</button>
-            <button className="btn primary" disabled={w.status === 'Paid'} title={w.status === 'Paid' ? 'This worker has paid for June' : undefined} onClick={() => setRemind(true)}><Send /> Send reminder</button>
+            <button className="btn primary" disabled={w.status === 'Paid'} title={w.status === 'Paid' ? 'This worker has paid for December' : undefined} onClick={() => setRemind(true)}><Send /> Send reminder</button>
           </>
         )}
       </PageHead>
@@ -150,7 +150,7 @@ export function WorkerProfile({ base, readOnly }) {
             <div className="id">{w.id}</div>
             <Pill tone="grey">{w.nationality}</Pill>
             <div className="gv-arrears">
-              <div><b className="num">{rm(w.arrears)}</b><small>Owing, June included</small></div>
+              <div><b className="num">{rm(w.arrears)}</b><small>Owing, December included</small></div>
               <Status>{w.status}</Status>
             </div>
             <div className="gv-permit">
@@ -190,10 +190,10 @@ export function WorkerProfile({ base, readOnly }) {
               <div className="stack">
                 <div className="gv-mini">
                   <div><span>Paid up to</span><b>{w.paidThrough}</b></div>
-                  <div><span>Owing, June included</span><b className="num">{rm(w.arrears)}</b></div>
+                  <div><span>Owing, December included</span><b className="num">{rm(w.arrears)}</b></div>
                   <div><span>Monthly contribution</span><b className="num">{rm(100)}</b></div>
                   <div><span>Usual method</span><b style={{ fontSize: 14 }}>{usual ? usual[0] : '—'}</b></div>
-                  <div><span>Paid since January</span><b className="num">{rm(pays.reduce((s, p) => s + p.amount, 0))}</b></div>
+                  <div><span>Paid since July</span><b className="num">{rm(pays.reduce((s, p) => s + p.amount, 0))}</b></div>
                 </div>
                 {w.arrears > 0 && <Callout tone="warn" icon={AlertTriangle}>{rm(w.arrears)} not yet paid. Arrears lead to reminders only. They never lead to permit action, passport holding or travel restriction.</Callout>}
                 <Table pageSize={6} rows={pays} columns={[
@@ -215,7 +215,7 @@ export function WorkerProfile({ base, readOnly }) {
                     <div><dt>Sector</dt><dd>{w.sector}</dd></div>
                     <div><dt>Employer</dt><dd>{w.employer}</dd></div>
                   </dl>
-                  {d && <div className="gv-kv-card small"><MapPin size={14} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />{w.district}: {num(d.workers)} registered workers, {pct(d.rate)} paid for June.</div>}
+                  {d && <div className="gv-kv-card small"><MapPin size={14} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />{w.district}: {num(d.workers)} registered workers, {pct(d.rate)} paid for December.</div>}
                   <p className="small muted">Location is the work site on the employer’s eNORES record, not a tracked position.</p>
                 </div>
                 {d && <div className="gv-mini-map"><SabahMap districts={districts} selected={d.id} onSelect={() => {}} /></div>}
@@ -225,9 +225,9 @@ export function WorkerProfile({ base, readOnly }) {
               <ol className="gv-timeline">
                 {views.slice(0, 4).map((a) => <li key={a.id}><span className="dot info" /><b>{a.action}</b><span>{a.who} · {a.at}</span></li>)}
                 {pays.map((p) => <li key={p.id}><span className="dot ok" /><b>Payment received for {p.month}</b><span>{rm(p.amount)} by {p.method} · {p.date} · {p.id}</span></li>)}
-                {w.arrears > 0 && <li><span className="dot warn" /><b>Payment reminder sent</b><span>App and SMS in {w.language} · 10 Jun 2027</span></li>}
-                <li><span className="dot" /><b>Signed up to the SCANS app</b><span>{w.appActive ? 'Passport scan and KDN face check passed · 8 Jan 2027' : 'Not signed up yet'}</span></li>
-                <li><span className="dot" /><b>Record created from SWIMS and eNORES</b><span>Matched to {shortEmp(w.employer)} · 2 Jan 2027</span></li>
+                {w.arrears > 0 && <li><span className="dot warn" /><b>Payment reminder sent</b><span>App and SMS in {w.language} · 10 Dec 2027</span></li>}
+                <li><span className="dot" /><b>Signed up to the SCANS app</b><span>{w.appActive ? 'Passport scan and KDN face check passed · 8 Jul 2027' : 'Not signed up yet'}</span></li>
+                <li><span className="dot" /><b>Record created from SWIMS and eNORES</b><span>Matched to {shortEmp(w.employer)} · 2 Jul 2027</span></li>
               </ol>
             )}
             {tab === 'Documents' && (
@@ -284,7 +284,7 @@ function ReminderModal({ w, onClose, onSent }) {
         <div className="chips">{['App', 'SMS', 'WhatsApp'].map((c) => <button key={c} className="chip" aria-pressed={ch.includes(c)} onClick={() => toggle(c)}>{c}</button>)}</div>
         <div className="gv-lang">
           <b>Message (English shown)</b>
-          <p>{w.arrears > 100 ? `You owe RM${w.arrears}, June 2027 included.` : 'Your contribution for June 2027 is RM100.'} Pay in the SCANS app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit.</p>
+          <p>{w.arrears > 100 ? `You owe RM${w.arrears}, December 2027 included.` : 'Your contribution for December 2027 is RM100.'} Pay in the SCANS app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit.</p>
         </div>
         <p className="small muted">The worker gets this in {w.language}. The reminder is written to the audit log.</p>
       </div>

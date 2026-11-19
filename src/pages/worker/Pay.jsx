@@ -50,7 +50,7 @@ const GROUPS = ['E-wallet', 'Bank', 'Cash', 'Card']
 const GROUP_LABEL = { 'E-wallet': 'E-wallets', Bank: 'Bank and DuitNow', Cash: 'Cash', Card: 'Cards' }
 const markFor = (name) => METHODS.find((m) => m.name === name) || (name === 'Employer bulk payment' ? { tile: { t: 'BP', bg: '#13407A' } } : {})
 
-const NEW_ID = 'RCP-2706-121907'
+const NEW_ID = 'RCP-2712-121907'
 const COUNTER = 'SCN 2706 4721 8'
 
 export default function Pay() {
@@ -111,7 +111,7 @@ export default function Pay() {
           <div><span>Receipt</span><b className="num">{NEW_ID}</b></div>
           <div><span>Period</span><b>{done.plan} · {done.months}</b></div>
           <div><span>Paid up to</span><b>{done.upTo}</b></div>
-          <div><span>Date</span><b>4 Jun 2027, 08:41</b></div>
+          <div><span>Date</span><b>4 Dec 2027, 08:41</b></div>
           <div><span>Sent to</span><b>Your phone by SMS</b></div>
         </div>
         <div className="wk-foot static">
@@ -150,7 +150,7 @@ export default function Pay() {
           <span className="amt num">{rm(total, 2)} · {p.label}</span>
         </div>
         <ol className="wk-steps">
-          <li><b>Go to any 7-Eleven in Sabah</b><span>The code works until 5 Jun 2027.</span></li>
+          <li><b>Go to any 7-Eleven in Sabah</b><span>The code works until 5 Dec 2027.</span></li>
           <li><b>Show the code and pay {rm(total)} in cash</b><span>The cashier scans or keys in the code.</span></li>
           <li><b>Keep the printed slip</b><span>Your receipt also appears in the app within a minute.</span></li>
         </ol>
@@ -247,7 +247,7 @@ export function Receipt() {
   const known = workerPayments.find((x) => x.id === id)
   const s = known
     ? { total: known.amount, months: known.month, method: known.method, date: known.date, by: known.by }
-    : { total: 100, months: 'June 2027', method: 'Touch ’n Go eWallet', date: '4 Jun 2027, 08:41', by: w.name, plan: 'Monthly', upTo: 'June 2027', ...(loc.state || {}) }
+    : { total: 100, months: 'December 2027', method: 'Touch ’n Go eWallet', date: '4 Dec 2027, 08:41', by: w.name, plan: 'Monthly', upTo: 'December 2027', ...(loc.state || {}) }
   const byEmployer = s.by && s.by !== w.name
   return (
     <div className="wk-page">

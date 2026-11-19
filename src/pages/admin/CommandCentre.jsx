@@ -37,8 +37,8 @@ export default function CommandCentre() {
   const per = {
     today: { label: 'Today, by hour to 15:00', data: hourlyToday, total: todayNow, sub: 'today' },
     '7d': { label: 'Last 7 days', data: last7, total: week, sub: '7 days' },
-    '30d': { label: 'Last 30 days, 18 May to 17 June', data: last30, total: month30, sub: '30 days' },
-    month: { label: 'Settled into the FWECF account each month in 2027', data: monthly.map((m) => ({ label: m.m, value: m.v })), total: settledThisMonth, sub: 'June' },
+    '30d': { label: 'Last 30 days, 18 Nov to 17 December', data: last30, total: month30, sub: '30 days' },
+    month: { label: 'Settled into the FWECF account each month in 2027', data: monthly.map((m) => ({ label: m.m, value: m.v })), total: settledThisMonth, sub: 'December' },
   }[period]
   const methods = paymentMethods(per.total)
   const byType = q.waiting.reduce((m, i) => ({ ...m, [i.type]: (m[i.type] || 0) + 1 }), {})
@@ -46,20 +46,20 @@ export default function CommandCentre() {
 
   return (
     <>
-      <PageHead title="Command centre" sub="Thursday 17 June 2027. June contributions were due on 5 June.">
+      <PageHead title="Command centre" sub="Friday 17 December 2027. December contributions were due on 5 December.">
         <Seg items={PERIODS} value={period} onChange={setPeriod} label="Period" />
       </PageHead>
 
       <div className="grid g-4 keep2 gv-kpis">
-        <Kpi hero icon={Wallet} label="Contributions for June" value={rm(monthNow)} note={`${num(paidNow)} workers paid for June`}>
-          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>Settled in June <b>{rm(settledThisMonth)}</b></span></div>
+        <Kpi hero icon={Wallet} label="Contributions for December" value={rm(monthNow)} note={`${num(paidNow)} workers paid for December`}>
+          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>Settled in December <b>{rm(settledThisMonth)}</b></span></div>
           <div className="gv-hero-split"><span>State 70% <b>{rm(Math.round(settledThisMonth * STATE_SHARE))}</b></span><span>Operator 30% <b>{rm(settledThisMonth - Math.round(settledThisMonth * STATE_SHARE))}</b></span></div>
           <div className="gv-hero-spark"><Sparkline values={monthly.map((m) => m.v)} /></div>
-          <div className="gv-hero-split"><span>Settled January to June 2027</span></div>
+          <div className="gv-hero-split"><span>Settled July to December 2027</span></div>
         </Kpi>
         <Kpi icon={CalendarDays} label="Today" value={rm(todayNow)} note={`${num(todayNow / 100)} payments so far · ${rm(week)} in 7 days`} />
         <Kpi icon={CreditCard} tone="ok" label="Payment success" value={pct(paymentSuccess, 1)} note="Approved of all attempts today" />
-        <Kpi icon={Building2} label="Employers registered" value={num(employerTotals.count)} note={`${num(companiesActive)} paid for at least one worker in June`} />
+        <Kpi icon={Building2} label="Employers registered" value={num(employerTotals.count)} note={`${num(companiesActive)} paid for at least one worker in December`} />
         <Kpi icon={Users} label="Workers registered" value={num(REGISTERED)} note="31 Dec 2025, Parliament reply. SWIMS holds 122,228 records" />
         <Kpi icon={UserCheck} tone="purple" label="Workers paying" value={pct(paidNow / REGISTERED, 2)} note={`${num(paidNow)} of ${num(REGISTERED)}`} />
         <Kpi icon={Smartphone} tone="ok" label="Using the SCANS app" value={num(appUsers)} note={`${pct(appUsers / REGISTERED)} of registered workers`} />
@@ -149,11 +149,11 @@ export default function CommandCentre() {
       </div>
 
       <div className="grid g-2">
-        <Card title="Worker payment metrics" sub={`June 2027, all ${num(REGISTERED)} registered workers`}>
+        <Card title="Worker payment metrics" sub={`December 2027, all ${num(REGISTERED)} registered workers`}>
           <MeterRows big items={paymentMetrics.map((m) => ({ label: m.label, share: m.value / REGISTERED, text: num(m.value) + ' workers', color: m.color }))} />
           <p className="small muted" style={{ marginTop: 16 }}>Overdue workers get reminders in their language. Arrears never lead to permit action, passport holding or travel restriction.</p>
         </Card>
-        <Card title="Employer compliance" sub="Employers by share of their workers paid for June" action={<Link className="link" to={BASE + '/employers'}>Employers <ChevronRight size={14} /></Link>}>
+        <Card title="Employer compliance" sub="Employers by share of their workers paid for December" action={<Link className="link" to={BASE + '/employers'}>Employers <ChevronRight size={14} /></Link>}>
           <Donut data={companyCompliance} center={num(companies)} centerSub="employers" size={170} format={(v, t) => `${pct(v / t)} · ${num(v)}`} />
         </Card>
       </div>
@@ -180,7 +180,7 @@ export default function CommandCentre() {
         </div>
       </Card>
 
-      <Card title="Workforce map" sub="Registered workers by district, coloured by share not yet paid for June"
+      <Card title="Workforce map" sub="Registered workers by district, coloured by share not yet paid for December"
         action={<div className="chips">{[['all', 'All'], ['high', 'High arrears'], ['low', 'Low arrears']].map(([v, l]) => <button key={v} className="chip" aria-pressed={mapFilter === v} onClick={() => setMapFilter(v)}>{l}</button>)}</div>}>
         <SabahMap districts={districts} selected={sel} onSelect={setSel} filter={mapFilter} renderPanel={(d) => (
           <div className="stack" style={{ gap: 14 }}>

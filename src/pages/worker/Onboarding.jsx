@@ -168,7 +168,7 @@ export default function Onboarding() {
               <div><span>Name</span><b>{w.name.toUpperCase()}</b></div>
               <div><span>Passport</span><b className="num">{w.passport}</b></div>
               <div><span>Nationality</span><b>{w.nationality}</b></div>
-              <div><span>Date of birth</span><b>12 Aug 1991</b></div>
+              <div><span>Date of birth</span><b>12 Feb 1991</b></div>
             </div>
           )}
           {scan === 'failed' && (
@@ -267,7 +267,7 @@ function Review({ kind, sent, wrong, setWrong, onBack, onSend, onDone }) {
         <h1 className="wk-h1 center">A person will check it</h1>
         <p className="wk-lead center">This is a manual review, not a rejection. You can use the app while we check.</p>
         <div className="wk-card">
-          <div className="wk-ref"><span>Reference</span><b className="num">REV-2706-0312</b></div>
+          <div className="wk-ref"><span>Reference</span><b className="num">REV-2712-0312</b></div>
           <ol className="wk-timeline">
             <li className="done"><b>Sent today</b><span>{kind === 'face' ? 'Your face check and passport photo' : 'What you said is wrong: ' + (wrong.length ? wrong.join(', ').toLowerCase() : 'your details')}</span></li>
             <li className="on"><b>Checked by a SCANS officer</b><span>{kind === 'face' ? 'Compared again with KDN by a person' : 'Compared with SWIMS and eNORES'}, within 3 working days</span></li>

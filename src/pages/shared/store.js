@@ -43,7 +43,7 @@ function kindOf(action) {
 
 function stamp() {
   const d = new Date()
-  return '17 Jun 2027 ' + [d.getHours(), d.getMinutes()].map((n) => String(n).padStart(2, '0')).join(':')
+  return '17 Dec 2027 ' + [d.getHours(), d.getMinutes()].map((n) => String(n).padStart(2, '0')).join(':')
 }
 
 let seq = 9100

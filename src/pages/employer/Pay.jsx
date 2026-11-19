@@ -76,9 +76,9 @@ export default function Pay() {
     const t = setTimeout(() => {
       if (fail) { setPhase('failed'); return }
       const seq = getEmp().seq + 1
-      const id = `BAT-2706-${String(418 + seq).padStart(5, '0')}`
+      const id = `BAT-2712-${String(418 + seq).padStart(5, '0')}`
       const receipts = chosen.map((l, i) => ({
-        id: `RCP-2706-${String(310000 + seq * 1000 + i + 1)}`, workerId: l.w.id, name: l.w.name, period: l.period, amount: l.amount,
+        id: `RCP-2712-${String(310000 + seq * 1000 + i + 1)}`, workerId: l.w.id, name: l.w.name, period: l.period, amount: l.amount,
       }))
       const b = { id, date: DEMO_TODAY, time: clock(), workers: chosen.length, months, amount: total, method: 'FPX · ' + bank, status: 'Processing', receipts }
       setEmp((s) => {
@@ -130,7 +130,7 @@ export default function Pay() {
             </div>
             <Table rows={list} selectable selected={sel} onSelect={setSel} isSelectable={(w) => w.consent} pageSize={10} columns={[
               { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
-              { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
+              { key: 'status', label: 'December 2027', render: (w) => <WStatus w={w} /> },
               { key: 'paidThrough', label: 'Paid up to' },
               { key: 'owing', label: 'Owing', align: 'r', render: (w) => <b className="num">{rm(w.owing)}</b> },
               { key: 'auto', label: 'Auto-pay', render: (w) => (st.mandate && st.mandate.workers.includes(w.id) ? <span className="pill ok dot">On</span> : <span className="pill grey">Off</span>) },
@@ -261,7 +261,7 @@ export default function Pay() {
               <div><dt>Amount</dt><dd className="num">{rm(total, 2)}</dd></div>
               <div><dt>Bank</dt><dd>FPX · {bank}</dd></div>
               <div><dt>Workers</dt><dd className="num">{num(chosen.length)}</dd></div>
-              <div><dt>Reference</dt><dd className="num">FPX-2706-{String(77310 + attempt)}</dd></div>
+              <div><dt>Reference</dt><dd className="num">FPX-2712-{String(77310 + attempt)}</dd></div>
             </dl>
             <div className="row wrap" style={{ justifyContent: 'center', marginTop: 10 }}>
               <button className="btn primary" onClick={() => { setFail(false); setPhase('form') }}><RotateCcw /> Try again</button>

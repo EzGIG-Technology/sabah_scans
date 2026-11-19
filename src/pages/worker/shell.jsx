@@ -84,7 +84,7 @@ const quick = [
     ['Pay', '/worker/pay'],
     ['3 months due', '/worker/pay?demo=arrears'],
     ['Payment fails', '/worker/pay?demo=fail'],
-    ['Receipt', '/worker/receipt/RCP-2705-118204'],
+    ['Receipt', '/worker/receipt/RCP-2711-118204'],
     ['Receipts', '/worker/history'],
     ['Perks', '/worker/perks'],
     ['Notices', '/worker/notices'],
@@ -180,7 +180,7 @@ export function Stage({ children }) {
   const [scrolled, setScrolled] = useState(false)
   const p = loc.pathname.replace(/\/$/, '')
   const flow = ['/worker/start', '/worker/welcome', '/worker/signin', '/worker/card', '/worker/assistant'].includes(p) || p.startsWith('/worker/pay') || p.startsWith('/worker/receipt')
-  // ?demo=arrears: owing April to June 2027. ?demo=due: back to June due.
+  // ?demo=arrears: owing October to December 2027. ?demo=due: back to December due.
   useEffect(() => {
     const d = new URLSearchParams(loc.search).get('demo')
     if (d === 'arrears') setPaidIdx(ARREARS_PAID)

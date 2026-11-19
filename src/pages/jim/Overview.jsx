@@ -41,11 +41,11 @@ export default function Overview() {
   const soon60 = permitsWithin(60)
 
   const open = (w) => go(`${BASE}/workers/${w.id}`)
-  const exportOverview = () => { logEvent('Exported JIM overview', 'Record matching and permits · 17 Jun 2027 · PDF'); toast('Overview downloaded as PDF. The download is in the audit log.') }
+  const exportOverview = () => { logEvent('Exported JIM overview', 'Record matching and permits · 17 Dec 2027 · PDF'); toast('Overview downloaded as PDF. The download is in the audit log.') }
 
   return (
     <>
-      <PageHead title="Overview" sub="Thursday 17 June 2027. How SCANS records line up with JIM permit data, and what officers checked today.">
+      <PageHead title="Overview" sub="Friday 17 December 2027. How SCANS records line up with JIM permit data, and what officers checked today.">
         <button className="btn outline" onClick={exportOverview}><Download /> Download</button>
       </PageHead>
 
@@ -115,7 +115,7 @@ export default function Overview() {
         </Card>
       </div>
 
-      <Card title="Permits ending by month" sub="PLKS end dates from JIM permit data, July 2027 to June 2028. For planning office work only"
+      <Card title="Permits ending by month" sub="PLKS end dates from JIM permit data, January 2028 to December 2028. For planning office work only"
         action={<Link className="btn sm outline" to={`${BASE}/permits`}><CalendarClock /> Permits ending soon</Link>}>
         <BarChart data={expiryByMonth} height={230} colors={['#4D9AD3']} />
         <p className="small muted" style={{ marginTop: 10 }}>Scaled from the 160-record sample to all registered workers. Permit dates are shown as JIM sends them; they are not linked to contributions.</p>

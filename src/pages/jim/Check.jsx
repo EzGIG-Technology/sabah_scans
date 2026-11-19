@@ -33,7 +33,7 @@ const SAMPLES = [
 ]
 const BANNER = {
   Paid: { icon: CheckCircle2, text: (w) => `Paid up to ${w.paidThrough}` },
-  'Due this month': { icon: Clock, text: (w) => `Paid up to ${w.paidThrough}. June was due on 5 June.` },
+  'Due this month': { icon: Clock, text: (w) => `Paid up to ${w.paidThrough}. December was due on 5 December.` },
   '1–2 months overdue': { icon: Clock, text: (w) => `Paid up to ${w.paidThrough}. Reminders go out in the worker’s language.` },
   '3+ months overdue': { icon: AlertTriangle, text: (w) => `Paid up to ${w.paidThrough}. Reminders go out in the worker’s language.` },
 }

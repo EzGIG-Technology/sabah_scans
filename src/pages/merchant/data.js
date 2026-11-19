@@ -2,17 +2,17 @@
 // - 46 outlets (merchantSelf.outlets): the 6 in demo.js plus 40 generated here.
 // - Redemptions all time 15,234 (merchantSelf.redemptions) = sum of every offer, including two
 //   early offers that ended before the ones listed in demo.js.
-// - June offer redemptions add up to June in merchantRedemptionsMonthly (3,404), and each
-//   outlet's June figure is the sum of the offers it took part in.
+// - December offer redemptions add up to December in merchantRedemptionsMonthly (3,404), and each
+//   outlet's December figure is the sum of the offers it took part in.
 import { merchantSelf, merchantOffers, merchantOutlets, merchantRedemptionsMonthly, districts, offerSubmissions } from '../../data/demo.js'
 
 export const ME = { name: 'Tan Mei Ling', role: 'Partnerships manager', email: 'meiling.tan@7eleven.example.my' }
 export const MERCHANT = merchantSelf
 export const JUNE_TOTAL = merchantRedemptionsMonthly[merchantRedemptionsMonthly.length - 1].value
-export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
-export const NOW = '17 Jun 2027'
+export const MONTHS = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+export const NOW = '17 Dec 2027'
 // demo.js monthly figures add up to 40 fewer than merchantSelf.redemptions; the gap is put in
-// January (launch week) so the monthly chart and the all-time total agree on every screen.
+// July (launch week) so the monthly chart and the all-time total agree on every screen.
 const monthlyGap = merchantSelf.redemptions - merchantRedemptionsMonthly.reduce((s, m) => s + m.value, 0)
 export const MONTHLY = merchantRedemptionsMonthly.map((m, i) => (i === 0 ? { ...m, value: m.value + monthlyGap } : m))
 
@@ -73,7 +73,7 @@ function staffFor(id, n) {
     id: id + '-S' + (i + 1),
     name: firstNames[Math.floor(r() * firstNames.length)] + ' ' + lastNames[Math.floor(r() * lastNames.length)],
     role: i === 0 ? 'Store manager' : 'Cashier',
-    added: ['12 Jan 2027', '3 Feb 2027', '20 Mar 2027', '8 May 2027'][Math.floor(r() * 4)],
+    added: ['12 Jul 2027', '3 Aug 2027', '20 Sep 2027', '8 Nov 2027'][Math.floor(r() * 4)],
   }))
 }
 
@@ -87,24 +87,24 @@ const outletsBase = [
 
 /* ---------------- Offers ---------------- */
 const offerExtras = {
-  o1: { type: 'amount', value: '3', minSpend: '30', june: 1380, ref: 'OS-2701-004', what: 'RM3 off when you buy a RM30 prepaid reload for any network.', terms: 'One use a month. Reloads of RM30 or more. Cannot be used with other promotions.', districtsIn: null },
-  o6: { type: 'percent', value: '20', minSpend: '50', june: 374, ref: 'OS-2702-011', what: '20% off a mobile top-up of RM50 or more.', terms: 'One use a month. Top-up must be RM50 or more. Discount up to RM15.', districtsIn: null },
-  o7: { type: 'amount', value: '5', minSpend: '40', june: 1040, ref: 'OS-2703-019', what: 'RM5 off groceries when you spend RM40 or more.', terms: 'Two uses a month. Rice, oil, flour, sugar, tinned food and drinks. Not for cigarettes or phone cards.', districtsIn: ['tawau', 'lahaddatu', 'sandakan'] },
-  o8: { type: 'free', value: 'Delivery', minSpend: '25', june: 610, ref: 'OS-2704-007', what: 'Free delivery on orders of RM25 or more through 7-Eleven delivery.', terms: 'One use a week. Kota Kinabalu outlets only. Delivery within 5 km.', districtsIn: ['kk'] },
-  o5: { type: 'free', value: '600ml water', minSpend: '', june: 0, ref: 'OS-2706-021', submitted: '14 Jun 2027', what: 'A free 600ml bottle of water with any meal set.', terms: 'One use a month. Selected outlets in Kota Kinabalu.', districtsIn: ['kk'] },
+  o1: { type: 'amount', value: '3', minSpend: '30', june: 1380, ref: 'OS-2707-004', what: 'RM3 off when you buy a RM30 prepaid reload for any network.', terms: 'One use a month. Reloads of RM30 or more. Cannot be used with other promotions.', districtsIn: null },
+  o6: { type: 'percent', value: '20', minSpend: '50', june: 374, ref: 'OS-2708-011', what: '20% off a mobile top-up of RM50 or more.', terms: 'One use a month. Top-up must be RM50 or more. Discount up to RM15.', districtsIn: null },
+  o7: { type: 'amount', value: '5', minSpend: '40', june: 1040, ref: 'OS-2709-019', what: 'RM5 off groceries when you spend RM40 or more.', terms: 'Two uses a month. Rice, oil, flour, sugar, tinned food and drinks. Not for cigarettes or phone cards.', districtsIn: ['tawau', 'lahaddatu', 'sandakan'] },
+  o8: { type: 'free', value: 'Delivery', minSpend: '25', june: 610, ref: 'OS-2710-007', what: 'Free delivery on orders of RM25 or more through 7-Eleven delivery.', terms: 'One use a week. Kota Kinabalu outlets only. Delivery within 5 km.', districtsIn: ['kk'] },
+  o5: { type: 'free', value: '600ml water', minSpend: '', june: 0, ref: 'OS-2712-021', submitted: '14 Dec 2027', what: 'A free 600ml bottle of water with any meal set.', terms: 'One use a month. Selected outlets in Kota Kinabalu.', districtsIn: ['kk'] },
   o9: { type: 'amount', value: '2', minSpend: '', june: 0, ref: 'OS-2612-002', what: 'RM2 off any phone case.', terms: 'One use a month.', districtsIn: null },
-  o10: { type: 'amount', value: '8', minSpend: '60', june: 0, ref: '', what: 'RM8 off a Hari Raya bundle of rice, oil, sugar and biscuits.', terms: '', districtsIn: null },
+  o10: { type: 'amount', value: '8', minSpend: '60', june: 0, ref: '', what: 'RM8 off a Hari Raya bundle of rice, sugar and biscuits.', terms: '', districtsIn: null },
 }
 const earlyOffers = [
-  { id: 'o11', title: 'Free 500ml Milo with any bun', discount: 'Free item', category: 'Food', starts: '15 Jan 2027', ends: '28 Feb 2027', limit: 'One a month', redemptions: 1980, views: 7410, status: 'Expired', outlets: 'All outlets',
-    type: 'free', value: '500ml Milo', minSpend: '', june: 0, ref: 'OS-2701-001', what: 'A free 500ml Milo with any bun.', terms: 'One use a month.', districtsIn: null },
-  { id: 'o12', title: 'RM1 off a Touch n Go reload', discount: 'RM1', category: 'Top-up', starts: '15 Jan 2027', ends: '31 Mar 2027', limit: 'One a month', redemptions: 1252, views: 5030, status: 'Expired', outlets: 'All outlets',
-    type: 'amount', value: '1', minSpend: '10', june: 0, ref: 'OS-2701-002', what: 'RM1 off a Touch n Go reload of RM10 or more.', terms: 'One use a month.', districtsIn: null },
+  { id: 'o11', title: 'Free 500ml Milo with any bun', discount: 'Free item', category: 'Food', starts: '15 Jul 2027', ends: '28 Aug 2027', limit: 'One a month', redemptions: 1980, views: 7410, status: 'Expired', outlets: 'All outlets',
+    type: 'free', value: '500ml Milo', minSpend: '', june: 0, ref: 'OS-2707-001', what: 'A free 500ml Milo with any bun.', terms: 'One use a month.', districtsIn: null },
+  { id: 'o12', title: 'RM1 off a Touch n Go reload', discount: 'RM1', category: 'Top-up', starts: '15 Jul 2027', ends: '30 Sep 2027', limit: 'One a month', redemptions: 1252, views: 5030, status: 'Expired', outlets: 'All outlets',
+    type: 'amount', value: '1', minSpend: '10', june: 0, ref: 'OS-2707-002', what: 'RM1 off a Touch n Go reload of RM10 or more.', terms: 'One use a month.', districtsIn: null },
 ]
 // An offer Microtek sent back with a reason (no redemptions, so totals are unchanged).
 const sentBack = [
-  { id: 'o13', title: '30% off all items', discount: '30%', category: 'Other', starts: '1 Jul 2027', ends: '31 Jul 2027', limit: 'One a month', redemptions: 0, views: 0, status: 'Sent back', outlets: 'All outlets',
-    type: 'percent', value: '30', minSpend: '', june: 0, ref: 'OS-2706-012', submitted: '9 Jun 2027', reviewed: '11 Jun 2027',
+  { id: 'o13', title: '30% off all items', discount: '30%', category: 'Other', starts: '1 Jan 2028', ends: '31 Jan 2028', limit: 'One a month', redemptions: 0, views: 0, status: 'Sent back', outlets: 'All outlets',
+    type: 'percent', value: '30', minSpend: '', june: 0, ref: 'OS-2712-012', submitted: '9 Dec 2027', reviewed: '11 Dec 2027',
     reason: 'Say which items the offer covers and add a minimum spend. "All items" would include cigarettes and phone cards, which perks cannot cover.',
     what: '30% off everything in the shop.', terms: '', districtsIn: null },
 ]
@@ -117,7 +117,7 @@ export function outletsForOffer(o, outlets) {
   return outlets
 }
 
-// June redemptions per outlet per live offer, split by outlet weight. Paused outlets take none.
+// December redemptions per outlet per live offer, split by outlet weight. Paused outlets take none.
 function allocate(offers, outlets) {
   const map = {}
   offers.forEach((o) => {
@@ -139,7 +139,7 @@ export const initialOutlets = outletsBase.map((o) => {
   return { ...o, june, staff, pic: staff[0].name, phone }
 })
 
-// Redemptions per month for one offer, from its first month to June (or its last month).
+// Redemptions per month for one offer, from its first month to December (or its last month).
 const monthIndex = (d) => { const m = MONTHS.findIndex((x) => d && d.includes(x)); return d && d.includes('2027') ? m : -1 }
 export function offerMonthly(o) {
   const s = Math.max(0, monthIndex(o.starts))
@@ -198,42 +198,42 @@ export function discountLabel(type, value) {
   return value ? 'Free ' + value.toLowerCase() : 'Free item'
 }
 
-/* ---------------- Daily figures for June ---------------- */
-// 1 to 17 June 2027. 1 June is a Tuesday. Weekends and the days after the 7th (when most
-// workers are paid) are busier. Any June total splits across these weights exactly.
+/* ---------------- Daily figures for December ---------------- */
+// 1 to 17 December 2027. 1 December is a Wednesday. Weekends and the days after the 7th (when most
+// workers are paid) are busier. Any December total splits across these weights exactly.
 export const JUNE_DAYS = Array.from({ length: 17 }, (_, i) => i + 1)
-const dow = (d) => (d + 1) % 7 // 0 = Sunday
+const dow = (d) => (d + 2) % 7 // 0 = Sunday
 export const DAILY_W = JUNE_DAYS.map((d) => (dow(d) === 0 ? 1.3 : dow(d) === 6 ? 1.2 : 1) * (d >= 7 && d <= 10 ? 1.25 : 1) * (1 + d * 0.01))
 export function juneDaily(total) {
   return split(total, DAILY_W).map((value, i) => ({ label: String(JUNE_DAYS[i]), value }))
 }
-// Monday 14 to Thursday 17 June.
-export const thisWeek = (juneTotal) => split(juneTotal, DAILY_W).slice(13).reduce((a, b) => a + b, 0)
+// Monday 13 to Friday 17 December.
+export const thisWeek = (juneTotal) => split(juneTotal, DAILY_W).slice(12).reduce((a, b) => a + b, 0)
 
 /* ---------------- Notifications ---------------- */
 // kind sets the icon and tone. "to" is where the notification leads.
 export const initialNotes = [
-  { id: 'nt1', kind: 'review', title: 'Free 600ml water offer is with Microtek', body: 'Microtek is checking "Free 600ml water with any meal set". They usually reply within 2 working days.', at: '14 Jun 2027', ago: '3 days ago', to: '/merchant/offers/o5', area: 'Offers', read: false },
-  { id: 'nt2', kind: 'milestone', title: 'Your prepaid reload offer passed 4,000 uses', body: '"RM3 off a RM30 prepaid reload" has 4,120 confirmed redemptions since 1 Feb 2027.', at: '16 Jun 2027', ago: 'Yesterday', to: '/merchant/offers/o1', area: 'Offers', read: false },
-  { id: 'nt3', kind: 'ending', title: 'RM3 off a RM30 prepaid reload ends on 30 Jun', body: 'Workers stop seeing it after 30 June. To keep it going, copy it into a new offer and send it to Microtek.', at: '16 Jun 2027', ago: 'Yesterday', to: '/merchant/offers/o1', area: 'Offers', read: false },
-  { id: 'nt4', kind: 'licence', title: 'Business licence ends on 31 Jul 2027', body: 'Upload the renewed licence from your local council so your outlets keep confirming codes.', at: '15 Jun 2027', ago: '2 days ago', to: '/merchant/settings?tab=documents', area: 'Account', read: false },
-  { id: 'nt5', kind: 'sentback', title: 'Microtek sent back "30% off all items"', body: 'Reason: say which items the offer covers and add a minimum spend. Change it and send it again.', at: '11 Jun 2027', ago: '6 days ago', to: '/merchant/offers/o13', area: 'Offers', read: true },
-  { id: 'nt6', kind: 'statement', title: 'Statement for May 2027 is ready', body: '3,350 confirmed redemptions across 4 offers. Download it from Reports.', at: '1 Jun 2027', ago: '1 Jun 2027', to: '/merchant/reports', area: 'Reports', read: true },
-  { id: 'nt7', kind: 'outlet', title: '7-Eleven Kunak can confirm codes', body: 'Microtek approved the outlet. Its store manager can now confirm redemptions at the counter.', at: '28 May 2027', ago: '28 May 2027', to: '/merchant/outlets', area: 'Outlets', read: true },
-  { id: 'nt8', kind: 'approved', title: 'Offer approved: RM5 off groceries above RM40', body: 'Microtek approved the offer. It went live for workers on 1 Apr 2027.', at: '29 Mar 2027', ago: '29 Mar 2027', to: '/merchant/offers/o7', area: 'Offers', read: true },
-  { id: 'nt9', kind: 'welcome', title: 'Welcome to SCANS', body: 'Your partner application was approved. Add your outlets and send your first offer.', at: '12 Jan 2027', ago: '12 Jan 2027', to: '/merchant', area: 'Account', read: true },
+  { id: 'nt1', kind: 'review', title: 'Free 600ml water offer is with Microtek', body: 'Microtek is checking "Free 600ml water with any meal set". They usually reply within 2 working days.', at: '14 Dec 2027', ago: '3 days ago', to: '/merchant/offers/o5', area: 'Offers', read: false },
+  { id: 'nt2', kind: 'milestone', title: 'Your prepaid reload offer passed 4,000 uses', body: '"RM3 off a RM30 prepaid reload" has 4,120 confirmed redemptions since 1 Aug 2027.', at: '16 Dec 2027', ago: 'Yesterday', to: '/merchant/offers/o1', area: 'Offers', read: false },
+  { id: 'nt3', kind: 'ending', title: 'RM3 off a RM30 prepaid reload ends on 30 Dec', body: 'Workers stop seeing it after 30 December. To keep it going, copy it into a new offer and send it to Microtek.', at: '16 Dec 2027', ago: 'Yesterday', to: '/merchant/offers/o1', area: 'Offers', read: false },
+  { id: 'nt4', kind: 'licence', title: 'Business licence ends on 31 Jan 2028', body: 'Upload the renewed licence from your local council so your outlets keep confirming codes.', at: '15 Dec 2027', ago: '2 days ago', to: '/merchant/settings?tab=documents', area: 'Account', read: false },
+  { id: 'nt5', kind: 'sentback', title: 'Microtek sent back "30% off all items"', body: 'Reason: say which items the offer covers and add a minimum spend. Change it and send it again.', at: '11 Dec 2027', ago: '6 days ago', to: '/merchant/offers/o13', area: 'Offers', read: true },
+  { id: 'nt6', kind: 'statement', title: 'Statement for November 2027 is ready', body: '3,350 confirmed redemptions across 4 offers. Download it from Reports.', at: '1 Dec 2027', ago: '1 Dec 2027', to: '/merchant/reports', area: 'Reports', read: true },
+  { id: 'nt7', kind: 'outlet', title: '7-Eleven Kunak can confirm codes', body: 'Microtek approved the outlet. Its store manager can now confirm redemptions at the counter.', at: '28 Nov 2027', ago: '28 Nov 2027', to: '/merchant/outlets', area: 'Outlets', read: true },
+  { id: 'nt8', kind: 'approved', title: 'Offer approved: RM5 off groceries above RM40', body: 'Microtek approved the offer. It went live for workers on 1 Oct 2027.', at: '29 Sep 2027', ago: '29 Sep 2027', to: '/merchant/offers/o7', area: 'Offers', read: true },
+  { id: 'nt9', kind: 'welcome', title: 'Welcome to SCANS', body: 'Your partner application was approved. Add your outlets and send your first offer.', at: '12 Jul 2027', ago: '12 Jul 2027', to: '/merchant', area: 'Account', read: true },
 ]
 
 /* ---------------- Documents and security ---------------- */
 export const documents = [
-  { k: 'agreement', t: 'Partner agreement', s: 'Signed 12 Jan 2027 with Microtek for Kerajaan Negeri Sabah', file: 'SCANS_partner_agreement_7-Eleven.pdf', size: '1.2 MB', uploaded: '12 Jan 2027', expires: '11 Jan 2028', daysLeft: 208, kind: 'agreement' },
-  { k: 'ssm', t: 'SSM certificate', s: 'e-Info company profile', file: 'SSM_e-Info_198401015607.pdf', size: '412 KB', uploaded: '5 Jan 2027', expires: null, kind: 'file' },
-  { k: 'licence', t: 'Business licence', s: 'Premises licence, Dewan Bandaraya Kota Kinabalu', file: 'Lesen_perniagaan_2027.pdf', size: '286 KB', uploaded: '5 Jan 2027', expires: '31 Jul 2027', daysLeft: 44, kind: 'file' },
-  { k: 'auth', t: 'Authorisation letter', s: 'Names Tan Mei Ling as the person in charge', file: 'Authorisation_letter.pdf', size: '138 KB', uploaded: '5 Jan 2027', expires: null, kind: 'file' },
+  { k: 'agreement', t: 'Partner agreement', s: 'Signed 12 Jul 2027 with Microtek for Kerajaan Negeri Sabah', file: 'SCANS_partner_agreement_7-Eleven.pdf', size: '1.2 MB', uploaded: '12 Jul 2027', expires: '11 Jul 2028', daysLeft: 208, kind: 'agreement' },
+  { k: 'ssm', t: 'SSM certificate', s: 'e-Info company profile', file: 'SSM_e-Info_198401015607.pdf', size: '412 KB', uploaded: '5 Jul 2027', expires: null, kind: 'file' },
+  { k: 'licence', t: 'Business licence', s: 'Premises licence, Dewan Bandaraya Kota Kinabalu', file: 'Lesen_perniagaan_2027.pdf', size: '286 KB', uploaded: '5 Jul 2027', expires: '31 Jan 2028', daysLeft: 44, kind: 'file' },
+  { k: 'auth', t: 'Authorisation letter', s: 'Names Tan Mei Ling as the person in charge', file: 'Authorisation_letter.pdf', size: '138 KB', uploaded: '5 Jul 2027', expires: null, kind: 'file' },
 ]
 export const signIns = [
   { id: 's1', device: 'Chrome on Windows', place: 'Kota Kinabalu', at: 'Today 19:40', current: true },
   { id: 's2', device: 'Safari on iPhone', place: 'Kota Kinabalu', at: 'Today 08:15' },
-  { id: 's3', device: 'Chrome on Windows', place: 'Kota Kinabalu', at: '15 Jun 2027 17:02' },
-  { id: 's4', device: 'Safari on iPhone', place: 'Sandakan', at: '10 Jun 2027 12:44' },
+  { id: 's3', device: 'Chrome on Windows', place: 'Kota Kinabalu', at: '15 Dec 2027 17:02' },
+  { id: 's4', device: 'Safari on iPhone', place: 'Sandakan', at: '10 Dec 2027 12:44' },
 ]

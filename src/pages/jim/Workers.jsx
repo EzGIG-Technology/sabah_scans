@@ -44,8 +44,8 @@ export function JimWorkerList() {
       <Callout icon={ShieldCheck}>Read-only. You see identity, permit dates from JIM and contribution status. Contribution status is for information only and must not be used to refuse, delay or cancel a permit. Each record you open is written to the audit log.</Callout>
       <div className="grid g-4 keep2">
         <Kpi icon={Users} label="Registered on SCANS" value={num(REGISTERED)} />
-        <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(paidThisMonth)} note={pct(paidThisMonth / REGISTERED) + ' of registered'} />
-        <Kpi icon={Clock} tone="warn" label="Not yet paid for June" value={num(REGISTERED - paidThisMonth)} note={`${num(dueThisMonth)} due this month · ${num(overdue1)} 1–2 months overdue`} />
+        <Kpi icon={CheckCircle2} tone="ok" label="Paid for December" value={num(paidThisMonth)} note={pct(paidThisMonth / REGISTERED) + ' of registered'} />
+        <Kpi icon={Clock} tone="warn" label="Not yet paid for December" value={num(REGISTERED - paidThisMonth)} note={`${num(dueThisMonth)} due this month · ${num(overdue1)} 1–2 months overdue`} />
         <Kpi icon={AlertTriangle} tone="bad" label="3+ months overdue" value={num(overdue3)} note="Reminders only" />
       </div>
       <Card title="Worker records" sub={any ? `${num(rows.length)} of ${num(workers.length)} sample records match` : 'Choose a row to open the record.'}

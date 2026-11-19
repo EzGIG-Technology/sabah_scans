@@ -33,7 +33,7 @@ export default function Redeem() {
   const inputRef = useRef(null)
 
   const active = outlets.filter((o) => o.status === 'Active')
-  const today = redemptions.filter((r) => r.status === 'Confirmed' && r.at.startsWith('17 Jun 2027'))
+  const today = redemptions.filter((r) => r.status === 'Confirmed' && r.at.startsWith('17 Dec 2027'))
 
   const check = (c = code) => {
     setStage('checking')
@@ -180,7 +180,7 @@ export default function Redeem() {
               ))}
             </div>
           </Card>
-          <Card title="Confirmed today" sub="All your outlets, 17 June 2027">
+          <Card title="Confirmed today" sub="All your outlets, 17 December 2027">
             <div className="mx-today"><b>{num(TODAY_BEFORE + today.length)}</b><span>codes confirmed so far today, latest below</span></div>
             <div className="feed">
               {today.slice(0, 3).map((r) => (

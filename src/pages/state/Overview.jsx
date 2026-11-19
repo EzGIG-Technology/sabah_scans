@@ -25,10 +25,10 @@ const signed = (d) => (d >= 0 ? '+' : '−') + Math.abs(d * 100).toFixed(1) + '%
 
 /* ---------- Periods for the total collection header ---------- */
 const RANGES = [
-  { value: 'today', label: 'Today', range: '17 Jun 2027', total: collectionToday, note: 'Payments to 15:00' },
-  { value: '7d', label: 'Last 7 days', range: '11 Jun to 17 Jun 2027', total: week, note: 'Credited to the FWECF account, including arrears cleared' },
-  { value: '30d', label: 'Last 30 days', range: '18 May to 17 Jun 2027', total: month30, note: 'Credited to the FWECF account, including arrears cleared' },
-  { value: 'ytd', label: 'This year', range: '1 Jan to 17 Jun 2027', total: ytd, note: `Settled into the FWECF account, January to June. State share ${rmM(stateYtd)}` },
+  { value: 'today', label: 'Today', range: '17 Dec 2027', total: collectionToday, note: 'Payments to 15:00' },
+  { value: '7d', label: 'Last 7 days', range: '11 Dec to 17 Dec 2027', total: week, note: 'Credited to the FWECF account, including arrears cleared' },
+  { value: '30d', label: 'Last 30 days', range: '18 Nov to 17 Dec 2027', total: month30, note: 'Credited to the FWECF account, including arrears cleared' },
+  { value: 'ytd', label: 'This year', range: '1 Jul to 17 Dec 2027', total: ytd, note: `Settled into the FWECF account, July to December. State share ${rmM(stateYtd)}` },
 ]
 
 /* ---------- Monthly / weekly / daily collection with change ---------- */
@@ -46,7 +46,7 @@ const shortMethod = (m) => m.replace(' eWallet', '').replace(' online banking', 
 const MAP_FILTERS = [['all', 'All districts'], ['high', 'High arrears only'], ['low', 'Low arrears only']]
 const MAP_PERIODS = [{ value: 'today', label: 'Today' }, { value: 'week', label: 'This week' }, { value: 'month', label: 'This month' }]
 const PERIOD_TOTAL = { today: collectionToday, week, month: collectedThisMonth }
-const PERIOD_TEXT = { today: 'today', week: 'in the last 7 days', month: 'for June' }
+const PERIOD_TEXT = { today: 'today', week: 'in the last 7 days', month: 'for December' }
 
 export default function Overview() {
   const toast = useToast()
@@ -57,8 +57,8 @@ export default function Overview() {
   const go = useNavigate()
   return (
     <>
-      <PageHead title="Overview" sub={`Thursday 17 June 2027. ${num(paidThisMonth)} of ${num(REGISTERED)} registered workers have paid for June; payment was due on 5 June.`}>
-        <button className="btn outline" onClick={() => { logEvent('Downloaded report', 'Monthly collection and reconciliation · June 2027 · PDF'); toast('June 2027 report downloaded. The download is in the audit log.') }}><Download /> Monthly report</button>
+      <PageHead title="Overview" sub={`Friday 17 December 2027. ${num(paidThisMonth)} of ${num(REGISTERED)} registered workers have paid for December; payment was due on 5 December.`}>
+        <button className="btn outline" onClick={() => { logEvent('Downloaded report', 'Monthly collection and reconciliation · December 2027 · PDF'); toast('December 2027 report downloaded. The download is in the audit log.') }}><Download /> Monthly report</button>
       </PageHead>
 
       <TotalCollection />
@@ -67,21 +67,21 @@ export default function Overview() {
         <Card className="st-periods" title="Collection" sub="Gross, before the 70:30 split">
           <div className="st-period-list">
             <Kpi icon={Wallet} label="Monthly collection" value={rm(monthNow)}
-              delta={signed(delta(monthNow, may))} down={monthNow < may} note={`June contributions, against ${rm(may)} for May`} />
+              delta={signed(delta(monthNow, may))} down={monthNow < may} note={`December contributions, against ${rm(may)} for November`} />
             <Kpi icon={CalendarDays} label="Weekly collection" value={rm(weekNow)}
-              delta={signed(delta(week, prevWeek))} down={week < prevWeek} note="11 to 17 June, against 4 to 10 June, which had the 5 June due date" />
+              delta={signed(delta(week, prevWeek))} down={week < prevWeek} note="11 to 17 December, against 4 to 10 December, which had the 5 December due date" />
             <Kpi icon={Clock3} label="Daily collection" value={rm(todayNow)}
-              delta={signed(delta(todayNow, yesterday))} down={todayNow < yesterday} note={`Today so far, against ${rm(yesterday)} on 16 June`} />
+              delta={signed(delta(todayNow, yesterday))} down={todayNow < yesterday} note={`Today so far, against ${rm(yesterday)} on 16 December`} />
           </div>
         </Card>
         <LiveTransactions />
       </div>
 
       <div className="grid g-2">
-        <Card title="Payment channel" sub="How workers paid for June 2027">
-          <Donut data={channelData} center={rmM(monthNow)} centerSub="June" size={170} />
+        <Card title="Payment channel" sub="How workers paid for December 2027">
+          <Donut data={channelData} center={rmM(monthNow)} centerSub="December" size={170} />
         </Card>
-        <Card title="Worker payment metrics" sub={`June 2027, all ${num(REGISTERED)} registered workers`}>
+        <Card title="Worker payment metrics" sub={`December 2027, all ${num(REGISTERED)} registered workers`}>
           <MeterRows big items={paymentMetrics.map((m) => ({ label: m.label, share: m.value / REGISTERED, text: num(m.value) + ' workers', color: m.color }))} />
           <p className="small muted" style={{ marginTop: 16 }}>Workers who are behind get reminders in their own language. Arrears never lead to permit action, passport holding or travel restriction.</p>
           <button className="st-link" style={{ marginTop: 10 }} onClick={() => go(`${BASE}/workers?status=${encodeURIComponent('3+ months overdue')}`)}>See workers 3+ months overdue</button>
@@ -94,7 +94,7 @@ export default function Overview() {
         <Card title="Settled each month" sub="2027, reconciled settlements split between the State (70%) and the operator (30%)">
           <BarChart data={monthlySplit} series={['State share (70%)', 'Operator (30%)']} colors={['#1D66B8', '#4D9AD3']} height={250} format={axisRm} />
         </Card>
-        <Card title="Where the money goes" sub="Settled January to June 2027, after reconciliation">
+        <Card title="Where the money goes" sub="Settled July to December 2027, after reconciliation">
           <SplitBar parts={[
             { label: 'Kerajaan Negeri Sabah', share: STATE_SHARE, text: rm(stateYtd), color: '#1D66B8' },
             { label: 'Operator, Microtek', share: 1 - STATE_SHARE, text: rm(operatorYtd), color: '#4D9AD3' },
@@ -147,7 +147,7 @@ function TotalCollection() {
                 {x.value === range && <Check aria-hidden="true" />}
               </button>
             ))}
-            <p>Prototype data runs from 1 January to 17 June 2027.</p>
+            <p>Prototype data runs from 1 July to 17 December 2027.</p>
           </div>
         )}
       </div>
@@ -217,7 +217,7 @@ function WorkforceMap() {
   const received = (d) => (period === 'month' ? d.collected : Math.round(PERIOD_TOTAL[period] * (d.collected / collectedThisMonth)))
   return (
     <Card className="st-map" title="Workforce by district"
-      sub="Registered workers by work site on eNORES, coloured by the share not yet paid for June. Not a tracked position."
+      sub="Registered workers by work site on eNORES, coloured by the share not yet paid for December. Not a tracked position."
       action={
         <div className="row" style={{ gap: 8 }}>
           <span className="pill ok dot" aria-live="polite">{loading ? 'Updating' : mins < 1 ? 'Updated just now' : `Updated ${mins} min${mins > 1 ? 's' : ''} ago`}</span>

@@ -54,7 +54,7 @@ export function PerkPhone({ offer }) {
         </div>
         <div className="mx-ph-card dim">
           <span className="mono" style={{ background: '#1D66B8' }} aria-hidden="true">CD</span>
-          <div className="grow"><small>CelcomDigi</small><b>10GB extra data</b><span>Ends 31 Jul 2027</span></div>
+          <div className="grow"><small>CelcomDigi</small><b>10GB extra data</b><span>Ends 31 Jan 2028</span></div>
         </div>
       </div>
     </div>

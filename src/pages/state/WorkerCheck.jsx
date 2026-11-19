@@ -15,8 +15,8 @@ const BASE = '/state'
 const norm = (s) => s.toLowerCase().replace(/[\s-]/g, '')
 
 const RESULT = {
-  Paid: { tone: 'ok', icon: CheckCircle2, title: 'Paid up', text: 'Contribution paid for June 2027' },
-  'Due this month': { tone: 'info', icon: Clock, title: 'Due this month', text: 'Paid up to May 2027. June was due on 5 June.' },
+  Paid: { tone: 'ok', icon: CheckCircle2, title: 'Paid up', text: 'Contribution paid for December 2027' },
+  'Due this month': { tone: 'info', icon: Clock, title: 'Due this month', text: 'Paid up to November 2027. December was due on 5 December.' },
   '1–2 months overdue': { tone: 'warn', icon: AlertTriangle, title: '1–2 months overdue', text: 'Reminders go out in the worker’s language' },
   '3+ months overdue': { tone: 'bad', icon: AlertTriangle, title: '3+ months overdue', text: 'Reminders go out in the worker’s language' },
 }
@@ -129,7 +129,7 @@ function Result({ w, onReset, onExport, onOpen }) {
           <div><dt>Full name</dt><dd>{w.name}</dd></div>
           <div><dt>Paid up to</dt><dd>{w.paidThrough}</dd></div>
           <div><dt>Passport number</dt><dd>{w.passport}</dd></div>
-          <div><dt>Owing, June included</dt><dd className="num">{rm(w.arrears)}</dd></div>
+          <div><dt>Owing, December included</dt><dd className="num">{rm(w.arrears)}</dd></div>
           <div><dt>Nationality</dt><dd>{w.nationality}</dd></div>
           <div><dt>Permit expiry</dt><dd>{w.permitExpiry} <small className="muted" style={{ display: 'block' }}>{permitText(w)}, information only from JIM</small></dd></div>
           <div><dt>Employer</dt><dd>{w.employer}</dd></div>

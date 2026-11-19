@@ -7,7 +7,7 @@ import { logEvent, useStore } from './store.js'
 import { useToast } from '../../components/ui.jsx'
 import './shared.css'
 
-const PERIODS = ['June 2027', 'May 2027', 'April 2027', 'Q2 2027', 'January to June 2027']
+const PERIODS = ['December 2027', 'November 2027', 'October 2027', 'Q2 2027', 'July to December 2027']
 
 function ReportCard({ r }) {
   const toast = useToast()

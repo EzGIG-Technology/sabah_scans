@@ -27,8 +27,8 @@ export function EmpShell({ title, children }) {
   ]
   const notifications = [
     s.risk ? { title: `${s.risk} workers owe 3 months or more`, time: 'Today, 06:00' } : null,
-    { title: 'Batch BAT-2706-00418 settled into the FWECF account', time: '7 Jun 2027' },
-    { title: 'Your May 2027 statement is ready', time: '1 Jun 2027' },
+    { title: 'Batch BAT-2712-00418 settled into the FWECF account', time: '7 Dec 2027' },
+    { title: 'Your November 2027 statement is ready', time: '1 Dec 2027' },
   ].filter(Boolean)
   return (
     <AppShell nav={nav} portal={portal} user={user} title={title} kicker="Employer portal" notifications={notifications}

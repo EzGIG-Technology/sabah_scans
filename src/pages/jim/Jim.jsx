@@ -50,8 +50,8 @@ export default function JimApp() {
   ]
   const notifications = [
     ...(waiting ? [{ title: `${waiting} record${waiting > 1 ? 's' : ''} in your sample waiting for JIM to confirm`, time: 'Record matching', to: BASE + '/records' }] : []),
-    { title: 'JIM permit data received: 1,412 records, 0 failed', time: '17 Jun 2027, 06:04', to: BASE + '/sync' },
-    { title: 'Your notice on Hari Raya Aidiladha counter hours was sent by the State', time: '14 Jun 2027', to: BASE + '/notices' },
+    { title: 'JIM permit data received: 1,412 records, 0 failed', time: '17 Dec 2027, 06:04', to: BASE + '/sync' },
+    { title: 'Your notice on Christmas counter hours was sent by the State', time: '14 Dec 2027', to: BASE + '/notices' },
   ]
   return (
     <AppShell nav={nav} portal={{ name: 'Imigresen Negeri Sabah', sub: 'Jabatan Imigresen Malaysia', crest: '/img/logos/imigresen.png' }}

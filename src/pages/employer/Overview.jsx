@@ -17,7 +17,7 @@ function Score({ s }) {
             <h2 style={{ fontSize: 16, fontWeight: 600 }}>Your compliance score</h2>
             <Status tone={tone}>{standing}</Status>
           </div>
-          <p className="small muted" style={{ marginTop: 2 }}>Share of your workers who have paid for June 2027, by anyone</p>
+          <p className="small muted" style={{ marginTop: 2 }}>Share of your workers who have paid for December 2027, by anyone</p>
           <div className="row" style={{ alignItems: 'baseline', gap: 12, marginTop: 14 }}>
             <span className="emp-big num" style={{ color: `var(--${tone})` }}>{pct(share, 1)}</span>
             <span className="muted">{num(s.paid)} of {num(s.total)} workers</span>
@@ -57,8 +57,8 @@ export default function Overview() {
   const perMonth = paidPerMonth(s.paid)
   return (
     <EmpShell title="Overview">
-      <PageHead title="Good morning, Jennifer" sub={`June 2027 contributions for ${COMPANY.name}. Each worker’s payment was due by 5 June. Workers are responsible for their own contribution; you may pay for those who agreed in the app.`}>
-        <button className="btn outline" onClick={() => toast('June 2027 statement downloaded')}><Download /> June statement</button>
+      <PageHead title="Good morning, Jennifer" sub={`December 2027 contributions for ${COMPANY.name}. Each worker’s payment was due by 5 December. Workers are responsible for their own contribution; you may pay for those who agreed in the app.`}>
+        <button className="btn outline" onClick={() => toast('December 2027 statement downloaded')}><Download /> December statement</button>
         <Link to="/employer/pay" className="btn primary"><CreditCard /> Pay for workers</Link>
       </PageHead>
 
@@ -66,7 +66,7 @@ export default function Overview() {
         <Kpi hero icon={Users} label="Workers on SCANS" value={num(s.total)} note="From eNORES, synced 06:00 today">
           <div style={{ marginTop: 6 }}><Sparkline values={perMonth.map((p) => p.value)} /></div>
         </Kpi>
-        <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(s.paid)} note={`${pct(s.rate)} of your workers`} delta={`+${s.paid - 366} on May`} />
+        <Kpi icon={CheckCircle2} tone="ok" label="Paid for December" value={num(s.paid)} note={`${pct(s.rate)} of your workers`} delta={`+${s.paid - 366} on November`} />
         <Kpi icon={Clock} tone="warn" label="Not paid yet" value={num(s.unpaid)} note={`${rm(s.owing)} owing in total`} />
         <Kpi icon={Smartphone} tone="purple" label="Using the SCANS app" value={num(COMPANY.appUsers)} note={`${pct(COMPANY.appUsers / s.total)} of your workers`} />
       </div>
@@ -101,13 +101,13 @@ export default function Overview() {
           </div>
         </Card>
       ) : (
-        <Callout tone="ok" icon={CheckCircle2}>No worker owes any month before June.</Callout>
+        <Callout tone="ok" icon={CheckCircle2}>No worker owes any month before December.</Callout>
       )}
 
       <div className="grid g-2">
-        <Card title="Worker payment metrics" sub={`All ${num(s.total)} workers, June 2027`}>
+        <Card title="Worker payment metrics" sub={`All ${num(s.total)} workers, December 2027`}>
           <MeterRows big items={[
-            { label: 'Paid for June', text: `${num(s.paid)} workers`, share: s.paid / s.total, color: 'linear-gradient(90deg,#0E9F6E,#17B26A)' },
+            { label: 'Paid for December', text: `${num(s.paid)} workers`, share: s.paid / s.total, color: 'linear-gradient(90deg,#0E9F6E,#17B26A)' },
             { label: 'Due this month', text: `${num(s.due)} workers`, share: s.due / s.total, color: 'var(--gradBtn)' },
             { label: '1–2 months overdue', text: `${num(s.late)} workers`, share: s.late / s.total, color: 'linear-gradient(90deg,#FF8A1F,#FFB020)' },
             { label: '3+ months overdue', text: `${num(s.risk)} workers`, share: s.risk / s.total, color: 'linear-gradient(90deg,#D42253,#F0436A)' },

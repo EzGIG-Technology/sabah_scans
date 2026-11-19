@@ -20,7 +20,7 @@ const STATUSES = ['All paid', 'Partly paid', 'Behind']
 // matches the "Under half paid" figure on the Microtek command centre.
 const EMP_KPI = { active: 4192, renewal: 341, inactive: 288, nonCompliant: companyCompliance.find((c) => c.label === 'Under half paid').value }
 
-// Compliance score = share of the employer's workers paid for June. Used for reminders only.
+// Compliance score = share of the employer's workers paid for December. Used for reminders only.
 const scoreTone = (p) => (p >= 80 ? 'ok' : p >= 50 ? 'warn' : 'bad')
 function Score({ e }) {
   if (e.paid == null) return <span className="small muted">Not registered yet</span>
@@ -84,7 +84,7 @@ export function EmployerList({ base, canRegister = false }) {
           <div className="gv-emp-filters" id="emp-filters">
             <Select label="District" value={district} onChange={setDistrict} options={[{ value: 'All', label: 'All districts' }, ...districts.map((d) => d.name)]} />
             <Select label="Sector" value={sector} onChange={setSector} options={[{ value: 'All', label: 'All sectors' }, ...sectors.map((x) => x.name)]} />
-            <Select label="Paid for June" value={status} onChange={setStatus} options={[{ value: 'All', label: 'Any payment' }, ...STATUSES]} />
+            <Select label="Paid for December" value={status} onChange={setStatus} options={[{ value: 'All', label: 'Any payment' }, ...STATUSES]} />
             <Select label="Compliance score" value={band} onChange={setBand} options={[{ value: 'All', label: 'Any compliance' }, { value: '80', label: 'Under 80%' }, { value: '50', label: 'Under 50%' }]} />
             <Select label="Portal status" value={portal} onChange={setPortal} options={[{ value: 'All', label: 'Any portal status' }, 'Active', 'Inactive', 'Invited']} />
             <button className="btn ghost" disabled={!activeFilters && !q} onClick={clear}>Clear filters</button>
@@ -92,12 +92,12 @@ export function EmployerList({ base, canRegister = false }) {
         )}
       </Card>
       <div className="grid g-4 keep2">
-        <Kpi icon={Building2} tone="ok" label="Active on the portal" value={num(EMP_KPI.active)} delta="+3.2%" note="Signed in within 90 days, up since May" />
+        <Kpi icon={Building2} tone="ok" label="Active on the portal" value={num(EMP_KPI.active)} delta="+3.2%" note="Signed in within 90 days, up since November" />
         <Kpi icon={CalendarClock} tone="warn" label="Pending renewal" value={num(EMP_KPI.renewal)} note="Registration due within 60 days" />
         <Kpi icon={MonitorOff} tone="purple" label="Inactive portal" value={num(EMP_KPI.inactive)} note="No sign-in for 90 days" />
         <Kpi icon={ShieldAlert} tone="bad" label="Non-compliance" value={num(EMP_KPI.nonCompliant)} note="Under 50% of workers paid" />
       </div>
-      <Card title="Employer records" sub={`${rows.length} of ${all.length} sample employers. Compliance score is the share of workers paid for June. It is used for reminders only and never affects permits.`}
+      <Card title="Employer records" sub={`${rows.length} of ${all.length} sample employers. Compliance score is the share of workers paid for December. It is used for reminders only and never affects permits.`}
         action={(q || activeFilters) ? <button className="link" onClick={clear}>Clear filters</button> : null}>
         <Table rows={rows} onRowClick={open} columns={[
           { key: 'no', label: 'No.', render: (e) => <span className="muted num">{e.no}</span> },
@@ -228,7 +228,7 @@ export function EmployerProfile({ base, readOnly }) {
   return (
     <>
       <PageHead title={e.name} back={`${base}/employers`} crumbs={[{ label: 'Employers', to: `${base}/employers` }, { label: e.name }]}>
-        <button className="btn outline" onClick={() => { logEvent('Downloaded employer statement', e.name); toast('June 2027 statement downloaded. The download is in the audit log.') }}><Download /> Statement</button>
+        <button className="btn outline" onClick={() => { logEvent('Downloaded employer statement', e.name); toast('December 2027 statement downloaded. The download is in the audit log.') }}><Download /> Statement</button>
         {!readOnly && <button className="btn primary" onClick={() => setMsg(true)}><Mail /> Message employer</button>}
       </PageHead>
       <Card>
@@ -243,8 +243,8 @@ export function EmployerProfile({ base, readOnly }) {
       </Card>
       <div className="grid g-4 keep2">
         <Kpi icon={Users} label="Workers on SCANS" value={num(e.workers)} note="From eNORES" />
-        <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={pct(e.paidShare)} note={`${num(e.paid)} of ${num(e.workers)} workers`} />
-        <Kpi icon={Wallet} tone="warn" label="Owing for June" value={rm(e.owing)} note={`${num(e.workers - e.paid)} workers not yet paid`} />
+        <Kpi icon={CheckCircle2} tone="ok" label="Paid for December" value={pct(e.paidShare)} note={`${num(e.paid)} of ${num(e.workers)} workers`} />
+        <Kpi icon={Wallet} tone="warn" label="Owing for December" value={rm(e.owing)} note={`${num(e.workers - e.paid)} workers not yet paid`} />
         <Kpi icon={ShieldCheck} tone={e.deductionPermit === 'Valid' ? 'ok' : 'bad'} label="Deduction permit" value={e.deductionPermit} note="JTK s.113(4)" />
       </div>
       <div className="grid g-main" style={{ alignItems: 'start' }}>
@@ -257,7 +257,7 @@ export function EmployerProfile({ base, readOnly }) {
                 columns={[
                   { key: 'name', label: 'Worker', render: (w) => <div className="who"><Avatar name={w.name} /><div><b>{w.name}</b><small>{w.id}</small></div></div> },
                   { key: 'role', label: 'Job' },
-                  { key: 'status', label: 'June 2027', render: (w) => <Status>{w.status}</Status> },
+                  { key: 'status', label: 'December 2027', render: (w) => <Status>{w.status}</Status> },
                   { key: 'consent', label: 'Employer may pay', render: (w) => (w.consent ? 'Yes' : 'No consent') },
                 ]} />
             )}
@@ -306,7 +306,7 @@ export function EmployerProfile({ base, readOnly }) {
         <Modal title="Message employer" onClose={() => setMsg(false)} actions={<><button className="btn outline" onClick={() => setMsg(false)}>Cancel</button><button className="btn primary" onClick={() => { setMsg(false); logEvent('Sent message to employer', e.name); toast(`Message sent to ${e.contact} at ${e.name}`) }}><Send /> Send</button></>}>
           <div className="stack" style={{ gap: 12 }}>
             <p className="ink2">To {e.contact} and the company admins, by email and in the employer portal.</p>
-            <textarea className="input" defaultValue={`${num(e.workers - e.paid)} of your workers have not paid for June 2027. You can pay for workers who gave consent in the employer portal under Pay for workers.`} />
+            <textarea className="input" defaultValue={`${num(e.workers - e.paid)} of your workers have not paid for December 2027. You can pay for workers who gave consent in the employer portal under Pay for workers.`} />
           </div>
         </Modal>
       )}

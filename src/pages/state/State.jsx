@@ -69,8 +69,8 @@ export default function StateApp() {
   ]
   const notifications = [
     ...(waiting ? [{ title: `${waiting} notice${waiting > 1 ? 's' : ''} from Microtek or JIM waiting for your approval`, time: 'Official notices' }] : []),
-    { title: 'Settlement of RM 302,700 credited to the FWECF account', time: '16 Jun 2027, 23:04' },
-    { title: 'New complaint routed to JTK Sabah', time: 'Keningau · 26 May 2027' },
+    { title: 'Settlement of RM 302,700 credited to the FWECF account', time: '16 Dec 2027, 23:04' },
+    { title: 'New complaint routed to JTK Sabah', time: 'Keningau · 26 Nov 2027' },
   ]
   return (
     <AppShell nav={nav} portal={{ name: 'Kerajaan Negeri Sabah', sub: 'Kementerian Kewangan Negeri Sabah', crest: '/img/logos/mof-sabah.png' }}
@@ -104,8 +104,8 @@ function Districts() {
   const fcell = (label, v, cls = 'r') => <td data-label={label} className={cls}><b className="num">{v}</b></td>
   return (
     <>
-      <PageHead title="Districts" sub="June 2027. Sample split of the 130,391 registered workers for this prototype. Choose a district to look up its workers." />
-      <Card title="Paid and not yet paid" sub="Workers by district, June 2027">
+      <PageHead title="Districts" sub="December 2027. Sample split of the 130,391 registered workers for this prototype. Choose a district to look up its workers." />
+      <Card title="Paid and not yet paid" sub="Workers by district, December 2027">
         <BarChart data={rows.map((d) => ({ label: d.name.replace('Kota Kinabalu', 'KK'), values: [d.paid, d.overdue] }))} series={['Paid', 'Not yet paid']} colors={['#1D66B8', '#FF8A1F']} height={240} format={axisRm} />
       </Card>
       <Card flush>
@@ -129,7 +129,7 @@ function Districts() {
           } />
         </div>
       </Card>
-      <Callout>District totals add up to the {num(REGISTERED)} registered workers and to {rm(collectedThisMonth)} collected for June, the same figures as the overview and the FWECF account.</Callout>
+      <Callout>District totals add up to the {num(REGISTERED)} registered workers and to {rm(collectedThisMonth)} collected for December, the same figures as the overview and the FWECF account.</Callout>
     </>
   )
 }
@@ -137,11 +137,11 @@ function Districts() {
 /* =====================================================================
    FWECF account
    ===================================================================== */
-const MONTHS = ['June 2027', 'May 2027', 'April 2027', 'March 2027', 'February 2027', 'January 2027']
+const MONTHS = ['December 2027', 'November 2027', 'October 2027', 'September 2027', 'August 2027', 'July 2027']
 
 function Finance() {
   const toast = useToast()
-  const [month, setMonth] = useState('June 2027')
+  const [month, setMonth] = useState('December 2027')
   const [day, setDay] = useState(null)
   const reconciled = settlements.filter((s) => s.status !== 'Pending').length
   // Same break log as the operator's Settlement page, so resolving a break there shows here too.
@@ -161,16 +161,16 @@ function Finance() {
         <button className="btn primary" onClick={() => download('FWECF account statement', 'PDF')}><Download /> Statement</button>
       </PageHead>
       <div className="grid g-4 keep2">
-        <Kpi hero icon={Landmark} label="Settled in June" value={rm(settledJune)} note={`${num(totals.receipts)} receipts, 1 to 17 June`} />
+        <Kpi hero icon={Landmark} label="Settled in December" value={rm(settledJune)} note={`${num(totals.receipts)} receipts, 1 to 17 December`} />
         <Kpi icon={PiggyBank} tone="ok" label="State share (70%)" value={rm(totals.state)} note="Stays in the FWECF account" />
         <Kpi icon={Wallet} tone="purple" label="Operator share (30%)" value={rm(totals.operator)} note="Paid to Microtek monthly" />
         <Kpi icon={Scale} tone={openBreaks ? 'warn' : 'ok'} label="Days reconciled" value={`${reconciled} of ${settlements.length}`} note={`${resolvedBreaks} breaks found and resolved${openBreaks ? `, ${openBreaks} open` : ''}. Today settles at 23:00.`} />
       </div>
       <Callout icon={CalendarCheck}>
-        June settlements of {rm(settledJune)} = June contributions of {rm(collectedThisMonth)} (the figure on the overview) + {rm(arrearsAndAdvance)} of arrears cleared and months paid in advance. The 70:30 split and the operator’s invoice are worked out on settlements, after reconciliation.
+        December settlements of {rm(settledJune)} = December contributions of {rm(collectedThisMonth)} (the figure on the overview) + {rm(arrearsAndAdvance)} of arrears cleared and months paid in advance. The 70:30 split and the operator’s invoice are worked out on settlements, after reconciliation.
       </Callout>
       <div className="grid g-main">
-        <Card title="Daily settlement" sub="Credited to the FWECF account each night, June 2027">
+        <Card title="Daily settlement" sub="Credited to the FWECF account each night, December 2027">
           <BarChart data={settlements.map((s, i) => ({ label: String(i + 1), values: [s.state, s.operator] }))} series={['State share (70%)', 'Operator (30%)']} colors={['#1D66B8', '#4D9AD3']} height={240} format={axisRm} />
         </Card>
         <Card title="Statements and extracts" sub={month}>
@@ -182,7 +182,7 @@ function Finance() {
               </button>
             ))}
           </div>
-          <div className="gv-sub" style={{ marginTop: 18 }}>Settled since January</div>
+          <div className="gv-sub" style={{ marginTop: 18 }}>Settled since July</div>
           <SplitBar parts={[
             { label: 'State', share: STATE_SHARE, text: rmM(stateYtd), color: '#1D66B8' },
             { label: 'Operator', share: 1 - STATE_SHARE, text: rmM(operatorYtd), color: '#4D9AD3' },
@@ -201,7 +201,7 @@ function Finance() {
           { key: 'breaks', label: 'Breaks', align: 'r', render: (s) => { const b = dayBreaks(s); return b.all ? <span className="row" style={{ gap: 4, justifyContent: 'flex-end' }}>{b.open > 0 && <Pill tone="bad">{b.open} open</Pill>}{b.resolved > 0 && <Pill tone="warn">{b.resolved} resolved</Pill>}</span> : '0' } },
         ]} footer={
           <tfoot><tr>
-            <td data-label="Date"><b>June to date</b></td>
+            <td data-label="Date"><b>December to date</b></td>
             {fcell('Receipts', num(totals.receipts))}
             {fcell('Gross', rm(totals.gross))}
             {fcell('State 70%', rm(totals.state))}
@@ -255,8 +255,8 @@ function Notices() {
   const reach = sentOnly.reduce((s, n) => s + n.reached * n.recipients, 0) / Math.max(1, sentOnly.reduce((s, n) => s + n.recipients, 0))
 
   const approve = (n) => {
-    const later = n.date && n.date !== '—' && n.date !== '17 Jun 2027' && /2027/.test(n.date) && new Date(n.date) > new Date('2027-06-17')
-    updateNotice(n.id, { status: later ? 'Scheduled' : 'Sent', date: later ? n.date : '17 Jun 2027', reached: later ? 0 : 0.04 })
+    const later = n.date && n.date !== '—' && n.date !== '17 Dec 2027' && /202[78]/.test(n.date) && new Date(n.date) > new Date('2027-12-17')
+    updateNotice(n.id, { status: later ? 'Scheduled' : 'Sent', date: later ? n.date : '17 Dec 2027', reached: later ? 0 : 0.04 })
     logEvent('Approved and sent notice', `${n.id} · ${n.title}`)
     toast(later ? `Approved. It goes out on ${n.date} in six languages.` : 'Approved and sent in six languages.')
     setView(null)
@@ -281,7 +281,7 @@ function Notices() {
       </PageHead>
       <div className="grid g-4 keep2">
         <Kpi icon={Inbox} tone="warn" label="Waiting for you" value={num(waiting.length)} note="From Microtek and JIM Sabah" />
-        <Kpi icon={Send} tone="ok" label="Sent" value={num(sentOnly.length)} note="Since May 2027" />
+        <Kpi icon={Send} tone="ok" label="Sent" value={num(sentOnly.length)} note="Since November 2027" />
         <Kpi icon={Users} label="Reached" value={pct(reach)} note="Of people each notice was sent to" />
         <Kpi icon={Languages} tone="purple" label="Languages" value="6" note="BM, English, Indonesian, Filipino, Bengali, Nepali" />
       </div>
@@ -359,7 +359,7 @@ function Complaints() {
       <div className="grid g-4 keep2">
         <Kpi icon={Inbox} tone="warn" label="New" value={num(rows.filter((x) => x.status === 'New').length)} note="Not yet routed" />
         <Kpi icon={RouteIcon} label="With an agency" value={num(rows.filter((x) => x.status === 'With agency').length)} />
-        <Kpi icon={CheckCircle2} tone="ok" label="Resolved" value={num(rows.filter((x) => x.status === 'Resolved').length)} note="Since May 2027" />
+        <Kpi icon={CheckCircle2} tone="ok" label="Resolved" value={num(rows.filter((x) => x.status === 'Resolved').length)} note="Since November 2027" />
         <Kpi icon={Clock} tone="purple" label="Median time to resolve" value={`${median} days`} />
       </div>
       <div className="grid g-main" style={{ alignItems: 'start' }}>
@@ -377,7 +377,7 @@ function Complaints() {
             { key: 'status', label: 'Status', render: (x) => <Status>{x.status}</Status> },
           ]} />
         </Card>
-        <Card title="By agency" sub="All complaints since May 2027">
+        <Card title="By agency" sub="All complaints since November 2027">
           <HBarChart data={byAgency} />
           <p className="small muted" style={{ marginTop: 16 }}>Complaints are never shared with employers. SCANS support handles app and payment problems; work and housing go to JTK Sabah.</p>
         </Card>

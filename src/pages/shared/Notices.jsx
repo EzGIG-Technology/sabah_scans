@@ -41,7 +41,7 @@ export function NoticeComposer({ mode, onClose, onSubmit }) {
   const [ch, setCh] = useState(['App', 'SMS', 'WhatsApp'])
   const [lang, setLang] = useState('ms')
   const [when, setWhen] = useState('now')
-  const [at, setAt] = useState('2027-06-20T09:00')
+  const [at, setAt] = useState('2027-12-20T09:00')
   const [tried, setTried] = useState(false)
 
   const template = TEMPLATES.find((x) => x.key === tpl)
@@ -71,7 +71,7 @@ export function NoticeComposer({ mode, onClose, onSubmit }) {
   const needsState = mode === 'admin' && toWorkers
   const ok = title.trim() && message.trim() && ch.length > 0
   const toggle = (c) => setCh(ch.includes(c) ? ch.filter((x) => x !== c) : [...ch, c])
-  const when2 = when === 'now' ? '17 Jun 2027' : new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  const when2 = when === 'now' ? '17 Dec 2027' : new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
   const submit = () => {
     setTried(true)
@@ -135,7 +135,7 @@ export function NoticeComposer({ mode, onClose, onSubmit }) {
       <div className="field">
         <span><CalendarClock size={15} style={{ display: 'inline', verticalAlign: -3, marginRight: 4 }} />When</span>
         <Seg items={[{ value: 'now', label: needsState ? 'As soon as approved' : 'Now' }, { value: 'later', label: 'Schedule for later' }]} value={when} onChange={setWhen} label="When to send" />
-        {when === 'later' && <input type="datetime-local" className="input" style={{ marginTop: 8 }} value={at} onChange={(e) => setAt(e.target.value)} min="2027-06-17T00:00" />}
+        {when === 'later' && <input type="datetime-local" className="input" style={{ marginTop: 8 }} value={at} onChange={(e) => setAt(e.target.value)} min="2027-12-17T00:00" />}
       </div>
     </Drawer>
   )

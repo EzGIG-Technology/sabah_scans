@@ -59,10 +59,10 @@ export default function Merchants() {
       <div className="grid g-4 keep2">
         <Kpi icon={Store} label="Active partners" value={num(active.length)} note={`${num(active.reduce((s, x) => s + x.outlets, 0))} outlets · ${details.length - active.length} waiting to join`} />
         <Kpi icon={Tags} tone="purple" label="Top category" value={byCat[0].c} note={`${pct(byCat[0].total / allUses)} of confirmed uses`} />
-        <Kpi icon={Receipt} tone="ok" label="Perks used in June" value={num(juneUses)} delta={(juneUses >= mayUses ? '+' : '−') + Math.abs(((juneUses - mayUses) / mayUses) * 100).toFixed(1) + '%'} down={juneUses < mayUses} note="against May" />
-        <Kpi icon={Receipt} label="Perks used since January" value={num(allUses)} note="Confirmed by the shop" />
+        <Kpi icon={Receipt} tone="ok" label="Perks used in December" value={num(juneUses)} delta={(juneUses >= mayUses ? '+' : '−') + Math.abs(((juneUses - mayUses) / mayUses) * 100).toFixed(1) + '%'} down={juneUses < mayUses} note="against November" />
+        <Kpi icon={Receipt} label="Perks used since July" value={num(allUses)} note="Confirmed by the shop" />
       </div>
-      <Card title="Perks used each month" sub="Confirmed uses by category, January to June 2027">
+      <Card title="Perks used each month" sub="Confirmed uses by category, July to December 2027">
         <LineChart series={trend} height={240} area={false} />
       </Card>
       <Card title="Partners" sub={`${rows.length} of ${details.length} merchants`}
@@ -94,7 +94,7 @@ export default function Merchants() {
           <dl className="kv">
             <div><dt>Outlets</dt><dd className="num">{num(m.outlets)}</dd></div>
             <div><dt>Joined</dt><dd>{m.joined}</dd></div>
-            <div><dt>Perks used since January</dt><dd className="num">{num(m.redemptions)}</dd></div>
+            <div><dt>Perks used since July</dt><dd className="num">{num(m.redemptions)}</dd></div>
             <div><dt>Contact</dt><dd>{m.contact}</dd></div>
           </dl>
           {m.status === 'Active' ? (

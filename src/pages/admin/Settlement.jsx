@@ -42,7 +42,7 @@ export default function Settlement() {
         <button className="btn outline" onClick={() => { logEvent('Downloaded report', `Daily settlement · ${d.date} · PDF`); toast(`Settlement report for ${d.date} downloaded. The download is in the audit log.`) }}><FileText /> Daily report</button>
       </PageHead>
       <div className="grid g-4 keep2">
-        <Kpi hero icon={Landmark} label="Settled in June" value={rm(T.gross)} note={`${num(T.receipts)} receipts, 1 to 17 June`} />
+        <Kpi hero icon={Landmark} label="Settled in December" value={rm(T.gross)} note={`${num(T.receipts)} receipts, 1 to 17 December`} />
         <Kpi icon={PiggyBank} tone="ok" label="State share (70%)" value={rm(T.state)} note="Stays in the FWECF account" />
         <Kpi icon={Wallet} tone="purple" label="Operator share (30%)" value={rm(T.operator)} note="Invoiced to the State monthly" />
         <Kpi icon={Scale} tone={open.length ? 'bad' : 'ok'} label="Breaks open" value={num(open.length)} note={`${T.reconciled} of ${settlements.length} days reconciled`} />
@@ -63,7 +63,7 @@ export default function Settlement() {
       </Card>
 
       <div className="ad-two">
-        <Card flush title="Daily reconciliation" sub="SCANS receipts, acquirer report and bank credit, June 2027">
+        <Card flush title="Daily reconciliation" sub="SCANS receipts, acquirer report and bank credit, December 2027">
           <Table rows={[...settlements].reverse()} pageSize={8} onRowClick={(s) => s.status !== 'Pending' && setDay(s.id)} columns={[
             { key: 'date', label: 'Day', render: (s) => <span className="gv-nowrap">{s.date}</span> },
             { key: 'receipts', label: 'Receipts', align: 'r', render: (s) => num(s.receipts) },

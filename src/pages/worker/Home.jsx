@@ -10,7 +10,7 @@ import { monthName, period, DUE_IDX } from './account.js'
 export const kindIcon = { Payment: Wallet, Rights: Scale, Safety: ShieldAlert, Receipt: Receipt }
 export const kindTone = { Payment: 'c-blue', Rights: 'c-purple', Safety: 'c-orange', Receipt: 'c-green' }
 
-// Permit expiry 14 Mar 2028, counted from the demo day. Information only.
+// Permit expiry 14 Sep 2028, counted from the demo day. Information only.
 const PERMIT_DAYS = daysFromDemo(2028, 2, 14)
 // The State notice teased in the SCANS info card (JTK Sabah, rest days).
 const INFO_NOTICE = notices.find((n) => n.id === 'n2') || notices[0]

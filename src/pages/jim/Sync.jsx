@@ -23,7 +23,7 @@ export default function Sync() {
   const [officers, setOfficers] = useState(OFFICERS)
   const timer = useRef(null)
   useEffect(() => () => clearInterval(timer.current), [])
-  const today = runs.filter((r) => r.at.startsWith('17 Jun'))
+  const today = runs.filter((r) => r.at.startsWith('17 Dec'))
   const sum = (k) => today.reduce((s, r) => s + r[k], 0)
   const last = runs[0]
 

@@ -111,7 +111,7 @@ export default function MerchantDetail() {
           {tab === 'analytics' && (m.redemptions === 0 ? <Empty title="No uses yet">This merchant has not gone live. Figures appear after the first confirmed use.</Empty> : (
             <>
               <div className="row between" style={{ flexWrap: 'wrap', gap: 10 }}>
-                <span className="small muted">{period === '1M' ? 'June 2027, by week' : period === '3M' ? 'April to June 2027' : 'January to June 2027'}. Counted only after the shop confirms.</span>
+                <span className="small muted">{period === '1M' ? 'December 2027, by week' : period === '3M' ? 'October to December 2027' : 'July to December 2027'}. Counted only after the shop confirms.</span>
                 <Seg items={ANALYTIC_PERIODS} value={period} onChange={setPeriod} label="Period" />
               </div>
               <div className="grid g-4 keep2">

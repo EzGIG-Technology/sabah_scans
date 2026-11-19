@@ -15,17 +15,18 @@ const hw = HOUR_W.reduce((a, b) => a + b, 0)
 export const hourlyToday = HOUR_W.map((w, i) => ({ label: String(i).padStart(2, '0'), value: Math.round((collectionToday * w) / hw) }))
 hourlyToday[hourlyToday.length - 1].value += collectionToday - hourlyToday.reduce((s, x) => s + x.value, 0)
 
-// Last 7 and last 30 days, built from the daily June figures
-export const last7 = dailyCollection.slice(-7).map((d) => ({ label: d.label + ' Jun', value: d.value }))
+// Last 7 and last 30 days, built from the daily December figures
+export const last7 = dailyCollection.slice(-7).map((d) => ({ label: d.label + ' Dec', value: d.value }))
 export const week = last7.reduce((s, d) => s + d.value, 0)
-const MAY_TAIL = [142300, 128900, 117400, 96200, 88700, 131800, 120600, 109300, 101500, 87400, 79200, 93600, 116800, 168500]
+// 18 to 30 November, so the last 30 days run from 18 November to 17 December
+const NOV_TAIL = [128900, 117400, 96200, 88700, 131800, 120600, 109300, 101500, 87400, 79200, 93600, 116800, 168500]
 export const last30 = [
-  ...MAY_TAIL.map((v, i) => ({ label: String(18 + i), value: v })),
+  ...NOV_TAIL.map((v, i) => ({ label: String(18 + i), value: v })),
   ...dailyCollection,
 ].slice(-30)
 export const month30 = last30.reduce((s, d) => s + d.value, 0)
 export const settledJune = settledThisMonth
-// June settlements include arrears cleared and advance payments, on top of June contributions
+// December settlements include arrears cleared and advance payments, on top of December contributions
 export const arrearsAndAdvance = settledJune - collectedThisMonth
 
 export const paymentSuccess = 0.986
@@ -36,13 +37,13 @@ export const CH_COLORS = ['#1D66B8', '#4D9AD3', '#13407A', '#14B8A6', '#7B4DE3',
 export const channelData = channels.map((c, i) => ({ label: c.name, value: c.share, color: CH_COLORS[i] }))
 
 /* ---------- Reconciliation breaks: one log for the State and the operator ---------- */
-// 3 resolved (4 and 11 June) and 2 open from today's run (17 June). Both portals count from this list.
+// 3 resolved (4 and 11 December) and 2 open from today's run (17 December). Both portals count from this list.
 export const reconciliationBreaks = [
-  { id: 'RB-2706-007', date: '17 Jun 2027', kind: 'Credit with no receipt', ref: 'ACQ-88412093', amount: 100, note: 'Acquirer credit received, no SCANS receipt yet. Usually a late callback.', status: 'Open' },
-  { id: 'RB-2706-006', date: '17 Jun 2027', kind: 'Duplicate payment', ref: 'TXN44271903', amount: 100, note: 'Worker paid twice for June by DuitNow QR. Refund or carry forward to July.', status: 'Open' },
-  { id: 'RB-2706-005', date: '11 Jun 2027', kind: 'Amount mismatch', ref: 'BAT-2706-00431', amount: 300, note: 'Employer batch total differs from acquirer credit by RM300.', status: 'Resolved' },
-  { id: 'RB-2706-004', date: '4 Jun 2027', kind: 'Credit with no receipt', ref: 'ACQ-88203317', amount: 200, note: 'Matched after acquirer resent callbacks.', status: 'Resolved' },
-  { id: 'RB-2706-003', date: '4 Jun 2027', kind: 'Late settlement', ref: 'STL-270604', amount: 0, note: 'Settlement arrived 02:10 instead of 23:00. No money missing.', status: 'Resolved' },
+  { id: 'RB-2712-007', date: '17 Dec 2027', kind: 'Credit with no receipt', ref: 'ACQ-88412093', amount: 100, note: 'Acquirer credit received, no SCANS receipt yet. Usually a late callback.', status: 'Open' },
+  { id: 'RB-2712-006', date: '17 Dec 2027', kind: 'Duplicate payment', ref: 'TXN44271903', amount: 100, note: 'Worker paid twice for December by DuitNow QR. Refund or carry forward to January.', status: 'Open' },
+  { id: 'RB-2712-005', date: '11 Dec 2027', kind: 'Amount mismatch', ref: 'BAT-2712-00431', amount: 300, note: 'Employer batch total differs from acquirer credit by RM300.', status: 'Resolved' },
+  { id: 'RB-2712-004', date: '4 Dec 2027', kind: 'Credit with no receipt', ref: 'ACQ-88203317', amount: 200, note: 'Matched after acquirer resent callbacks.', status: 'Resolved' },
+  { id: 'RB-2712-003', date: '4 Dec 2027', kind: 'Late settlement', ref: 'STL-271204', amount: 0, note: 'Settlement arrived 02:10 instead of 23:00. No money missing.', status: 'Resolved' },
 ]
 // Breaks on each settlement day, counted from a break list (pass the live list so resolving one updates every page).
 export const breaksOn = (list, date) => {
@@ -53,11 +54,11 @@ export const breaksOn = (list, date) => {
 /* ---------- Daily settlement into the FWECF account ---------- */
 export const settlements = dailyCollection.map((d, i) => {
   const day = i + 1
-  const date = `${day} Jun 2027`
+  const date = `${day} Dec 2027`
   const pending = day === 17
   const b = breaksOn(reconciliationBreaks, date)
   return {
-    id: 'STL-2706' + String(day).padStart(2, '0'),
+    id: 'STL-2712' + String(day).padStart(2, '0'),
     date,
     gross: d.value,
     receipts: Math.round(d.value / RATE),
@@ -88,7 +89,7 @@ const CONTACTS = ['Jennifer Liew', 'Tan Boon Huat', 'Rosnah Abdullah', 'Wong Kah
 // SCANS employer ID, derived from the SSM number so it is stable across the demo (format SCN26E + 7 digits).
 export const employerScansId = (e) => e.scansId || 'SCN26E' + String(1000 + (parseInt(e.ssm.slice(-5), 10) * 37) % 3800).padStart(7, '0')
 // Employer portal status: Inactive when no one from the company has signed in for 90 days (sample).
-const PORTAL_INACTIVE = { 'emp-kaf': '2 Mar 2027', 'emp-ssp': '14 Feb 2027' }
+const PORTAL_INACTIVE = { 'emp-kaf': '2 Sep 2027', 'emp-ssp': '14 Aug 2027' }
 export const employerPortal = (e) => (e.status === 'Invited' ? 'Invited' : PORTAL_INACTIVE[e.id] ? 'Inactive' : 'Active')
 export const employerLastSignIn = (e) => PORTAL_INACTIVE[e.id] || null
 
@@ -110,7 +111,7 @@ export function employerDetail(e) {
     sample,
     deductionPermit: permit,
     permitRef: permit === 'Not on file' ? '—' : `JTKS/113(4)/${e.district.slice(0, 3).toUpperCase()}/${2026 - (i % 2)}/${String(400 + i * 37)}`,
-    permitValid: permit === 'Valid' ? '31 Dec 2027' : permit === 'Expired' ? '31 Mar 2027' : '—',
+    permitValid: permit === 'Valid' ? '30 Jun 2028' : permit === 'Expired' ? '30 Sep 2027' : '—',
     autoDebit: i % 2 === 0 ? 'Active' : 'Not set up',
     users: i === 0 ? employerUsers : [
       { name: CONTACTS[i] || 'Company admin', email: 'admin@' + e.id.slice(4) + '.example.my', role: 'Admin', twoFA: true, last: 'Today', status: 'Active' },
@@ -137,8 +138,8 @@ const OUTLET_AREAS = ['Kota Kinabalu', 'Sandakan', 'Tawau', 'Lahad Datu', 'Kenin
 export function merchantDetail(m) {
   const is711 = m.id === 'mer-711'
   const live = is711 ? merchantOffers : [
-    ...offers.filter((o) => o.merchant === m.name).map((o) => ({ ...o, discount: '—', category: m.category, starts: '1 Mar 2027', limit: 'One a month', views: o.redemptions * 4, outlets: 'All outlets' })),
-    ...offerSubmissions.filter((o) => o.merchant === m.name && o.status === 'Approved').map((o) => ({ id: o.id, title: o.title, discount: o.discount, category: m.category, starts: o.goLive, ends: '31 Dec 2027', limit: o.limit, redemptions: Math.round(m.redemptions * 0.4), views: Math.round(m.redemptions * 1.6), status: 'Live', outlets: o.audience })),
+    ...offers.filter((o) => o.merchant === m.name).map((o) => ({ ...o, discount: '—', category: m.category, starts: '1 Sep 2027', limit: 'One a month', views: o.redemptions * 4, outlets: 'All outlets' })),
+    ...offerSubmissions.filter((o) => o.merchant === m.name && o.status === 'Approved').map((o) => ({ id: o.id, title: o.title, discount: o.discount, category: m.category, starts: o.goLive, ends: '30 Jun 2028', limit: o.limit, redemptions: Math.round(m.redemptions * 0.4), views: Math.round(m.redemptions * 1.6), status: 'Live', outlets: o.audience })),
   ]
   const scale = m.redemptions / 15234
   const monthly = merchantRedemptionsMonthly.map((x) => ({ ...x, value: Math.round(x.value * scale) }))
@@ -164,27 +165,27 @@ export function offerCounts(m, subs = offerSubmissions) {
 }
 
 export const applicationDocs = {
-  'MA-2706-014': [['SSM company certificate', true], ['List of outlets with addresses', true], ['Bank account for settlement', true], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', false]],
-  'MA-2706-011': [['SSM business registration', true], ['List of outlets with addresses', true], ['Bank account for settlement', false], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', false]],
-  'MA-2705-087': [['SSM company certificate', true], ['List of outlets with addresses', true], ['Bank account for settlement', true], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', true]],
-  'MA-2705-061': [['SSM business registration', true], ['List of outlets with addresses', false], ['Bank account for settlement', false], ['Signed partner agreement', false], ['PDPA undertaking (no worker data)', false]],
+  'MA-2712-014': [['SSM company certificate', true], ['List of outlets with addresses', true], ['Bank account for settlement', true], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', false]],
+  'MA-2712-011': [['SSM business registration', true], ['List of outlets with addresses', true], ['Bank account for settlement', false], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', false]],
+  'MA-2711-087': [['SSM company certificate', true], ['List of outlets with addresses', true], ['Bank account for settlement', true], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', true]],
+  'MA-2711-061': [['SSM business registration', true], ['List of outlets with addresses', false], ['Bank account for settlement', false], ['Signed partner agreement', false], ['PDPA undertaking (no worker data)', false]],
 }
 
 /* ---------- Complaints (demo.js has five; this adds older ones for the State figures) ---------- */
 const MORE_COMPLAINTS = [
-  { id: 'CMP-2705-0361', topic: 'Receipt not received', district: 'Sandakan', lang: 'Filipino', agency: 'SCANS support', opened: '24 May 2027', status: 'Resolved' },
-  { id: 'CMP-2705-0344', topic: 'Overtime not paid', district: 'Tawau', lang: 'Bahasa Indonesia', agency: 'JTK Sabah', opened: '22 May 2027', status: 'Resolved' },
-  { id: 'CMP-2705-0322', topic: 'Lost passport', district: 'Kota Kinabalu', lang: 'Bengali', agency: 'JIM', opened: '20 May 2027', status: 'With agency' },
-  { id: 'CMP-2705-0310', topic: 'Identity check failed', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'KDN', opened: '19 May 2027', status: 'Resolved' },
-  { id: 'CMP-2705-0298', topic: 'Unsafe transport to site', district: 'Keningau', lang: 'Nepali', agency: 'JTK Sabah', opened: '17 May 2027', status: 'With agency' },
-  { id: 'CMP-2705-0276', topic: 'Perk not honoured at shop', district: 'Tawau', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '15 May 2027', status: 'Resolved' },
-  { id: 'CMP-2705-0251', topic: 'Medical leave refused', district: 'Semporna', lang: 'Filipino', agency: 'JTK Sabah', opened: '12 May 2027', status: 'New' },
-  { id: 'CMP-2705-0415', topic: 'Payment taken twice', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '7 May 2027', status: 'Resolved' },
-  { id: 'CMP-2704-0218', topic: 'Cannot see April receipt', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '20 Apr 2027', status: 'Resolved' },
+  { id: 'CMP-2711-0361', topic: 'Receipt not received', district: 'Sandakan', lang: 'Filipino', agency: 'SCANS support', opened: '24 Nov 2027', status: 'Resolved' },
+  { id: 'CMP-2711-0344', topic: 'Overtime not paid', district: 'Tawau', lang: 'Bahasa Indonesia', agency: 'JTK Sabah', opened: '22 Nov 2027', status: 'Resolved' },
+  { id: 'CMP-2711-0322', topic: 'Lost passport', district: 'Kota Kinabalu', lang: 'Bengali', agency: 'JIM', opened: '20 Nov 2027', status: 'With agency' },
+  { id: 'CMP-2711-0310', topic: 'Identity check failed', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'KDN', opened: '19 Nov 2027', status: 'Resolved' },
+  { id: 'CMP-2711-0298', topic: 'Unsafe transport to site', district: 'Keningau', lang: 'Nepali', agency: 'JTK Sabah', opened: '17 Nov 2027', status: 'With agency' },
+  { id: 'CMP-2711-0276', topic: 'Perk not honoured at shop', district: 'Tawau', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '15 Nov 2027', status: 'Resolved' },
+  { id: 'CMP-2711-0251', topic: 'Medical leave refused', district: 'Semporna', lang: 'Filipino', agency: 'JTK Sabah', opened: '12 Nov 2027', status: 'New' },
+  { id: 'CMP-2711-0415', topic: 'Payment taken twice', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '7 Nov 2027', status: 'Resolved' },
+  { id: 'CMP-2710-0218', topic: 'Cannot see October receipt', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '20 Oct 2027', status: 'Resolved' },
 ]
 const BODY = {
-  'Wages paid late': ['Gaji bulan Mei belum dibayar sampai sekarang. Mandor bilang tunggu bulan depan.', 'May wages have still not been paid. The supervisor says to wait until next month.'],
-  'Payment taken twice': ['Nabawasan ako ng dalawang beses para sa Hunyo sa DuitNow.', 'I was charged twice for June through DuitNow.'],
+  'Wages paid late': ['Gaji bulan November belum dibayar sampai sekarang. Mandor bilang tunggu bulan depan.', 'November wages have still not been paid. The supervisor says to wait until next month.'],
+  'Payment taken twice': ['Nabawasan ako ng dalawang beses para sa Disyembre sa DuitNow.', 'I was charged twice for December through DuitNow.'],
   'Passport kept by employer': ['Paspor saya dipegang oleh kantor estet dan tidak dikembalikan.', 'The estate office is keeping my passport and has not given it back.'],
   'Housing conditions': ['Atap rumah kongsi bocor dan air tidak ada sejak dua minggu.', 'The roof of the workers’ quarters leaks and there has been no water for two weeks.'],
 }
@@ -206,21 +207,21 @@ export const LANGS = [
 export const TEMPLATES = [
   {
     key: 'due', name: 'Contribution reminder',
-    en: ['July contribution is due by 5 July', 'Pay RM100 by 5 July in the SCANS app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit.'],
-    ms: ['Caruman Julai perlu dibayar sebelum 5 Julai', 'Bayar RM100 sebelum 5 Julai melalui aplikasi SCANS, di mana-mana 7-Eleven, atau minta majikan anda. Bayaran lewat tidak menjejaskan permit anda.'],
-    id: ['Iuran Juli harus dibayar sebelum 5 Juli', 'Bayar RM100 sebelum 5 Juli lewat aplikasi SCANS, di 7-Eleven mana saja, atau minta majikan Anda. Terlambat bayar tidak mempengaruhi izin kerja Anda.'],
-    fil: ['Ang kontribusyon para sa Hulyo ay dapat bayaran bago ang 5 Hulyo', 'Magbayad ng RM100 bago ang 5 Hulyo sa SCANS app, sa kahit anong 7-Eleven, o hilingin sa iyong employer. Hindi maaapektuhan ang iyong permit kung mahuli ang bayad.'],
-    bn: ['জুলাইয়ের অবদান ৫ জুলাইয়ের মধ্যে দিতে হবে', '৫ জুলাইয়ের মধ্যে SCANS অ্যাপে, যেকোনো 7-Eleven-এ, অথবা আপনার নিয়োগকর্তার মাধ্যমে RM100 পরিশোধ করুন। দেরিতে পরিশোধ করলে আপনার পারমিটে কোনো প্রভাব পড়বে না।'],
-    ne: ['जुलाईको योगदान ५ जुलाईभित्र तिर्नुपर्छ', '५ जुलाईभित्र SCANS एपमा, कुनै पनि 7-Eleven मा, वा आफ्नो रोजगारदातामार्फत RM100 तिर्नुहोस्। ढिलो तिर्दा तपाईंको अनुमतिपत्रमा असर पर्दैन।'],
+    en: ['January contribution is due by 5 January', 'Pay RM100 by 5 January in the SCANS app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit.'],
+    ms: ['Caruman Januari perlu dibayar sebelum 5 Januari', 'Bayar RM100 sebelum 5 Januari melalui aplikasi SCANS, di mana-mana 7-Eleven, atau minta majikan anda. Bayaran lewat tidak menjejaskan permit anda.'],
+    id: ['Iuran Januari harus dibayar sebelum 5 Januari', 'Bayar RM100 sebelum 5 Januari lewat aplikasi SCANS, di 7-Eleven mana saja, atau minta majikan Anda. Terlambat bayar tidak mempengaruhi izin kerja Anda.'],
+    fil: ['Ang kontribusyon para sa Enero ay dapat bayaran bago ang 5 Enero', 'Magbayad ng RM100 bago ang 5 Enero sa SCANS app, sa kahit anong 7-Eleven, o hilingin sa iyong employer. Hindi maaapektuhan ang iyong permit kung mahuli ang bayad.'],
+    bn: ['জানুয়ারির অবদান ৫ জানুয়ারির মধ্যে দিতে হবে', '৫ জানুয়ারির মধ্যে SCANS অ্যাপে, যেকোনো 7-Eleven-এ, অথবা আপনার নিয়োগকর্তার মাধ্যমে RM100 পরিশোধ করুন। দেরিতে পরিশোধ করলে আপনার পারমিটে কোনো প্রভাব পড়বে না।'],
+    ne: ['जनवरीको योगदान ५ जनवरीभित्र तिर्नुपर्छ', '५ जनवरीभित्र SCANS एपमा, कुनै पनि 7-Eleven मा, वा आफ्नो रोजगारदातामार्फत RM100 तिर्नुहोस्। ढिलो तिर्दा तपाईंको अनुमतिपत्रमा असर पर्दैन।'],
   },
   {
     key: 'hours', name: 'Office hours',
-    en: ['Help desks closed on 7 July', 'SCANS help desks are closed on 7 July for Awal Muharram. The app and payments work as normal.'],
-    ms: ['Kaunter bantuan ditutup pada 7 Julai', 'Kaunter bantuan SCANS ditutup pada 7 Julai sempena Awal Muharram. Aplikasi dan pembayaran berjalan seperti biasa.'],
-    id: ['Loket bantuan tutup pada 7 Juli', 'Loket bantuan SCANS tutup pada 7 Juli untuk Tahun Baru Islam. Aplikasi dan pembayaran tetap berjalan seperti biasa.'],
-    fil: ['Sarado ang help desk sa 7 Hulyo', 'Sarado ang mga help desk ng SCANS sa 7 Hulyo para sa Awal Muharram. Gumagana pa rin ang app at ang pagbabayad.'],
-    bn: ['৭ জুলাই সহায়তা কেন্দ্র বন্ধ', 'আওয়াল মুহাররম উপলক্ষে ৭ জুলাই SCANS সহায়তা কেন্দ্র বন্ধ থাকবে। অ্যাপ ও পেমেন্ট স্বাভাবিকভাবে চলবে।'],
-    ne: ['७ जुलाईमा सहायता कक्ष बन्द', 'अवल मुहर्रमको अवसरमा ७ जुलाईमा SCANS सहायता कक्ष बन्द रहनेछ। एप र भुक्तानी सामान्य रूपमा चल्नेछ।'],
+    en: ['Help desks closed on 25 December', 'SCANS help desks are closed on 25 December for Christmas. The app and payments work as normal.'],
+    ms: ['Kaunter bantuan ditutup pada 25 Disember', 'Kaunter bantuan SCANS ditutup pada 25 Disember sempena Hari Krismas. Aplikasi dan pembayaran berjalan seperti biasa.'],
+    id: ['Loket bantuan tutup pada 25 Desember', 'Loket bantuan SCANS tutup pada 25 Desember untuk Hari Natal. Aplikasi dan pembayaran tetap berjalan seperti biasa.'],
+    fil: ['Sarado ang help desk sa 25 Disyembre', 'Sarado ang mga help desk ng SCANS sa 25 Disyembre para sa Pasko. Gumagana pa rin ang app at ang pagbabayad.'],
+    bn: ['২৫ ডিসেম্বর সহায়তা কেন্দ্র বন্ধ', 'বড়দিন উপলক্ষে ২৫ ডিসেম্বর SCANS সহায়তা কেন্দ্র বন্ধ থাকবে। অ্যাপ ও পেমেন্ট স্বাভাবিকভাবে চলবে।'],
+    ne: ['२५ डिसेम्बरमा सहायता कक्ष बन्द', 'क्रिसमसको अवसरमा २५ डिसेम्बरमा SCANS सहायता कक्ष बन्द रहनेछ। एप र भुक्तानी सामान्य रूपमा चल्नेछ।'],
   },
   {
     key: 'safety', name: 'Safety notice',

@@ -100,7 +100,7 @@ function Company() {
           <button className="btn outline" onClick={() => setFix(false)}>Cancel</button>
           <button className="btn primary" onClick={() => {
             if (text.trim().length < 5) { setErr('Tell us what the correct value should be, so the source agency can check it.'); return }
-            setFix(false); setText(''); setErr(''); toast('Correction request COR-2706-0112 sent to Microtek')
+            setFix(false); setText(''); setErr(''); toast('Correction request COR-2712-0112 sent to Microtek')
           }}>Send request</button>
         </>}>
           <div className="stack" style={{ gap: 14 }}>
@@ -224,11 +224,11 @@ function Notifications() {
 
 const SIGNINS = [
   { id: 1, when: 'Today, 08:12', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
-  { id: 2, when: '16 Jun 2027, 17:40', device: 'Safari on iPhone', place: 'Lahad Datu', result: 'Signed in' },
-  { id: 3, when: '16 Jun 2027, 08:05', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
-  { id: 4, when: '15 Jun 2027, 21:13', device: 'Chrome on Android', place: 'Kota Kinabalu', result: 'Wrong code, blocked' },
-  { id: 5, when: '15 Jun 2027, 08:09', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
-  { id: 6, when: '14 Jun 2027, 08:15', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
+  { id: 2, when: '16 Dec 2027, 17:40', device: 'Safari on iPhone', place: 'Lahad Datu', result: 'Signed in' },
+  { id: 3, when: '16 Dec 2027, 08:05', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
+  { id: 4, when: '15 Dec 2027, 21:13', device: 'Chrome on Android', place: 'Kota Kinabalu', result: 'Wrong code, blocked' },
+  { id: 5, when: '15 Dec 2027, 08:09', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
+  { id: 6, when: '14 Dec 2027, 08:15', device: 'Chrome on Windows', place: 'Lahad Datu', result: 'Signed in' },
 ]
 
 /* Figma "Security & Verification": last sign-in with history, 2-step sign-in, linked records. */

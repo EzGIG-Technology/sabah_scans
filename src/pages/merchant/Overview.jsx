@@ -21,21 +21,21 @@ export default function Overview() {
   const confirmed = redemptions.filter((r) => r.status === 'Confirmed').slice(0, 6)
   const pending = redemptions.filter((r) => r.status !== 'Confirmed')
   const may = MONTHLY[MONTHLY.length - 2].value
-  const endingSoon = live.filter((o) => o.ends.includes('Jun 2027')).length
+  const endingSoon = live.filter((o) => o.ends.includes('Dec 2027')).length
   const monthly = MONTHLY.map((m, i, a) => (i === a.length - 1 ? { ...m, value: m.value + (june - JUNE_TOTAL) } : m))
 
   return (
     <MShell title="Dashboard">
-      <PageHead title="Good evening, Mei Ling" sub="How your SCANS perks are doing in June 2027. You see counts and shares only, never who a worker is.">
+      <PageHead title="Good evening, Mei Ling" sub="How your SCANS perks are doing in December 2027. You see counts and shares only, never who a worker is.">
         <Link className="btn outline" to="/merchant/offers/new"><Plus /> New offer</Link>
         <Link className="btn primary" to="/merchant/redeem"><ScanLine /> Confirm a redemption</Link>
       </PageHead>
 
       <div className="grid g-4">
-        <Kpi hero icon={CheckCircle2} label="Redemptions all time" value={num(allTime + liveR)} note={`${num(june + liveR)} in June so far`} delta={'+' + pct(june / may - 1, 0) + ' on May'}>
+        <Kpi hero icon={CheckCircle2} label="Redemptions all time" value={num(allTime + liveR)} note={`${num(june + liveR)} in December so far`} delta={'+' + pct(june / may - 1, 0) + ' on November'}>
           <div style={{ marginTop: 6 }}><Sparkline values={monthly.map((m) => m.value)} /></div>
         </Kpi>
-        <Kpi icon={Tag} label="Active offers" value={num(live.length)} note={endingSoon ? `${endingSoon} ends on 30 Jun` : 'Live in the worker app'} />
+        <Kpi icon={Tag} label="Active offers" value={num(live.length)} note={endingSoon ? `${endingSoon} ends on 30 Dec` : 'Live in the worker app'} />
         <Kpi icon={Hourglass} tone="warn" label="Waiting for approval" value={num(waiting.length)} note={waiting[0] ? `With Microtek since ${waiting[0].submitted}` : 'Nothing waiting'} />
         <div className="card">
           <div className="kpi">
@@ -47,7 +47,7 @@ export default function Overview() {
       </div>
 
       <div className="grid g-main">
-        <Card title="Offer performance this month" sub="Confirmed redemptions, 1 to 17 June 2027" action={<Link className="link" to="/merchant/offers">All offers <ChevronRight size={15} /></Link>}>
+        <Card title="Offer performance this month" sub="Confirmed redemptions, 1 to 17 December 2027" action={<Link className="link" to="/merchant/offers">All offers <ChevronRight size={15} /></Link>}>
           <HBarChart data={perf} />
           <p className="small muted" style={{ marginTop: 14 }}>{num(june)} redemptions across {live.length} live offers. Counts include only codes your staff confirmed at the counter.</p>
         </Card>
@@ -58,14 +58,14 @@ export default function Overview() {
       </div>
 
       <div className="grid g-2">
-        <Card title="Peak redemption hours" sub="Average confirmed redemptions per hour, June" action={<span className="pill info"><Clock size={13} /> Busiest {merchantPeakHours[peak - 1].label} to {merchantPeakHours[peak + 1].label}</span>}>
+        <Card title="Peak redemption hours" sub="Average confirmed redemptions per hour, December" action={<span className="pill info"><Clock size={13} /> Busiest {merchantPeakHours[peak - 1].label} to {merchantPeakHours[peak + 1].label}</span>}>
           <BarChart data={merchantPeakHours.map((h) => ({ ...h, label: h.label.replace('am', 'a').replace('pm', 'p') }))} highlight={peak} height={230} format={num} />
           <p className="small muted" style={{ marginTop: 8 }}>Most workers come after their shift. Keep a second till open from 7pm.</p>
         </Card>
-        <Card title="Redemptions over time" sub={span === 'month' ? 'Confirmed redemptions per month, 2027' : 'Confirmed redemptions per day, June 2027'}
+        <Card title="Redemptions over time" sub={span === 'month' ? 'Confirmed redemptions per month, 2027' : 'Confirmed redemptions per day, December 2027'}
           action={<Seg label="Show" value={span} onChange={setSpan} items={[{ value: 'month', label: 'Monthly' }, { value: 'day', label: 'Daily' }]} />}>
           {span === 'month' ? <LineChart data={monthly} height={230} format={num} /> : <BarChart data={juneDaily(june)} height={230} format={num} />}
-          <p className="small muted" style={{ marginTop: 8 }}>{span === 'month' ? 'June is up to 17 June. ' : `${num(june)} in June so far. Busier at weekends. `}<Link className="link" to="/merchant/reports">Reports</Link></p>
+          <p className="small muted" style={{ marginTop: 8 }}>{span === 'month' ? 'December is up to 17 December. ' : `${num(june)} in December so far. Busier at weekends. `}<Link className="link" to="/merchant/reports">Reports</Link></p>
         </Card>
       </div>
 

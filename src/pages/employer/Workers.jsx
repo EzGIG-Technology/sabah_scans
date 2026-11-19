@@ -8,7 +8,7 @@ import { COMPANY, useRoster, summarise, useEmp, historyFor, monthLabel, CUR } fr
 
 const TABS = ['All', 'Not paid', 'Permit ends soon']
 const BUCKETS = [
-  { value: 'paid', label: 'Paid for June' },
+  { value: 'paid', label: 'Paid for December' },
   { value: 'due', label: 'Due this month' },
   { value: 'late', label: '1–2 months overdue' },
   { value: 'risk', label: '3+ months overdue' },
@@ -28,7 +28,7 @@ function FilterModal({ value, natOptions, onApply, onClose }) {
       <button className="btn primary" onClick={() => onApply(f)}>Apply</button>
     </>}>
       <p className="small muted" style={{ marginTop: -6, marginBottom: 10 }}>Choose as many as you need.</p>
-      <div className="emp-fsec"><fieldset className="emp-fgroup"><legend>June 2027 status</legend>
+      <div className="emp-fsec"><fieldset className="emp-fgroup"><legend>December 2027 status</legend>
         <div className="emp-fgrid">{BUCKETS.map((b) => (
           <label key={b.value} className="check"><input type="checkbox" checked={f.buckets.includes(b.value)} onChange={() => tog('buckets', b.value)} /><span>{b.label}</span></label>
         ))}</div>
@@ -101,7 +101,7 @@ export function WorkersList() {
   const only = (b) => setF(f.buckets.length === 1 && f.buckets[0] === b ? NO_FILTER : { ...NO_FILTER, buckets: [b] })
   const removeChip = (c) => setF({ ...f, [c.k]: Array.isArray(f[c.k]) ? f[c.k].filter((x) => x !== c.v) : '' })
   const tiles = [
-    { b: 'paid', label: 'Paid for June', v: s.paid, note: `${pct(s.rate, 1)} of ${num(s.total)}`, tone: 'ok', Icon: CheckCircle2, click: false },
+    { b: 'paid', label: 'Paid for December', v: s.paid, note: `${pct(s.rate, 1)} of ${num(s.total)}`, tone: 'ok', Icon: CheckCircle2, click: false },
     { b: 'due', label: 'Due this month', v: s.due, note: 'No earlier months owing', tone: '', Icon: Clock, click: true },
     { b: 'late', label: '1–2 months overdue', v: s.late, note: 'Caution', tone: 'warn', Icon: AlertTriangle, click: true },
     { b: 'risk', label: '3+ months overdue', v: s.risk, note: 'Critical', tone: 'bad', Icon: AlertTriangle, click: true },
@@ -109,7 +109,7 @@ export function WorkersList() {
   ]
   return (
     <EmpShell title="Workers">
-      <PageHead title="Workers" sub={`${num(s.total)} workers registered to ${COMPANY.name} in eNORES. This list shows every worker who has not paid for June and a sample of those who have. Records can only be corrected through JTK Sabah.`}>
+      <PageHead title="Workers" sub={`${num(s.total)} workers registered to ${COMPANY.name} in eNORES. This list shows every worker who has not paid for December and a sample of those who have. Records can only be corrected through JTK Sabah.`}>
         <button className="btn outline" onClick={() => toast(`Worker list downloaded as CSV (${num(rows.length)} rows). The download is recorded in the audit log.`)}><Download /> Download list</button>
         <Link to="/employer/pay" className="btn primary"><CreditCard /> Pay for workers</Link>
       </PageHead>
@@ -145,7 +145,7 @@ export function WorkersList() {
             { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
             { key: 'nationality', label: 'Nationality' },
             { key: 'role', label: 'Job' },
-            { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
+            { key: 'status', label: 'December 2027', render: (w) => <WStatus w={w} /> },
             { key: 'paidThrough', label: 'Paid up to' },
             { key: 'owing', label: 'Owing', align: 'r', render: (w) => <span className="num" style={{ whiteSpace: 'nowrap', fontWeight: 600, color: w.owing ? (w.bucket === 'risk' ? 'var(--bad)' : 'var(--ink)') : 'var(--ink3)' }}>{rm(w.owing)}</span> },
             { key: 'consent', label: 'Consent', render: (w) => <Status tone={w.consent ? 'ok' : 'grey'}>{w.consent ? 'Given' : 'Not given'}</Status> },
@@ -158,7 +158,7 @@ export function WorkersList() {
   )
 }
 
-/* Twelve months of 2027 for one worker: who paid each month, what is owing, what is ahead. */
+/* Twelve months from the July 2027 launch for one worker: who paid each month, what is owing, what is ahead. */
 function Months({ w, history, added }) {
   const cells = Array.from({ length: 12 }, (_, m) => {
     const label = monthLabel(m)
@@ -168,7 +168,7 @@ function Months({ w, history, added }) {
       return { m, label, cls: company ? 'company' : 'self', text: company ? 'Paid by company' : 'Paid' }
     }
     if (m < CUR) return { m, label, cls: 'owing', text: 'Not paid' }
-    if (m === CUR) return { m, label, cls: 'due', text: 'Due 5 Jun' }
+    if (m === CUR) return { m, label, cls: 'due', text: 'Due 5 Dec' }
     return { m, label, cls: 'ahead', text: 'Not due yet' }
   })
   return (
@@ -178,7 +178,7 @@ function Months({ w, history, added }) {
         <div><small>Monthly contribution</small><b className="num">{rm(RATE)}</b></div>
         <div><small>Paid up to</small><b>{w.paidThrough}</b></div>
       </div>
-      <div className="emp-months" role="list" aria-label="Months of 2027">
+      <div className="emp-months" role="list" aria-label="Months from July 2027">
         {cells.map((c) => <div key={c.m} role="listitem" className={'emp-month ' + c.cls}><b>{c.label.split(' ')[0]}</b><small>{c.text}</small></div>)}
       </div>
       <div className="legend">
@@ -222,7 +222,7 @@ export function WorkerProfile() {
             <span className="muted num">{w.id}</span>
             <span className="small muted">{w.role} · {COMPANY.site}</span>
             <div className="emp-owing">
-              <div><b className="num" style={{ color: w.bucket === 'risk' ? 'var(--bad)' : undefined }}>{rm(w.owing)}</b><small>{w.owing ? `Owing, ${w.owingMonths} ${w.owingMonths === 1 ? 'month' : 'months'} including June` : 'Nothing owing'}</small></div>
+              <div><b className="num" style={{ color: w.bucket === 'risk' ? 'var(--bad)' : undefined }}>{rm(w.owing)}</b><small>{w.owing ? `Owing, ${w.owingMonths} ${w.owingMonths === 1 ? 'month' : 'months'} including December` : 'Nothing owing'}</small></div>
               <WStatus w={w} />
             </div>
             <div style={{ width: '100%', textAlign: 'left', marginTop: 14 }}>
@@ -242,7 +242,7 @@ export function WorkerProfile() {
                   <div><dt>Job</dt><dd>{w.role}</dd></div>
                   <div><dt>Nationality</dt><dd>{w.nationality}</dd></div>
                   <div><dt>Work site</dt><dd>{COMPANY.site}</dd></div>
-                  <div><dt>June 2027</dt><dd><WStatus w={w} /></dd></div>
+                  <div><dt>December 2027</dt><dd><WStatus w={w} /></dd></div>
                   <div><dt>Paid up to</dt><dd>{w.paidThrough}</dd></div>
                   <div><dt>Amount owing</dt><dd className="num">{rm(w.owing)}</dd></div>
                   <div><dt>Next month due</dt><dd>{monthLabel(Math.max(w.paidIdx + 1, CUR), true)}</dd></div>
@@ -255,7 +255,7 @@ export function WorkerProfile() {
                 <Callout icon={ShieldCheck}>You see this worker’s contribution status only. Wages, complaints and immigration details are not shared with employers.</Callout>
               </div>
             ) : history.length === 0 ? (
-              <Empty icon={Receipt} title="No payments yet">Nothing has been paid for this worker since SCANS started in January 2027.</Empty>
+              <Empty icon={Receipt} title="No payments yet">Nothing has been paid for this worker since SCANS started in July 2027.</Empty>
             ) : (
               <Table rows={history} pageSize={8} columns={[
                 { key: 'id', label: 'Receipt', render: (p) => <b className="num">{p.id}</b> },

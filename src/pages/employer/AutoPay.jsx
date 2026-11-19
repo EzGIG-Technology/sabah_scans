@@ -7,9 +7,9 @@ import { EmpShell, Who, WStatus } from './shell.jsx'
 import { COMPANY, DEMO_TODAY, useRoster, useEmp, setEmp, banks } from './data.js'
 
 const DAYS = [
-  { d: 1, label: '1st of the month', note: 'First debit 1 Jul 2027' },
-  { d: 3, label: '3rd of the month', note: 'First debit 3 Jul 2027' },
-  { d: 5, label: '5th of the month', note: 'The due date. First debit 5 Jul 2027' },
+  { d: 1, label: '1st of the month', note: 'First debit 1 Jan 2028' },
+  { d: 3, label: '3rd of the month', note: 'First debit 3 Jan 2028' },
+  { d: 5, label: '5th of the month', note: 'The due date. First debit 5 Jan 2028' },
 ]
 const ord = (d) => (d === 1 ? '1st' : d === 3 ? '3rd' : d + 'th')
 
@@ -67,7 +67,7 @@ function Wizard({ initial, onDone, onCancel }) {
           </div>
           {auth === 'none' && <Callout icon={Landmark}>You will be sent to {bank} to approve the mandate. You can stop it at any time.</Callout>}
           {auth === 'waiting' && <Callout icon={Repeat}>Waiting for {bank} to approve the mandate. Please do not close this page.</Callout>}
-          {auth === 'ok' && <Callout tone="ok" icon={CheckCircle2}>Mandate approved by {bank} on {DEMO_TODAY}. Reference MDT-2706-04417.</Callout>}
+          {auth === 'ok' && <Callout tone="ok" icon={CheckCircle2}>Mandate approved by {bank} on {DEMO_TODAY}. Reference MDT-2712-04417.</Callout>}
           <div className="row between wrap">
             <button className="btn ghost" onClick={() => setStep(0)}>Back</button>
             {auth === 'ok'
@@ -82,7 +82,7 @@ function Wizard({ initial, onDone, onCancel }) {
           <p className="ink2">Only workers who agreed in the app can be included. Workers who have not agreed are never included.</p>
           <Table rows={roster} selectable selected={sel} onSelect={setSel} isSelectable={(w) => w.consent} pageSize={8} columns={[
             { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
-            { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
+            { key: 'status', label: 'December 2027', render: (w) => <WStatus w={w} /> },
             { key: 'consent', label: 'Consent', render: (w) => (w.consent ? <Status tone="ok">Given</Status> : <span className="small muted">Not given, cannot be included</span>) },
           ]} />
           <label className="row" style={{ gap: 12, padding: '12px 14px', borderRadius: 12, background: 'var(--surface2)' }}>
@@ -121,7 +121,7 @@ function Wizard({ initial, onDone, onCancel }) {
           <div className="row between wrap">
             <button className="btn ghost" onClick={() => setStep(2)}>Back</button>
             <button className="btn primary" disabled={!day || !agree || monthly <= 0}
-              onClick={() => onDone({ bank, workers: [...sel], autoAdd, day, ref: 'MDT-2706-04417', since: DEMO_TODAY })}>
+              onClick={() => onDone({ bank, workers: [...sel], autoAdd, day, ref: 'MDT-2712-04417', since: DEMO_TODAY })}>
               <CheckCircle2 /> Turn on auto-pay
             </button>
           </div>
@@ -150,7 +150,7 @@ function Enrolment({ m }) {
     const ids = [...sel].filter((id) => !on.has(id))
     setEmp((st) => ({ mandate: { ...st.mandate, workers: [...st.mandate.workers, ...ids], added: { ...(st.mandate.added || {}), ...Object.fromEntries(ids.map((id) => [id, DEMO_TODAY])) } } }))
     setSel(new Set())
-    toast(`${ids.length} ${ids.length === 1 ? 'worker' : 'workers'} added to auto-pay from ${m.day} Jul 2027. They are told in the app first.`)
+    toast(`${ids.length} ${ids.length === 1 ? 'worker' : 'workers'} added to auto-pay from ${m.day} Jan 2028. They are told in the app first.`)
   }
   return (
     <Card title="Workers on auto-pay" sub={`${num(m.workers.length)} of the ${num(roster.filter((w) => w.consent).length)} workers in this list who agreed in the app`}>
@@ -164,7 +164,7 @@ function Enrolment({ m }) {
         empty={<Empty icon={Users} title="No worker matches">Try another search or show all workers.</Empty>}
         columns={[
           { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
-          { key: 'status', label: 'June 2027', render: (w) => <WStatus w={w} /> },
+          { key: 'status', label: 'December 2027', render: (w) => <WStatus w={w} /> },
           { key: 'owing', label: 'Owing', align: 'r', render: (w) => <span className="num">{rm(w.owing)}</span> },
           { key: 'auto', label: 'Auto-pay', render: (w) => (on.has(w.id) ? <span className="pill ok dot">On</span> : w.consent ? <span className="pill grey">Not on it</span> : <span className="small muted"><Lock size={13} style={{ verticalAlign: -2 }} /> No consent</span>) },
           { key: 'since', label: 'Added on', render: (w) => (on.has(w.id) ? since(w.id) : <span className="muted">-</span>) },
@@ -179,7 +179,7 @@ function Enrolment({ m }) {
             toast(`${remove.name} removed from auto-pay`); setRemove(null)
           }}>Remove</button>
         </>}>
-          <p className="ink2">The company stops paying for {remove.name} from July 2027. They stay responsible for their own contribution and are told in the app.</p>
+          <p className="ink2">The company stops paying for {remove.name} from January 2028. They stay responsible for their own contribution and are told in the app.</p>
         </Modal>
       )}
     </Card>
@@ -246,7 +246,7 @@ export default function AutoPay() {
                 <div>
                   <div className="row" style={{ gap: 10 }}><Repeat size={20} /><b style={{ fontSize: 17 }}>Auto-pay is on</b><span className="pill white">Active</span></div>
                   <div className="num" style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-.03em', marginTop: 10 }}>{rm(m.workers.length * RATE)}<span style={{ fontSize: 15, fontWeight: 500, opacity: .85 }}> a month</span></div>
-                  <p style={{ opacity: .85, marginTop: 4 }}>For {num(m.workers.length)} workers on the {ord(m.day)} of each month from {m.bank}. Next debit {m.day} Jul 2027.</p>
+                  <p style={{ opacity: .85, marginTop: 4 }}>For {num(m.workers.length)} workers on the {ord(m.day)} of each month from {m.bank}. Next debit {m.day} Jan 2028.</p>
                 </div>
                 <div className="row wrap">
                   <button className="btn white sm" onClick={() => setWizard(true)}>Change workers</button>
@@ -268,7 +268,7 @@ export default function AutoPay() {
           )}
           {wizard && (
             <Wizard initial={m} onCancel={() => setWizard(false)}
-              onDone={(mandate) => { setEmp({ mandate }); setWizard(false); toast(`Auto-pay is on for ${mandate.workers.length} workers from ${mandate.day} Jul 2027`) }} />
+              onDone={(mandate) => { setEmp({ mandate }); setWizard(false); toast(`Auto-pay is on for ${mandate.workers.length} workers from ${mandate.day} Jan 2028`) }} />
           )}
         </div>
         <Card title="What auto-pay needs">
@@ -298,7 +298,7 @@ export default function AutoPay() {
           <button className="btn outline" onClick={() => setStop(false)}>Keep auto-pay</button>
           <button className="btn danger" onClick={() => { setEmp({ mandate: null }); setStop(false); toast('Auto-pay stopped. No further debits will be made.') }}>Stop auto-pay</button>
         </>}>
-          <p className="ink2">No more debits will be made from {m && m.bank}. Workers stay responsible for their own contribution and will be reminded in the app to pay from July.</p>
+          <p className="ink2">No more debits will be made from {m && m.bank}. Workers stay responsible for their own contribution and will be reminded in the app to pay from January.</p>
         </Modal>
       )}
     </EmpShell>

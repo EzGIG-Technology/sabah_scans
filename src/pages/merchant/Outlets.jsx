@@ -44,15 +44,15 @@ export default function Outlets() {
       <div className="grid g-4 keep2">
         <Kpi hero icon={Store} label="Outlets" value={num(outlets.length)} note={`In ${new Set(outlets.map((o) => o.districtId)).size} districts`} />
         <Kpi icon={CheckCircle2} tone="ok" label="Active" value={num(active)} note={`${outlets.length - active} paused or in review`} />
-        <Kpi icon={MapPin} label="Redemptions in June" value={num(june)} note="Confirmed, 1 to 17 June" />
+        <Kpi icon={MapPin} label="Redemptions in December" value={num(june)} note="Confirmed, 1 to 17 December" />
         <Kpi icon={Users} tone="purple" label="Staff who can confirm" value={num(staffTotal)} note="At active outlets" />
       </div>
 
       <div className="grid g-2">
-        <Card title="Redemptions by district" sub="June 2027, confirmed">
+        <Card title="Redemptions by district" sub="December 2027, confirmed">
           <HBarChart data={byDistrict} />
         </Card>
-        <Card title="Busiest outlets" sub="June 2027, confirmed">
+        <Card title="Busiest outlets" sub="December 2027, confirmed">
           <HBarChart data={topOutlets} />
         </Card>
       </div>
@@ -68,7 +68,7 @@ export default function Outlets() {
           { key: 'name', label: 'Outlet', render: (o) => <div className="who"><span className="mx-outlet-ic"><Store size={16} /></span><div style={{ minWidth: 0 }}><b>{o.name.replace('7-Eleven ', '')}</b><small>{o.id} · {o.address}</small></div></div> },
           { key: 'pic', label: 'Person in charge', render: (o) => <div style={{ minWidth: 0 }}><span style={{ display: 'block' }}>{o.pic}</span><small className="muted">{o.phone}</small></div> },
           { key: 'district', label: 'District' },
-          { key: 'june', label: 'June', align: 'r', render: (o) => num(o.june) },
+          { key: 'june', label: 'December', align: 'r', render: (o) => num(o.june) },
           { key: 'allTime', label: 'All time', align: 'r', render: (o) => num(o.allTime) },
           { key: 'staff', label: 'Staff', align: 'r', render: (o) => o.staff.length },
           { key: 'status', label: 'Status', render: (o) => <Status>{o.status}</Status> },
@@ -101,11 +101,11 @@ function OutletCards({ rows, topId, onOpen, onEdit, onToggle }) {
                 <div style={{ minWidth: 0 }}><b>{o.name}</b><small>{o.address}</small></div>
                 <Status>{o.status}</Status>
               </div>
-              {o.id === topId && <span className="mx-topbadge"><Award size={14} aria-hidden="true" /> Busiest outlet in June</span>}
+              {o.id === topId && <span className="mx-topbadge"><Award size={14} aria-hidden="true" /> Busiest outlet in December</span>}
               <dl className="mx-outlet-kv">
                 <div><dt><UserRound size={14} aria-hidden="true" /> Person in charge</dt><dd>{o.pic}</dd></div>
                 <div><dt><Phone size={14} aria-hidden="true" /> Phone</dt><dd>{o.phone}</dd></div>
-                <div><dt><CheckCircle2 size={14} aria-hidden="true" /> Redemptions in June</dt><dd>{num(o.june)}</dd></div>
+                <div><dt><CheckCircle2 size={14} aria-hidden="true" /> Redemptions in December</dt><dd>{num(o.june)}</dd></div>
               </dl>
             </button>
             <div className="mx-outlet-act">
@@ -134,20 +134,20 @@ function OutletDrawer({ o, top, onClose, onToggle, onEdit }) {
   const [role, setRole] = useState('Cashier')
   const add = () => {
     if (!name.trim()) return
-    updateOutlet(o.id, (x) => ({ staff: [...x.staff, { id: x.id + '-S' + Date.now(), name: name.trim(), role, added: '17 Jun 2027' }] }))
+    updateOutlet(o.id, (x) => ({ staff: [...x.staff, { id: x.id + '-S' + Date.now(), name: name.trim(), role, added: '17 Dec 2027' }] }))
     setName('')
     toast(`${name.trim()} can now confirm redemptions at this outlet`)
   }
   return (
     <Drawer title={o.name} sub={`${o.id} · ${o.address}`} onClose={onClose}
       footer={<><button className="btn outline" onClick={onEdit}><Pencil /> Edit</button>{o.status !== 'In review' && <button className="btn outline" onClick={onToggle}>{o.status === 'Paused' ? <><Play /> Resume outlet</> : <><Pause /> Pause outlet</>}</button>}<button className="btn primary" onClick={onClose}>Done</button></>}>
-      <div className="row between"><span className="row" style={{ gap: 8 }}><Status>{o.status}</Status>{top && <span className="mx-topbadge"><Award size={14} aria-hidden="true" /> Busiest in June</span>}</span><span className="small muted">{o.district}</span></div>
+      <div className="row between"><span className="row" style={{ gap: 8 }}><Status>{o.status}</Status>{top && <span className="mx-topbadge"><Award size={14} aria-hidden="true" /> Busiest in December</span>}</span><span className="small muted">{o.district}</span></div>
       <dl className="kv">
         <div><dt>Person in charge</dt><dd>{o.pic}</dd></div>
         <div><dt>Outlet phone</dt><dd>{o.phone || '—'}</dd></div>
       </dl>
       <div className="grid g-2 keep2" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-        <div className="mx-mini"><small>June</small><b>{num(o.june)}</b></div>
+        <div className="mx-mini"><small>December</small><b>{num(o.june)}</b></div>
         <div className="mx-mini"><small>All time</small><b>{num(o.allTime)}</b></div>
       </div>
       {o.status === 'Paused' && <Callout tone="warn" icon={Pause}>This outlet is paused. Its staff cannot confirm codes and workers do not see it in the perk details.</Callout>}
@@ -187,7 +187,7 @@ function AddOutlet({ onClose, onAdd }) {
     if (Object.values(errs).some(Boolean)) return
     const nm = f.name.trim().startsWith('7-Eleven') ? f.name.trim() : '7-Eleven ' + f.name.trim()
     onAdd({ name: nm, district: districtName(f.district), districtId: f.district, address: f.address.trim(), status: 'In review', june: 0, allTime: 0, weight: 1, redemptions: 0, pic: f.manager.trim(), phone: f.phone.trim() || '—',
-      staff: [{ id: 'new-' + Date.now(), name: f.manager.trim(), role: 'Store manager', added: '17 Jun 2027' }] })
+      staff: [{ id: 'new-' + Date.now(), name: f.manager.trim(), role: 'Store manager', added: '17 Dec 2027' }] })
   }
   return (
     <Drawer title="Add outlet" sub="Microtek checks new outlets, usually within 1 working day" onClose={onClose}

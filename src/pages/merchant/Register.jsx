@@ -262,7 +262,7 @@ function Success({ brand, email, outlets }) {
     <section className="card mx-success">
       <span className="mx-big-ic ok big"><CheckCircle2 aria-hidden="true" /></span>
       <h1>Sent to Microtek for review</h1>
-      <p className="muted">Thank you. {brand} and {outlets} {outlets === 1 ? 'outlet are' : 'outlets are'} now waiting for review. Your reference is <b className="ink2" style={{ whiteSpace: 'nowrap' }}>MA-2706-015</b>.</p>
+      <p className="muted">Thank you. {brand} and {outlets} {outlets === 1 ? 'outlet are' : 'outlets are'} now waiting for review. Your reference is <b className="ink2" style={{ whiteSpace: 'nowrap' }}>MA-2712-015</b>.</p>
       <div className="mx-timeline wide" style={{ textAlign: 'left' }}>
         <div className="on"><span><Send size={14} /></span><div><b>Sign-up sent</b><small>Today</small></div></div>
         <div className="now"><span><ShieldCheck size={14} /></span><div><b>Microtek checks documents</b><small>Within 3 working days</small></div></div>

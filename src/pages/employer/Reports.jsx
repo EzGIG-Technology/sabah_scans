@@ -18,7 +18,7 @@ function useExport() {
   const st = useEmp()
   return (name, format = 'PDF') => {
     const n = st.exports.length + 1
-    const e = { id: `EXP-2706-${String(40 + n).padStart(3, '0')}`, name, date: DEMO_TODAY, format, size: format === 'CSV' ? `${60 + n * 7} KB` : `${300 + n * 23} KB`, fresh: true }
+    const e = { id: `EXP-2712-${String(40 + n).padStart(3, '0')}`, name, date: DEMO_TODAY, format, size: format === 'CSV' ? `${60 + n * 7} KB` : `${300 + n * 23} KB`, fresh: true }
     setEmp((s) => ({ exports: [e, ...s.exports] }))
     toast(`${name} downloaded as ${format}`)
   }
@@ -40,26 +40,26 @@ function Contribution({ roster, s }) {
     <>
       <div className="grid g-5 emp-kpi5">
         <Kpi icon={Users} label="Workers on SCANS" value={num(s.total)} note="From eNORES" />
-        <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(s.paid)} note={pct(s.rate, 1)} />
+        <Kpi icon={CheckCircle2} tone="ok" label="Paid for December" value={num(s.paid)} note={pct(s.rate, 1)} />
         <Kpi icon={Clock} label="Due this month" value={num(s.due)} note="No earlier months owing" />
-        <Kpi icon={AlertTriangle} tone="warn" label="1–2 months overdue" value={num(s.late)} note="Earlier months owing as well as June" />
+        <Kpi icon={AlertTriangle} tone="warn" label="1–2 months overdue" value={num(s.late)} note="Earlier months owing as well as December" />
         <Kpi icon={AlertTriangle} tone="bad" label="3+ months overdue" value={num(s.risk)} note={`${rm(s.owing)} owing in total`} />
       </div>
       <div className="grid g-main">
-        <Card title="Contribution status, last 6 months" sub={`All ${num(s.total)} workers at the end of each month, June to date`}>
+        <Card title="Contribution status, last 6 months" sub={`All ${num(s.total)} workers at the end of each month, December to date`}>
           <BarChart height={280} series={['Paid', 'Due this month', '1–2 months overdue', '3+ months overdue']} colors={[C.paid, C.due, C.late, C.risk]}
             data={trend.map((t) => ({ label: t.label, values: [t.paid, t.due, t.late, t.risk] }))} format={(v) => num(Math.round(v))} />
         </Card>
-        <Card title="Who owes, by job" sub={`The ${num(owing.length)} workers not paid for June`}>
-          {byJob.length === 0 ? <Empty icon={CheckCircle2} title="Everyone has paid for June" /> : (
+        <Card title="Who owes, by job" sub={`The ${num(owing.length)} workers not paid for December`}>
+          {byJob.length === 0 ? <Empty icon={CheckCircle2} title="Everyone has paid for December" /> : (
             <MeterRows items={byJob.slice(0, 6).map((j) => ({ label: j.label, text: `${j.value} ${j.value === 1 ? 'worker' : 'workers'}`, share: j.value / owing.length }))} />
           )}
           <Callout icon={Info} style={{ marginTop: 16 }}>Late payment never affects a worker’s permit. Use this to plan reminders or, with their consent, to pay for them.</Callout>
         </Card>
       </div>
-      <Card title="Workers not paid for June" sub="Paid in 2027 counts January to June" action={<ExportBtn name="Workers not paid for June 2027" />}>
+      <Card title="Workers not paid for December" sub="Paid in 2027 counts July to December" action={<ExportBtn name="Workers not paid for December 2027" />}>
         <Table rows={owing} pageSize={8} onRowClick={(w) => go('/employer/workers/' + w.id)}
-          empty={<Empty icon={CheckCircle2} title="Everyone has paid for June">No worker owes anything today.</Empty>}
+          empty={<Empty icon={CheckCircle2} title="Everyone has paid for December">No worker owes anything today.</Empty>}
           columns={[
             { key: 'name', label: 'Worker', render: (w) => <Who w={w} /> },
             { key: 'nationality', label: 'Nationality' },
@@ -87,12 +87,12 @@ function WorkersTab({ roster, s, st }) {
     <>
       <div className="grid g-4">
         <Kpi icon={Users} label="Workers on SCANS" value={num(s.total)} note="From eNORES" />
-        <Kpi icon={Wallet} label="Paid June themselves" value={num(split.self)} note={`${pct(split.self / s.paid)} of those paid`} />
-        <Kpi icon={Layers} tone="purple" label="Paid June by the company" value={num(split.company)} note={`${pct(split.company / s.paid)} of those paid, with consent`} />
+        <Kpi icon={Wallet} label="Paid December themselves" value={num(split.self)} note={`${pct(split.self / s.paid)} of those paid`} />
+        <Kpi icon={Layers} tone="purple" label="Paid December by the company" value={num(split.company)} note={`${pct(split.company / s.paid)} of those paid, with consent`} />
         <Kpi icon={CheckCircle2} tone="ok" label="Consent to company payment" value={num(roster.filter((w) => w.consent).length)} note={`of the ${num(roster.length)} workers in this list`} />
       </div>
       <div className="grid g-main">
-        <Card title="Status by nationality" sub={`The ${num(roster.length)} workers in your list: every worker not paid for June and a sample of those who have`}>
+        <Card title="Status by nationality" sub={`The ${num(roster.length)} workers in your list: every worker not paid for December and a sample of those who have`}>
           <div className="emp-natrows">
             {nat.map((n) => (
               <div key={n.label}>
@@ -108,7 +108,7 @@ function WorkersTab({ roster, s, st }) {
             <span><i style={{ background: C.late }} />1–2 months overdue</span><span><i style={{ background: C.risk }} />3+ months overdue</span>
           </div>
         </Card>
-        <Card title="Who paid for June" sub={`${num(s.paid)} workers paid`}>
+        <Card title="Who paid for December" sub={`${num(s.paid)} workers paid`}>
           <MeterRows big items={[
             { label: 'The worker, in the app or at 7-Eleven', text: `${num(split.self)} workers`, share: split.self / s.paid, color: 'var(--gradBtn)' },
             { label: 'Your company, with the worker’s consent', text: `${num(split.company)} workers`, share: split.company / s.paid, color: 'linear-gradient(90deg,#7B4DE3,#A27BFF)' },
@@ -126,7 +126,7 @@ function Payments({ st, s }) {
   const batches = allBatches(st)
   const paid = batches.reduce((a, b) => a + b.amount, 0)
   const covered = batches.reduce((a, b) => a + b.workers * b.months, 0)
-  const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+  const MS = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   const byMonth = MS.map((m) => ({ label: m, value: batches.filter((b) => b.date.split(' ')[1] === m).reduce((a, b) => a + b.amount, 0) }))
   const m = st.mandate
   return (
@@ -163,10 +163,10 @@ function AppUse({ s }) {
   return (
     <>
       <div className="grid g-4">
-        <Kpi icon={Smartphone} tone="purple" label="Using the SCANS app" value={num(COMPANY.appUsers)} note={`${pct(COMPANY.appUsers / s.total)} of your workers`} delta={`+${COMPANY.appUsers - 347} on May`} />
+        <Kpi icon={Smartphone} tone="purple" label="Using the SCANS app" value={num(COMPANY.appUsers)} note={`${pct(COMPANY.appUsers / s.total)} of your workers`} delta={`+${COMPANY.appUsers - 347} on November`} />
         <Kpi icon={Users} tone="warn" label="Not using the app yet" value={num(notUsing)} note="They can still pay at 7-Eleven" />
         <Kpi icon={Gift} label="Perks used in 2027" value={num(perks)} note="Confirmed by partner shops" />
-        <Kpi icon={Gift} label="Perks used in June" value={num(perksRedemptionsByMonth[5].value)} note="Month to date" />
+        <Kpi icon={Gift} label="Perks used in December" value={num(perksRedemptionsByMonth[5].value)} note="Month to date" />
       </div>
       <Card title="App use each month" sub="Workers who opened the app, and perks confirmed by shops">
         <LineChart height={240} format={(v) => num(Math.round(v))} series={[
@@ -195,8 +195,8 @@ const REPORTS = [
 function ReportCard({ r }) {
   const ex = useExport()
   const [period, setPeriod] = useState('Monthly')
-  const [from, setFrom] = useState('2027-06-01')
-  const [to, setTo] = useState('2027-06-17')
+  const [from, setFrom] = useState('2027-12-01')
+  const [to, setTo] = useState('2027-12-17')
   const [format, setFormat] = useState('PDF')
   const err = !from || !to ? 'Choose both dates.' : from > to ? 'The start date must be before the end date.' : null
   const fmt = (d) => { const [y, m, dd] = d.split('-'); return `${Number(dd)} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][Number(m) - 1]} ${y}` }
@@ -209,8 +209,8 @@ function ReportCard({ r }) {
         </div>
         <div className="field"><span>Summary</span><Seg label={`${r.title} summary`} value={period} onChange={setPeriod} items={[{ value: 'Daily', label: 'Daily' }, { value: 'Monthly', label: 'Monthly' }]} /></div>
         <div className="emp-dates">
-          <Field label="From"><input type="date" className={'input' + (err ? ' err' : '')} min="2027-01-01" max="2027-06-17" value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
-          <Field label="To"><input type="date" className={'input' + (err ? ' err' : '')} min="2027-01-01" max="2027-06-17" value={to} onChange={(e) => setTo(e.target.value)} /></Field>
+          <Field label="From"><input type="date" className={'input' + (err ? ' err' : '')} min="2027-07-01" max="2027-12-17" value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
+          <Field label="To"><input type="date" className={'input' + (err ? ' err' : '')} min="2027-07-01" max="2027-12-17" value={to} onChange={(e) => setTo(e.target.value)} /></Field>
         </div>
         {err && <small className="error" role="alert">{err}</small>}
         <div className="row between wrap" style={{ gap: 8 }}>
@@ -256,8 +256,8 @@ export default function Reports() {
   return (
     <EmpShell title="Reports">
       <PageHead title="Reports" crumbs={[{ label: 'Monitor' }, { label: 'Reports' }]}
-        sub={`Contribution, payment and app figures for ${COMPANY.name}, January to ${DEMO_TODAY}. They match the Overview and Statements pages.`}>
-        <span className="chip"><CalendarRange size={15} /> 1 Jan to {DEMO_TODAY}</span>
+        sub={`Contribution, payment and app figures for ${COMPANY.name}, July to ${DEMO_TODAY}. They match the Overview and Statements pages.`}>
+        <span className="chip"><CalendarRange size={15} /> 1 Jul to {DEMO_TODAY}</span>
       </PageHead>
       <Tabs label="Report" value={tab} onChange={(t) => setParams(t === 'Contribution' ? {} : { tab: t })} items={TABS} />
       {tab === 'Contribution' && <Contribution roster={roster} s={s} />}

@@ -6,12 +6,12 @@ import { EmpShell } from './shell.jsx'
 import { COMPANY, useEmp, allBatches, useRoster, summarise } from './data.js'
 
 const STATEMENTS = [
-  { id: 'ST-2706', month: 'June 2027', note: 'Month to date, final on 1 July', ready: false },
-  { id: 'ST-2705', month: 'May 2027', note: 'Issued 1 Jun 2027', ready: true },
-  { id: 'ST-2704', month: 'April 2027', note: 'Issued 1 May 2027', ready: true },
-  { id: 'ST-2703', month: 'March 2027', note: 'Issued 1 Apr 2027', ready: true },
-  { id: 'ST-2702', month: 'February 2027', note: 'Issued 1 Mar 2027', ready: true },
-  { id: 'ST-2701', month: 'January 2027', note: 'Issued 1 Feb 2027', ready: true },
+  { id: 'ST-2712', month: 'December 2027', note: 'Month to date, final on 1 January', ready: false },
+  { id: 'ST-2711', month: 'Nov 2027', note: 'Issued 1 Dec 2027', ready: true },
+  { id: 'ST-2710', month: 'October 2027', note: 'Issued 1 Nov 2027', ready: true },
+  { id: 'ST-2709', month: 'September 2027', note: 'Issued 1 Oct 2027', ready: true },
+  { id: 'ST-2708', month: 'August 2027', note: 'Issued 1 Sep 2027', ready: true },
+  { id: 'ST-2707', month: 'July 2027', note: 'Issued 1 Aug 2027', ready: true },
 ]
 
 export default function Statements() {
