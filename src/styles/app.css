@@ -420,8 +420,68 @@ dl.kv dd { margin: 2px 0 0; font-weight: 600; font-size: 14px; overflow-wrap: an
 .map-wrap .panel { background: #fff; padding: 18px; border-left: 1px solid var(--line2); }
 .map-legend { position: absolute; left: 12px; bottom: 12px; background: #fff; border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow); font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
 .map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
-.bubble { cursor: pointer; transition: opacity .15s; }
-.bubble:hover { opacity: .85; }
+
+/* Sabah map (components/SabahMap.jsx) */
+.smap .map { background: #DCEAF8; min-height: 0; align-self: start; }
+.smap .map svg { height: auto; }
+.smap { align-items: stretch; }
+.smap-grid { stroke: #C9DCF0; stroke-width: .6; stroke-dasharray: 2 4; }
+.smap-grid-t { font: 500 10px var(--font); fill: #8FA9C6; }
+.smap-neighbour { fill: #EEF1F5; stroke: #DCE2EA; stroke-width: .5; }
+.smap-sea-t { font: italic 500 14px var(--font); fill: #7FA2C8; letter-spacing: .04em; }
+.smap-land-t { font: 600 11px var(--font); fill: #A3AFBF; letter-spacing: .18em; }
+.smap-area { cursor: pointer; outline: none; }
+.smap-area path { fill: var(--tone); fill-opacity: .2; stroke: #fff; stroke-width: .9; stroke-linejoin: round; transition: fill-opacity .2s; }
+.smap-area.hot path, .smap-area:focus-visible path { fill-opacity: .34; }
+.smap-area.on path { fill-opacity: .38; stroke: var(--navy); stroke-width: 1.8; }
+.smap-area.dim { cursor: default; }
+.smap-area.dim path { fill: #C9D2DE; fill-opacity: .25; }
+.smap-heat { pointer-events: none; mix-blend-mode: multiply; }
+.smap-heat circle { transform-box: fill-box; transform-origin: center; animation: smap-breathe 4.2s ease-in-out infinite; }
+@keyframes smap-breathe { 0%, 100% { transform: scale(.86); opacity: .8; } 50% { transform: scale(1.08); opacity: 1; } }
+.smap-dot { pointer-events: none; }
+.smap-dot circle { fill: #fff; stroke: var(--navy); stroke-width: 1.2; }
+.smap-dot.main circle { fill: var(--navy); stroke: #fff; stroke-width: 1.6; }
+.smap-dot.on.main circle { fill: var(--blue); }
+.smap-town { font: 500 12px var(--font); fill: var(--ink2); paint-order: stroke; stroke: rgba(255, 255, 255, .9); stroke-width: 3px; stroke-linejoin: round; }
+.smap-town.main { font-weight: 700; font-size: 15.5px; fill: var(--navy); }
+.smap-sub { font: 600 12px var(--font); fill: var(--ink2); paint-order: stroke; stroke: rgba(255, 255, 255, .9); stroke-width: 3px; stroke-linejoin: round; }
+.smap-kinabalu { pointer-events: none; }
+.smap-kinabalu path { fill: #6B7A90; stroke: #fff; stroke-width: 1; }
+.smap-kinabalu text { font: italic 500 11px var(--font); fill: #5D6B80; paint-order: stroke; stroke: rgba(255, 255, 255, .9); stroke-width: 3px; }
+.smap-pulse { pointer-events: none; animation: smap-fade 2.6s ease-out both; }
+.smap-pulse circle { fill: none; stroke: var(--blue); stroke-width: 2.2; transform-box: fill-box; transform-origin: center; animation: smap-ring 2.6s ease-out both; animation-delay: inherit; }
+.smap-pulse circle.r2 { stroke: #4D9AD3; animation-duration: 2s; }
+.smap-pulse text { font: 700 13px var(--font); fill: var(--ok); paint-order: stroke; stroke: #fff; stroke-width: 3px; animation: smap-rise 2.6s ease-out both; animation-delay: inherit; }
+@keyframes smap-ring { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(6.5); opacity: 0; } }
+@keyframes smap-rise { 0% { transform: translateY(6px); opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-22px); opacity: 0; } }
+@keyframes smap-fade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+.smap-empty { font: 600 14px var(--font); fill: var(--ink2); }
+.smap-credit { font: 500 9px var(--font); fill: #8FA9C6; }
+.smap-live { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 24px); padding: 7px 12px; border-radius: 99px; background: rgba(255, 255, 255, .92); box-shadow: var(--shadow); font-size: 12px; color: var(--ink2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.smap-live b { color: var(--ink); font-weight: 600; }
+.smap-live .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--okFill); box-shadow: 0 0 0 0 rgba(23, 178, 106, .5); animation: smap-live 1.8s ease-out infinite; }
+.smap-live.frozen .dot { background: var(--warnFill); animation: none; }
+@keyframes smap-live { 0% { box-shadow: 0 0 0 0 rgba(23, 178, 106, .5); } 100% { box-shadow: 0 0 0 9px rgba(23, 178, 106, 0); } }
+.smap-tip { position: absolute; z-index: 2; pointer-events: none; display: flex; flex-direction: column; gap: 2px; min-width: 190px; padding: 10px 12px; border-radius: 12px; background: #fff; box-shadow: var(--shadow); font-size: 12px; color: var(--ink2); }
+.smap-tip b { color: var(--ink); font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+.smap-tip i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.smap-key i.glow { background: radial-gradient(circle, rgba(255, 138, 31, .7), rgba(255, 138, 31, 0) 70%); width: 14px; height: 14px; margin-left: -2px; vertical-align: -3px; }
+.smap-key i.ring { background: none; border: 2px solid var(--blue); width: 10px; height: 10px; }
+.smap-towns .row { display: grid; grid-template-columns: minmax(0, 1fr) 70px auto; align-items: center; gap: 10px; font-size: 13px; padding: 3px 0; }
+.smap-towns .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.smap-towns .bar { height: 6px; border-radius: 99px; background: var(--line2); overflow: hidden; }
+.smap-towns .bar span { display: block; height: 100%; border-radius: 99px; background: var(--blue); }
+.smap.compact .map { min-height: 0; }
+.smap .map-legend { left: auto; right: 12px; top: 12px; bottom: auto; }
+@media (max-width: 640px) {
+  .smap .map-legend { position: static; margin: 8px 12px 12px; box-shadow: none; }
+  .smap .map { background: var(--surface2); }
+  .smap-live { font-size: 11px; padding: 5px 10px; left: 8px; top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .smap-heat circle, .smap-live .dot { animation: none; }
+}
 
 /* Feed */
 .feed { display: flex; flex-direction: column; }

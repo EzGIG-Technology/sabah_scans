@@ -180,7 +180,7 @@ export default function CommandCentre() {
         </div>
       </Card>
 
-      <Card title="Workforce map" sub="Registered workers by district, coloured by share not yet paid for December"
+      <Card title="Workforce map" sub="Where registered workers are across Sabah’s 27 districts, coloured by the share not yet paid for December. Ripples are payments arriving."
         action={<div className="chips">{[['all', 'All'], ['high', 'High arrears'], ['low', 'Low arrears']].map(([v, l]) => <button key={v} className="chip" aria-pressed={mapFilter === v} onClick={() => setMapFilter(v)}>{l}</button>)}</div>}>
         <SabahMap districts={districts} selected={sel} onSelect={setSel} filter={mapFilter} renderPanel={(d) => (
           <div className="stack" style={{ gap: 14 }}>

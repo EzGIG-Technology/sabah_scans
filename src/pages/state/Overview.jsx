@@ -217,7 +217,7 @@ function WorkforceMap() {
   const received = (d) => (period === 'month' ? d.collected : Math.round(PERIOD_TOTAL[period] * (d.collected / collectedThisMonth)))
   return (
     <Card className="st-map" title="Workforce by district"
-      sub="Registered workers by work site on eNORES, coloured by the share not yet paid for December. Not a tracked position."
+      sub="Sabah’s 27 districts in 8 reporting areas, coloured by the share not yet paid for December. Glows show where registered workers are, by work site on eNORES; ripples are payments arriving. Not a tracked position."
       action={
         <div className="row" style={{ gap: 8 }}>
           <span className="pill ok dot" aria-live="polite">{loading ? 'Updating' : mins < 1 ? 'Updated just now' : `Updated ${mins} min${mins > 1 ? 's' : ''} ago`}</span>
@@ -230,7 +230,7 @@ function WorkforceMap() {
         </div>
         <Seg items={MAP_PERIODS} value={period} onChange={setPeriod} label="Payments received" />
       </div>
-      <p className="small muted st-map-note"><MapPin size={13} aria-hidden="true" /> {rm(PERIOD_TOTAL[period])} received {PERIOD_TEXT[period]} across {districts.length} districts. Choose a district for detail.</p>
+      <p className="small muted st-map-note"><MapPin size={13} aria-hidden="true" /> {rm(PERIOD_TOTAL[period])} received {PERIOD_TEXT[period]} across {districts.length} reporting areas. Choose an area for detail.</p>
       {loading ? (
         <div className="st-map-skel"><Skeleton h={300} /><div className="stack" style={{ gap: 10 }}><Skeleton h={22} w="60%" /><Skeleton /><Skeleton /><Skeleton w="80%" /></div></div>
       ) : (

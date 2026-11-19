@@ -218,7 +218,7 @@ export function WorkerProfile({ base, readOnly }) {
                   {d && <div className="gv-kv-card small"><MapPin size={14} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />{w.district}: {num(d.workers)} registered workers, {pct(d.rate)} paid for December.</div>}
                   <p className="small muted">Location is the work site on the employer’s eNORES record, not a tracked position.</p>
                 </div>
-                {d && <div className="gv-mini-map"><SabahMap districts={districts} selected={d.id} onSelect={() => {}} /></div>}
+                {d && <div className="gv-mini-map"><SabahMap districts={districts} selected={d.id} onSelect={() => {}} compact /></div>}
               </div>
             )}
             {tab === 'History' && (

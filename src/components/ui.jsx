@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, createContext, useContext, useCal
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, Search, LogOut, Bell, ChevronLeft, ChevronRight, ArrowLeft, Info, CheckCircle2, AlertTriangle, Inbox, Repeat } from 'lucide-react'
 import { DEMO_DATE, num, pct, rm } from '../data/demo.js'
+import { SabahMap } from './SabahMap.jsx'
 
 /* =====================================================================
    Brand
@@ -729,82 +730,14 @@ export function SplitBar({ parts }) {
   )
 }
 
-/* =====================================================================
-   Sabah map: simplified coastline with one bubble per district.
-   Bubble size = registered workers; label and colour = share not yet paid
-   (PRD thresholds: green under 15%, orange 15 to 40%, red over 40%).
-   ===================================================================== */
-const SABAH = [
-  [115.55, 4.95], [115.62, 5.25], [115.78, 5.5], [115.92, 5.75], [116.07, 5.98], [116.2, 6.2], [116.38, 6.48], [116.58, 6.74],
-  [116.76, 6.98], [116.86, 6.96], [116.92, 6.78], [116.88, 6.6], [117.0, 6.48], [117.14, 6.62], [117.28, 6.86], [117.42, 6.66],
-  [117.62, 6.48], [117.86, 6.18], [118.06, 5.88], [118.32, 5.8], [118.6, 5.6], [118.94, 5.46], [119.27, 5.2], [119.2, 5.05],
-  [118.9, 5.0], [118.6, 5.04], [118.36, 5.02], [118.3, 4.86], [118.5, 4.7], [118.68, 4.5], [118.52, 4.36], [118.2, 4.4],
-  [117.9, 4.26], [117.6, 4.18], [117.2, 4.32], [116.8, 4.36], [116.4, 4.34], [116.0, 4.36], [115.8, 4.5], [115.68, 4.75],
-]
-const COORD = {
-  kudat: [116.84, 6.88], kk: [116.07, 5.98], sandakan: [118.07, 5.84], beaufort: [115.75, 5.35],
-  keningau: [116.16, 5.34], lahaddatu: [118.33, 5.03], tawau: [117.89, 4.25], semporna: [118.61, 4.48],
-}
-const proj = ([lon, lat]) => [(lon - 115.3) * 100, (7.25 - lat) * 100]
+/* Tone for a reporting area from its paid share: PRD thresholds on the share not yet paid
+   (green under 15%, orange 15 to 40%, red over 40%). The map itself is in SabahMap.jsx. */
 export function zoneTone(rate) {
   const owing = 1 - rate
   return owing < 0.15 ? { c: '#17B26A', t: 'Low arrears' } : owing <= 0.4 ? { c: '#FF8A1F', t: 'Watch' } : { c: '#F0436A', t: 'High arrears' }
 }
-export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 'all' }) {
-  const path = SABAH.map((p, i) => (i ? 'L' : 'M') + proj(p).join(',')).join(' ') + 'Z'
-  const maxW = Math.max(...districts.map((d) => d.workers))
-  const shown = districts.filter((d) => {
-    const z = zoneTone(d.rate).t
-    return filter === 'all' || (filter === 'high' && z === 'High arrears') || (filter === 'low' && z === 'Low arrears')
-  })
-  const sel = districts.find((d) => d.id === selected)
-  return (
-    <div className="map-wrap">
-      <div className="map">
-        <svg viewBox="-10 -10 420 340" role="img" aria-label="Map of Sabah districts with workers and payment rate">
-          <defs>
-            <pattern id="sea" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="10" stroke="#DCE8F8" strokeWidth="2" />
-            </pattern>
-          </defs>
-          <rect x="-10" y="-10" width="420" height="340" fill="url(#sea)" />
-          <path d={path} fill="#fff" stroke="#BFD3F2" strokeWidth="1.5" strokeLinejoin="round" />
-          {shown.map((d) => {
-            const [x, y] = proj(COORD[d.id] || [117, 5.5])
-            const rad = 9 + 20 * Math.sqrt(d.workers / maxW)
-            const z = zoneTone(d.rate)
-            const on = d.id === selected
-            return (
-              <g key={d.id} className="bubble" role="button" tabIndex={0} aria-pressed={on} aria-label={`${d.name}: ${num(d.workers)} workers, ${pct(1 - d.rate)} not yet paid`}
-                onClick={() => onSelect(on ? null : d.id)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(on ? null : d.id)}>
-                <circle cx={x} cy={y} r={rad + 6} fill={z.c} opacity=".16" />
-                <circle cx={x} cy={y} r={rad} fill={z.c} opacity=".9" stroke={on ? 'var(--navy)' : '#fff'} strokeWidth={on ? 3 : 2} />
-                <text x={x} y={y + 3.5} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: '#fff', fontFamily: 'var(--font)' }}>{pct(1 - d.rate)}</text>
-                <text x={x} y={y + rad + 13} textAnchor="middle" style={{ fontSize: 10, fontWeight: 600, fill: 'var(--ink)', fontFamily: 'var(--font)' }}>{d.name}</text>
-              </g>
-            )
-          })}
-          {!shown.length && <text x="200" y="165" textAnchor="middle" style={{ fontSize: 12, fill: 'var(--ink2)', fontFamily: 'var(--font)' }}>No district matches this filter</text>}
-        </svg>
-        <div className="map-legend">
-          <b style={{ fontSize: 12 }}>Share not yet paid</b>
-          <span><i style={{ background: '#17B26A' }} />Under 15%</span>
-          <span><i style={{ background: '#FF8A1F' }} />15% to 40%</span>
-          <span><i style={{ background: '#F0436A' }} />Over 40%</span>
-        </div>
-      </div>
-      <div className="panel">
-        {sel ? (renderPanel ? renderPanel(sel) : <DistrictDetail d={sel} />) : (
-          <div className="empty" style={{ padding: '40px 8px' }}>
-            <div className="ic"><Info size={22} /></div>
-            <b>No district selected</b>
-            Choose a district on the map to see its workers, payments and arrears.
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+
+export { SabahMap }
 
 export function DistrictDetail({ d }) {
   const z = zoneTone(d.rate)
