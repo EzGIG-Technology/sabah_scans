@@ -17,7 +17,7 @@ export const PORTALS = [
     desc: 'Read-only contribution status for information, the JIM permit data link, and matching records when SCANS and JIM disagree.' },
   { key: 'merchant', to: '/merchant', who: 'Partner shops', name: 'Merchant portal', img: '/img/portal-merchant.jpg', icon: Store,
     desc: 'Offer small savings to workers who are up to date and see how often they are used at each outlet.' },
-  { key: 'admin', to: '/admin', who: 'Platform operator', name: 'Microtek operations', img: '/img/portal-operator.jpg', icon: ServerCog,
+  { key: 'admin', to: '/admin', who: 'Platform operator', name: 'SCANS Operation Team', img: '/img/portal-operator.jpg', icon: ServerCog,
     desc: 'Approvals, record checks against SWIMS and eNORES, the audit log and daily reconciliation for the State.' },
 ]
 

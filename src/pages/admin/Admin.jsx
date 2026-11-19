@@ -77,7 +77,7 @@ export default function AdminApp() {
     { title: `${q.stateWaiting} announcement${q.stateWaiting === 1 ? '' : 's'} waiting for State approval`, time: 'Global announcements' },
   ]
   return (
-    <AppShell nav={nav} portal={{ name: 'Microtek operations', sub: 'SCANS operator console', mark: 'MT' }} user={{ name: 'Faizal Rahman', role: 'Superadmin' }}
+    <AppShell nav={nav} portal={{ name: 'SCANS Operation Team', sub: 'SCANS operator console', mark: 'SO' }} user={{ name: 'Faizal Rahman', role: 'Superadmin' }}
       title={title} kicker="Platform operator" notifications={notifications} searchPlaceholder="Search SCANS ID, name or passport">
       <Routes>
         <Route index element={<CommandCentre />} />

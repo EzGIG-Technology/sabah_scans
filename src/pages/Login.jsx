@@ -19,7 +19,7 @@ const HOW = {
     codeTo: 'Enter the 6-digit code from your authenticator app. 2-step sign-in is required for every JIM account.', note: 'Immigration sees contribution status only, for information. Every view, lookup and export is written to the audit log.' },
   merchant: { idLabel: 'Work email', id: 'partners@7eleven.example.my', user: 'Tan Mei Ling, 7-Eleven Sabah',
     codeTo: 'We sent a 6-digit code by SMS to +60 12-•••• 8810.', note: 'Merchant partners are approved by Microtek before they can sign in.' },
-  admin: { idLabel: 'Microtek email', id: 'faizal@microtek.example.my', user: 'Faizal Rahman, Microtek operations',
+  admin: { idLabel: 'Microtek email', id: 'faizal@microtek.example.my', user: 'Faizal Rahman, SCANS Operation Team',
     codeTo: 'Required for every operator account. Enter the code from your authenticator app.', note: 'Operator accounts can only sign in from approved devices.' },
 }
 

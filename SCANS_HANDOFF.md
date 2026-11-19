@@ -47,7 +47,7 @@ Every registered foreign worker in Sabah (130,391 on 31 Dec 2025) pays a contrib
 | State dashboard | Kerajaan Negeri Sabah, Kementerian Kewangan Negeri Sabah, Jabatan Kewangan Negeri, auditors | `/state/*` | Web dashboard |
 | Immigration dashboard | Jabatan Imigresen Malaysia, Negeri Sabah (JIM Sabah) officers | `/jim/*` | Web dashboard |
 | Merchant portal | Partner shops (e.g. 7-Eleven Sabah) | `/merchant/*` | Web dashboard |
-| Operator console | Microtek operations | `/admin/*` | Web dashboard |
+| Operator console | SCANS Operation Team | `/admin/*` | Web dashboard |
 
 ### Full screen list (all exist in the prototype)
 

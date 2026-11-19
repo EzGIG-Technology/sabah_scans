@@ -70,7 +70,7 @@ export const requestsTotal = requestsToday.reduce((s, x) => s + x.value, 0)
 // Who can sign in, by portal. Microtek and government counts come from adminUsers; the rest are demo-only.
 const count = (orgs) => adminUsers.filter((u) => orgs.includes(u.org) && u.status !== 'Disabled').length
 export const accessByRole = [
-  { portal: 'Microtek operations', users: count(['Microtek']), review: '5 Jun 2027', note: 'Superadmin, operations, support' },
+  { portal: 'SCANS Operation Team', users: count(['Microtek']), review: '5 Jun 2027', note: 'Superadmin, operations, support' },
   { portal: 'State finance and approvers', users: count(['Jabatan Kewangan Negeri', 'Kementerian Kewangan Negeri']), review: '1 Jun 2027', note: 'Collection, notices, exports' },
   { portal: 'Agency officers', users: count(['JTK Sabah']), review: '1 Jun 2027', note: 'Complaints routed to their agency' },
   { portal: 'Auditors', users: count(['Jabatan Audit Negeri']), review: '1 Jun 2027', note: 'Read everything, export audit log' },
