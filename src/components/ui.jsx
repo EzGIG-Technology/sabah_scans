@@ -730,11 +730,10 @@ export function SplitBar({ parts }) {
   )
 }
 
-/* Tone for a reporting area from its paid share: PRD thresholds on the share not yet paid
-   (green under 15%, orange 15 to 40%, red over 40%). The map itself is in SabahMap.jsx. */
+/* Tone for a reporting area from the share of its workers paid this month:
+   green 90% or more, orange 50% to 89%, red under 50%. The map itself is in SabahMap.jsx. */
 export function zoneTone(rate) {
-  const owing = 1 - rate
-  return owing < 0.15 ? { c: '#17B26A', t: 'Low arrears' } : owing <= 0.4 ? { c: '#FF8A1F', t: 'Watch' } : { c: '#F0436A', t: 'High arrears' }
+  return rate >= 0.9 ? { c: '#17B26A', t: 'Low arrears' } : rate >= 0.5 ? { c: '#FF8A1F', t: 'Watch' } : { c: '#F0436A', t: 'High arrears' }
 }
 
 export { SabahMap }

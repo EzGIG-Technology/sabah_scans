@@ -43,6 +43,24 @@ export const districts = [
   return { ...d, paid, overdue: d.workers - paid, collected: paid * RATE }
 })
 
+// Split a whole number over weights so the parts add up exactly (largest remainder).
+const apportion = (total, weights) => {
+  const sum = weights.reduce((s, w) => s + w, 0)
+  const raw = weights.map((w) => (total * w) / sum)
+  const out = raw.map(Math.floor)
+  let left = total - out.reduce((s, x) => s + x, 0)
+  raw.map((x, i) => [x - Math.floor(x), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { out[i] += 1; left -= 1 } })
+  return out
+}
+
+// Employers by reporting area (sample split of the 4,821 registered employers) and how many paid for at
+// least one worker this month (3,204 in all, the figure on the Microtek command centre).
+export const EMPLOYERS = 4821
+export const EMPLOYERS_PAID = 3204
+const empIn = apportion(EMPLOYERS, districts.map((d) => d.workers))
+const empPaidIn = apportion(EMPLOYERS_PAID, districts.map((d, i) => empIn[i] * d.rate))
+districts.forEach((d, i) => { d.employers = empIn[i]; d.employersPaid = empPaidIn[i] })
+
 // One set of contribution statuses for every portal. Owing = every unpaid month, the current one included.
 //   Paid               nothing owing
 //   Due this month     only the current month owing (RM100)

@@ -1,19 +1,21 @@
 /* =====================================================================
    Sabah workforce map.
    Real district boundaries (src/data/sabahMap.js), coloured by the share
-   of each reporting area not yet paid (PRD thresholds), with a glowing
+   of each reporting area's workers paid this month (green 90% or more,
+   orange 50% to 89%, red under 50%), with a glowing
    hotspot at every town where registered workers are and a ripple with
    "+RM100" wherever a live payment arrives. Live payments follow the
    shared ticker, so the map stops with "Freeze for recording" and with
    reduced motion.
    ===================================================================== */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Info } from 'lucide-react'
 import { zoneTone, DistrictDetail, useLivePayments, useFrozen } from './ui.jsx'
 import { num, pct, rm, RATE } from '../data/demo.js'
 import { MAP_W, MAP_H, project, SABAH_DISTRICTS, NEIGHBOURS, TOWNS, KINABALU, MAP_LABELS } from '../data/sabahMap.js'
 
-const TONES = [['#17B26A', 'Under 15%'], ['#FF8A1F', '15% to 40%'], ['#F0436A', 'Over 40%']]
+const TONES = [['#17B26A', '90% or more'], ['#FF8A1F', '50% to 89%'], ['#F0436A', 'Under 50%']]
+const TIP_W = 272
 const HIDE_LABEL = new Set(['Penampang', 'Putatan', 'Membakut'])
 // Labels that would overlap a neighbour sit beside their dot instead of above it.
 const SIDE = { Beaufort: 'end', Keningau: 'start' }
@@ -57,19 +59,48 @@ function useTween(value, ms = 700) {
   return v
 }
 
-function TownLabel({ t, d, compact }) {
-  const unpaid = 1 - d.rate
+// Town names only. Figures for an area show in the hover card and the side panel.
+function TownLabel({ t, compact }) {
   const main = t.main
   const side = SIDE[t.name]
   const anchor = side || 'middle'
   const dx = side === 'end' ? -10 : side === 'start' ? 10 : 0
-  const dy = side ? -1 : main ? -16 : -10
-  if (compact) return main ? <text className="smap-town main" x={t.x} y={t.y - 16} textAnchor="middle">{t.name}</text> : null
+  const dy = side ? 5 : main ? -12 : -9
+  if (compact && !main) return null
+  return <text className={'smap-town' + (main ? ' main' : '')} x={t.x + dx} y={t.y + dy} textAnchor={anchor}>{t.name}</text>
+}
+
+// Hover card: the figures that matter for one reporting area.
+function HoverCard({ a, x, y, w, h }) {
+  const z = zoneTone(a.rate)
+  const coRate = a.employers ? a.employersPaid / a.employers : 0
+  const ref = useRef(null)
+  const [cardH, setCardH] = useState(280)
+  useLayoutEffect(() => { if (ref.current) setCardH(ref.current.offsetHeight) }, [a.id, a.live])
+  // Right of the pointer, or left of it near the right edge; always kept inside the map.
+  const left = x + 18 + TIP_W > w ? Math.max(8, x - 18 - TIP_W) : x + 18
+  const top = Math.min(Math.max(8, y - 40), Math.max(8, h - cardH - 8))
   return (
-    <g className={'smap-label' + (main ? ' main' : '')} transform={`translate(${t.x + dx} ${t.y + dy})`}>
-      <text className={'smap-town' + (main ? ' main' : '')} textAnchor={anchor}>{t.name}</text>
-      {main && <text className="smap-sub" textAnchor={anchor} y={15}>{pct(unpaid)} not yet paid</text>}
-    </g>
+    <div ref={ref} className="smap-tip" style={{ left, top, width: TIP_W, '--tone': z.c }} role="status">
+      <div className="tip-head">
+        <b>{a.name}</b>
+        <span className="tip-pill"><i />{z.t}</span>
+      </div>
+      <div className="tip-big"><span className="num">{num(a.workers)}</span><small>registered workers</small></div>
+      <div className="tip-bar" aria-hidden="true"><span style={{ width: pct(a.rate, 1) }} /></div>
+      <div className="tip-grid">
+        <div><small>Paid</small><b className="num">{num(a.paid)}</b><em className="num">{pct(a.rate)}</em></div>
+        <div><small>Not yet paid</small><b className="num">{num(a.overdue)}</b><em className="num tone">{pct(1 - a.rate)}</em></div>
+      </div>
+      {a.employers > 0 && (
+        <div className="tip-co">
+          <div className="row"><small>Companies paid</small><em className="num">{pct(coRate)}</em></div>
+          <div className="tip-bar co" aria-hidden="true"><span style={{ width: pct(coRate, 1) }} /></div>
+          <span><b className="num">{num(a.employersPaid)}</b> of <b className="num">{num(a.employers)}</b> paid for at least one worker</span>
+        </div>
+      )}
+      {a.live > 0 && <div className="tip-live"><span className="dot" />{num(a.live)} paid since you opened this page</div>}
+    </div>
   )
 }
 
@@ -145,7 +176,7 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
   return (
     <div className={'map-wrap smap' + (compact ? ' compact' : '')}>
       <div className="map" ref={box} onMouseLeave={() => setHover(null)}>
-        <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-label="Map of Sabah: registered workers by town, coloured by the share not yet paid in each area">
+        <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-label="Map of Sabah: registered workers by town, coloured by the share paid this month in each area">
           <defs>
             <linearGradient id="smap-sea" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="#EAF3FC" />
@@ -181,7 +212,7 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
             return (
               <g key={d.id} className={'smap-area' + (on ? ' on' : '') + (dim ? ' dim' : '') + (hover && hover.id === d.id ? ' hot' : '')}
                 role={compact ? undefined : 'button'} tabIndex={compact || dim ? -1 : 0} aria-pressed={compact ? undefined : on}
-                aria-label={`${d.name}: ${num(d.workers)} registered workers, ${pct(1 - a.rate)} not yet paid`}
+                aria-label={`${d.name}: ${num(d.workers)} registered workers, ${pct(a.rate)} paid, ${num(a.employersPaid)} of ${num(a.employers)} companies paid`}
                 onClick={() => !dim && pick(d.id)} onMouseMove={compact ? undefined : move(d.id)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!dim) pick(d.id) } }}
                 style={{ '--tone': z.c }}>
@@ -224,7 +255,7 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
             return (
               <g key={t.name} className={'smap-dot' + (t.main ? ' main' : '') + (on ? ' on' : '')}>
                 <circle cx={t.x} cy={t.y} r={t.main ? 5 : 3} />
-                {(!HIDE_LABEL.has(t.name) || on) && <TownLabel t={t} d={areas[t.region]} compact={compact && !(on && t.main)} />}
+                {(!HIDE_LABEL.has(t.name) || on) && (!compact || (on && t.main)) && <TownLabel t={t} compact={compact} />}
               </g>
             )
           })}
@@ -241,18 +272,11 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
           </div>
         )}
 
-        {!compact && hov && (
-          <div className="smap-tip" style={{ left: Math.min(hover.x + 14, (box.current ? box.current.clientWidth : 600) - 210), top: hover.y + 14 }}>
-            <b>{hov.name}</b>
-            <span>{num(hov.workers)} registered workers</span>
-            <span>{num(hov.paid)} paid{hov.live ? ` (${num(hov.live)} just now)` : ''}</span>
-            <span><i style={{ background: zoneTone(hov.rate).c }} />{pct(1 - hov.rate)} not yet paid</span>
-          </div>
-        )}
+        {!compact && hov && <HoverCard a={hov} x={hover.x} y={hover.y} w={box.current ? box.current.clientWidth : 800} h={box.current ? box.current.clientHeight : 600} />}
 
         {!compact && (
           <div className="map-legend">
-            <b style={{ fontSize: 12 }}>Share not yet paid</b>
+            <b style={{ fontSize: 12 }}>Workers paid this month</b>
             {TONES.map(([c, t]) => <span key={c}><i style={{ background: c }} />{t}</span>)}
             <span className="smap-key"><i className="glow" />Glow: where registered workers are</span>
             <span className="smap-key"><i className="ring" />Ripple: a payment arriving</span>

@@ -217,7 +217,7 @@ function WorkforceMap() {
   const received = (d) => (period === 'month' ? d.collected : Math.round(PERIOD_TOTAL[period] * (d.collected / collectedThisMonth)))
   return (
     <Card className="st-map" title="Workforce by district"
-      sub="Sabah’s 27 districts in 8 reporting areas, coloured by the share not yet paid for December. Glows show where registered workers are, by work site on eNORES; ripples are payments arriving. Not a tracked position."
+      sub="Sabah’s 27 districts in 8 reporting areas, coloured by the share of workers paid for December: green 90% or more, orange 50% to 89%, red under 50%. Glows show where registered workers are, by work site on eNORES; ripples are payments arriving. Hover an area for its figures. Not a tracked position."
       action={
         <div className="row" style={{ gap: 8 }}>
           <span className="pill ok dot" aria-live="polite">{loading ? 'Updating' : mins < 1 ? 'Updated just now' : `Updated ${mins} min${mins > 1 ? 's' : ''} ago`}</span>
