@@ -27,17 +27,19 @@ export const sectors = [
   { name: 'Mining and quarrying', workers: 87 },
 ]
 
-// Districts: sample split of the 130,391 registered workers, with sample payment rates.
+// Districts: sample split of the 130,391 registered workers, with sample payment rates. The west coast pays
+// best (Kota Kinabalu and Kudat at 90% or more) and the east-coast plantation areas least (Lahad Datu, Tawau
+// and Semporna under 50%). Paid workers still add up to 78,455 for Sabah, the figure on every dashboard.
 // col/row place each district on the tile map in rough geographic order (west to east, north to south).
 export const districts = [
-  { id: 'kudat', name: 'Kudat', workers: 6200, rate: 0.66, col: 2, row: 0 },
-  { id: 'kk', name: 'Kota Kinabalu', workers: 18900, rate: 0.71, col: 1, row: 1 },
-  { id: 'sandakan', name: 'Sandakan', workers: 24600, rate: 0.63, col: 4, row: 1 },
-  { id: 'beaufort', name: 'Beaufort', workers: 7900, rate: 0.62, col: 0, row: 2 },
-  { id: 'keningau', name: 'Keningau', workers: 12300, rate: 0.57, col: 1, row: 2 },
-  { id: 'lahaddatu', name: 'Lahad Datu', workers: 26800, rate: 0.54, col: 4, row: 2 },
-  { id: 'tawau', name: 'Tawau', workers: 28400, rate: 0.58, col: 3, row: 3 },
-  { id: 'semporna', name: 'Semporna', workers: 5291, rate: 0.49, col: 5, row: 3 },
+  { id: 'kudat', name: 'Kudat', workers: 6200, rate: 0.91, col: 2, row: 0 },
+  { id: 'kk', name: 'Kota Kinabalu', workers: 18900, rate: 0.92, col: 1, row: 1 },
+  { id: 'sandakan', name: 'Sandakan', workers: 24600, rate: 0.5748, col: 4, row: 1 },
+  { id: 'beaufort', name: 'Beaufort', workers: 7900, rate: 0.7, col: 0, row: 2 },
+  { id: 'keningau', name: 'Keningau', workers: 12300, rate: 0.62, col: 1, row: 2 },
+  { id: 'lahaddatu', name: 'Lahad Datu', workers: 26800, rate: 0.46, col: 4, row: 2 },
+  { id: 'tawau', name: 'Tawau', workers: 28400, rate: 0.48, col: 3, row: 3 },
+  { id: 'semporna', name: 'Semporna', workers: 5291, rate: 0.41, col: 5, row: 3 },
 ].map((d) => {
   const paid = Math.round(d.workers * d.rate)
   return { ...d, paid, overdue: d.workers - paid, collected: paid * RATE }
@@ -58,7 +60,8 @@ const apportion = (total, weights) => {
 export const EMPLOYERS = 4821
 export const EMPLOYERS_PAID = 3204
 const empIn = apportion(EMPLOYERS, districts.map((d) => d.workers))
-const empPaidIn = apportion(EMPLOYERS_PAID, districts.map((d, i) => empIn[i] * d.rate))
+// More of an area's companies have paid where more of its workers have; never more than the area has.
+const empPaidIn = apportion(EMPLOYERS_PAID, districts.map((d, i) => empIn[i] * (0.3 + 0.7 * d.rate)))
 districts.forEach((d, i) => { d.employers = empIn[i]; d.employersPaid = empPaidIn[i] })
 
 // One set of contribution statuses for every portal. Owing = every unpaid month, the current one included.

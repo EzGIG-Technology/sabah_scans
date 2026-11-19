@@ -28,7 +28,7 @@ const RANGES = [
   { value: 'today', label: 'Today', range: '17 Dec 2027', total: collectionToday, note: 'Payments to 15:00' },
   { value: '7d', label: 'Last 7 days', range: '11 Dec to 17 Dec 2027', total: week, note: 'Credited to the FWECF account, including arrears cleared' },
   { value: '30d', label: 'Last 30 days', range: '18 Nov to 17 Dec 2027', total: month30, note: 'Credited to the FWECF account, including arrears cleared' },
-  { value: 'ytd', label: 'This year', range: '1 Jul to 17 Dec 2027', total: ytd, note: `Settled into the FWECF account, July to December. State share ${rmM(stateYtd)}` },
+  { value: 'ytd', label: 'This year', range: '1 Jul to 17 Dec 2027', total: ytd, note: 'Settled into the FWECF account, July to December', split: true },
 ]
 
 /* ---------- Monthly / weekly / daily collection with change ---------- */
@@ -133,6 +133,17 @@ function TotalCollection() {
   }, [open])
   return (
     <div className="card st-total">
+      <div className="st-total-fig" aria-live="polite">
+        <span className="lbl"><Wallet aria-hidden="true" />Total collection · {r.label}</span>
+        <b className="num st-total-num"><AnimatedValue value={rm(r.total + liveAmt)} /></b>
+        <small>{r.note}</small>
+        {r.split && (
+          <div className="st-total-split">
+            <span><i className="s" />Kerajaan Negeri Sabah 70% <b className="num">{rmM(stateYtd)}</b></span>
+            <span><i className="o" />Operator 30% <b className="num">{rmM(operatorYtd)}</b></span>
+          </div>
+        )}
+      </div>
       <div className="st-range" ref={ref}>
         <button className="st-range-btn" aria-haspopup="true" aria-expanded={open} onClick={() => setOpen(!open)}>
           <CalendarRange aria-hidden="true" />
@@ -150,11 +161,6 @@ function TotalCollection() {
             <p>Prototype data runs from 1 July to 17 December 2027.</p>
           </div>
         )}
-      </div>
-      <div className="st-total-fig" aria-live="polite">
-        <span>Total collection</span>
-        <b className="num"><AnimatedValue value={rm(r.total + liveAmt)} /></b>
-        <small>{r.note}</small>
       </div>
     </div>
   )
@@ -230,15 +236,15 @@ function WorkforceMap() {
         </div>
         <Seg items={MAP_PERIODS} value={period} onChange={setPeriod} label="Payments received" />
       </div>
-      <p className="small muted st-map-note"><MapPin size={13} aria-hidden="true" /> {rm(PERIOD_TOTAL[period])} received {PERIOD_TEXT[period]} across {districts.length} reporting areas. Choose an area for detail.</p>
+      <p className="small muted st-map-note"><MapPin size={13} aria-hidden="true" /> {rm(PERIOD_TOTAL[period])} received {PERIOD_TEXT[period]} across {districts.length} reporting areas. Choose an area on the map or from the list beside it.</p>
       {loading ? (
         <div className="st-map-skel"><Skeleton h={300} /><div className="stack" style={{ gap: 10 }}><Skeleton h={22} w="60%" /><Skeleton /><Skeleton /><Skeleton w="80%" /></div></div>
       ) : (
         <SabahMap districts={districts} selected={sel} onSelect={setSel} filter={filter} renderPanel={(d) => (
           <div className="stack" style={{ gap: 14 }}>
-            <DistrictDetail d={d} />
+            <DistrictDetail d={d} bare />
             <div className="gv-kv-card small">Received {PERIOD_TEXT[period]}: <b className="num">{rm(received(d))}</b></div>
-            <button className="btn sm outline" onClick={() => go(`${BASE}/workers?district=${encodeURIComponent(d.name)}`)}><Users /> Look up workers</button>
+            <button className="btn sm outline" onClick={() => go(d.id === 'all' ? `${BASE}/workers` : `${BASE}/workers?district=${encodeURIComponent(d.name)}`)}><Users /> Look up workers</button>
           </div>
         )} />
       )}

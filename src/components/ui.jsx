@@ -105,9 +105,9 @@ export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', 
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
           <Link to="/" className="top-logo" aria-label="SCANS home"><Logo width={92} /></Link>
-          <div className="title">
-            {kicker && <small>{kicker}</small>}
-            <b>{title}</b>
+          {/* The page's own heading names the page, so the top bar names the portal only. */}
+          <div className="title" title={title}>
+            <b>{kicker || title}</b>
           </div>
           <span className="spacer" />
           {topExtra}
@@ -738,21 +738,31 @@ export function zoneTone(rate) {
 
 export { SabahMap }
 
-export function DistrictDetail({ d }) {
+// bare: no name or bar, for the map panel, where the area picker and compliance score already show them.
+export function DistrictDetail({ d, bare = false }) {
   const z = zoneTone(d.rate)
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <div>
-        <div className="row between"><h3 style={{ fontSize: 17 }}>{d.name}</h3><span className="pill" style={{ background: z.c + '22', color: z.c }}>{z.t}</span></div>
-        <p className="small muted">District office data, {DEMO_DATE}</p>
-      </div>
-      <dl className="kv one">
-        <div><dt>Registered workers</dt><dd className="num">{num(d.workers)}</dd></div>
-        <div><dt>Paid this month</dt><dd className="num">{num(d.paid)} ({pct(d.rate)})</dd></div>
-        <div><dt>Not yet paid</dt><dd className="num">{num(d.overdue)}</dd></div>
-        <div><dt>Collected this month</dt><dd className="num">{rm(d.collected)}</dd></div>
-      </dl>
-      <div className="bar"><span style={{ width: pct(d.rate) }} /></div>
+      {bare ? <p className="small muted">{d.id === 'all' ? 'All reporting areas' : 'District office data'}, {DEMO_DATE}</p> : (
+        <div>
+          <div className="row between"><h3 style={{ fontSize: 17 }}>{d.name}</h3><span className="pill" style={{ background: z.c + '22', color: z.c }}>{z.t}</span></div>
+          <p className="small muted">District office data, {DEMO_DATE}</p>
+        </div>
+      )}
+      {bare ? (
+        <dl className="kv">
+          <div><dt>Not yet paid</dt><dd className="num">{num(d.overdue)}</dd></div>
+          <div><dt>Collected this month</dt><dd className="num">{rm(d.collected)}</dd></div>
+        </dl>
+      ) : (
+        <dl className="kv one">
+          <div><dt>Registered workers</dt><dd className="num">{num(d.workers)}</dd></div>
+          <div><dt>Paid this month</dt><dd className="num">{num(d.paid)} ({pct(d.rate)})</dd></div>
+          <div><dt>Not yet paid</dt><dd className="num">{num(d.overdue)}</dd></div>
+          <div><dt>Collected this month</dt><dd className="num">{rm(d.collected)}</dd></div>
+        </dl>
+      )}
+      {!bare && <div className="bar"><span style={{ width: pct(d.rate) }} /></div>}
     </div>
   )
 }

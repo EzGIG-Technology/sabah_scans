@@ -422,8 +422,8 @@ dl.kv dd { margin: 2px 0 0; font-weight: 600; font-size: 14px; overflow-wrap: an
 .map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
 
 /* Sabah map (components/SabahMap.jsx) */
-.smap .map { background: #DCEAF8; min-height: 0; align-self: start; }
-.smap .map svg { height: auto; }
+.smap .map { background: linear-gradient(180deg, #EAF3FC, #DCEAF8); min-height: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.smap .map svg { height: auto; flex: none; }
 .smap { align-items: stretch; }
 .smap-grid { stroke: #C9DCF0; stroke-width: .6; stroke-dasharray: 2 4; }
 .smap-grid-t { font: 500 10px var(--font); fill: #8FA9C6; }
@@ -498,6 +498,39 @@ dl.kv dd { margin: 2px 0 0; font-weight: 600; font-size: 14px; overflow-wrap: an
 .smap-tip .tip-live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--okFill); }
 .smap-key i.glow { background: radial-gradient(circle, rgba(255, 138, 31, .7), rgba(255, 138, 31, 0) 70%); width: 14px; height: 14px; margin-left: -2px; vertical-align: -3px; }
 .smap-key i.ring { background: none; border: 2px solid var(--blue); width: 10px; height: 10px; }
+.smap-picker { position: relative; margin-bottom: 14px; }
+.smap-picker-btn { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 8px; align-items: center; text-align: left; padding: 9px 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; font: inherit; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.smap-picker-btn:hover, .smap-picker-btn[aria-expanded='true'] { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(29, 102, 184, .12); }
+.smap-picker-btn .lbl { grid-column: 1; font-size: 11px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: .05em; }
+.smap-picker-btn .val { grid-column: 1; font-size: 17px; font-weight: 700; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.smap-picker-btn svg { grid-column: 2; grid-row: 1 / span 2; width: 20px; height: 20px; color: var(--blue); transition: transform .15s; }
+.smap-picker-btn svg.up { transform: rotate(180deg); }
+.smap-picker-list { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; border-radius: 16px; max-height: 360px; overflow-y: auto;
+  background: rgba(255, 255, 255, .86); border: 1px solid rgba(255, 255, 255, .9); box-shadow: 0 20px 44px rgba(11, 37, 69, .2); backdrop-filter: blur(16px) saturate(170%); -webkit-backdrop-filter: blur(16px) saturate(170%); }
+.smap-picker-list li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto 16px; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; font-size: 13.5px; color: var(--ink); cursor: pointer; outline: none; }
+.smap-picker-list li.all { font-weight: 600; border-bottom: 1px solid var(--line2); border-radius: 10px 10px 4px 4px; margin-bottom: 4px; }
+.smap-picker-list li:hover, .smap-picker-list li:focus-visible { background: var(--sky); }
+.smap-picker-list li[aria-selected='true'] { color: var(--blue); font-weight: 600; }
+.smap-picker-list li i { width: 10px; height: 10px; border-radius: 50%; }
+.smap-picker-list li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.smap-picker-list li .pc { font-size: 12.5px; color: var(--ink2); font-weight: 600; }
+.smap-picker-list li svg { width: 16px; height: 16px; color: var(--blue); }
+.smap-score { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 14px; margin-bottom: 14px; border-radius: 16px; background: linear-gradient(135deg, color-mix(in srgb, var(--tone) 12%, #fff), #fff); border: 1px solid color-mix(in srgb, var(--tone) 28%, transparent); }
+.smap-score .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.smap-score .head small { font-size: 11px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: .05em; }
+.smap-score .head .pill { white-space: nowrap; }
+.smap-score .body { display: flex; align-items: center; gap: 12px; }
+.smap-score svg { flex: none; }
+.smap-score .trk { fill: none; stroke: color-mix(in srgb, var(--tone) 18%, #fff); stroke-width: 9; }
+.smap-score .val { fill: none; stroke: var(--tone); stroke-width: 9; stroke-linecap: round; }
+.smap-score text { font: 800 20px var(--font); fill: var(--ink); }
+.smap-score .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 12.5px; color: var(--ink2); line-height: 1.35; }
+.smap-score .txt b { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; line-height: 1.1; }
+.smap-score .co { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid rgba(11, 37, 69, .08); font-size: 12px; color: var(--ink2); }
+.smap-score .co .row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.smap-score .co b { color: var(--ink); font-weight: 700; }
+.smap-score .cobar { height: 6px; border-radius: 99px; background: rgba(11, 37, 69, .08); overflow: hidden; }
+.smap-score .cobar span { display: block; height: 100%; border-radius: 99px; background: var(--blue); }
 .smap-towns .row { display: grid; grid-template-columns: minmax(0, 1fr) 70px auto; align-items: center; gap: 10px; font-size: 13px; padding: 3px 0; }
 .smap-towns .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .smap-towns .bar { height: 6px; border-radius: 99px; background: var(--line2); overflow: hidden; }

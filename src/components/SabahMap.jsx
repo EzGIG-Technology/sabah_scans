@@ -9,7 +9,7 @@
    reduced motion.
    ===================================================================== */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Info } from 'lucide-react'
+import { ChevronDown, Check } from 'lucide-react'
 import { zoneTone, DistrictDetail, useLivePayments, useFrozen } from './ui.jsx'
 import { num, pct, rm, RATE } from '../data/demo.js'
 import { MAP_W, MAP_H, project, SABAH_DISTRICTS, NEIGHBOURS, TOWNS, KINABALU, MAP_LABELS } from '../data/sabahMap.js'
@@ -157,7 +157,14 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
     return (filter === 'high' && t === 'High arrears') || (filter === 'low' && t === 'Low arrears')
   }
   const anyShown = districts.some((d) => shows(d.id))
-  const sel = selected ? areas[selected] : null
+  // "All of Sabah": every area added together, used when no single area is chosen.
+  const all = useMemo(() => {
+    const list = Object.values(areas)
+    const sum = (k) => list.reduce((s, a) => s + (a[k] || 0), 0)
+    const workers = sum('workers'), paid = sum('paid')
+    return { id: 'all', name: 'All of Sabah', workers, paid, overdue: workers - paid, collected: sum('collected'), rate: paid / workers, employers: sum('employers'), employersPaid: sum('employersPaid'), live: sum('live') }
+  }, [areas])
+  const sel = selected && areas[selected] ? areas[selected] : all
   const hov = hover ? areas[hover.id] : null
   const liveTotal = Object.values(liveBy).reduce((s, x) => s + x, 0)
   const liveRm = useTween(liveTotal * RATE)
@@ -284,30 +291,107 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
         )}
       </div>
       <div className="panel">
-        {sel ? (
-          <>
-            {renderPanel ? renderPanel(sel) : <DistrictDetail d={sel} />}
-            <TownList towns={towns.filter((t) => t.region === sel.id)} />
-          </>
-        ) : (
-          <div className="empty" style={{ padding: '40px 8px' }}>
-            <div className="ic"><Info size={22} /></div>
-            <b>No area selected</b>
-            Choose an area on the map to see its towns, workers, payments and arrears.
-          </div>
-        )}
+        <AreaPicker areas={[all, ...districts.map((d) => areas[d.id])]} value={sel.id} onChange={(id) => onSelect && onSelect(id === 'all' ? null : id)} />
+        <Compliance a={sel} />
+        {renderPanel ? renderPanel(sel) : <DistrictDetail d={sel} bare />}
+        <TownList towns={sel.id === 'all' ? towns : towns.filter((t) => t.region === sel.id)} all={sel.id === 'all'} />
       </div>
     </div>
   )
 }
 
-function TownList({ towns }) {
+/* Area picker at the top of the panel: All of Sabah or one reporting area, with each one's compliance. */
+function AreaPicker({ areas, value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const [focus, setFocus] = useState(0)
+  const wrap = useRef(null)
+  const btn = useRef(null)
+  const items = useRef([])
+  const cur = areas.find((a) => a.id === value) || areas[0]
+  useEffect(() => {
+    if (!open) return undefined
+    const i = Math.max(0, areas.findIndex((a) => a.id === value))
+    setFocus(i)
+    const click = (e) => { if (wrap.current && !wrap.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', click)
+    return () => document.removeEventListener('mousedown', click)
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (open && items.current[focus]) items.current[focus].focus() }, [open, focus])
+  const choose = (id) => { onChange(id); setOpen(false); btn.current && btn.current.focus() }
+  const key = (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setFocus((f) => Math.min(areas.length - 1, f + 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setFocus((f) => Math.max(0, f - 1)) }
+    else if (e.key === 'Home') { e.preventDefault(); setFocus(0) }
+    else if (e.key === 'End') { e.preventDefault(); setFocus(areas.length - 1) }
+    else if (e.key === 'Escape' || e.key === 'Tab') { setOpen(false); if (e.key === 'Escape') btn.current && btn.current.focus() }
+  }
+  return (
+    <div className="smap-picker" ref={wrap}>
+      <button ref={btn} type="button" className="smap-picker-btn" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)}
+        onKeyDown={(e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); setOpen(true) } }}>
+        <span className="lbl">Area</span>
+        <span className="val">{cur.name}</span>
+        <ChevronDown aria-hidden="true" className={open ? 'up' : ''} />
+      </button>
+      {open && (
+        <ul className="smap-picker-list" role="listbox" aria-label="Choose an area" onKeyDown={key}>
+          {areas.map((a, i) => {
+            const z = zoneTone(a.rate)
+            return (
+              <li key={a.id} ref={(el) => { items.current[i] = el }} role="option" aria-selected={a.id === value} tabIndex={-1}
+                className={a.id === 'all' ? 'all' : ''} onClick={() => choose(a.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(a.id) } }}>
+                <i style={{ background: z.c }} />
+                <span className="nm">{a.name}</span>
+                <span className="pc num">{pct(a.rate)}</span>
+                {a.id === value ? <Check aria-hidden="true" /> : <span className="ck" />}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/* Compliance score: the share of the area's registered workers paid this month, with its companies. */
+function Compliance({ a }) {
+  const z = zoneTone(a.rate)
+  const r = 34, c = 2 * Math.PI * r
+  const coRate = a.employers ? a.employersPaid / a.employers : 0
+  const shown = useTween(a.rate * 100, 600)
+  return (
+    <div className="smap-score" style={{ '--tone': z.c }}>
+      <div className="head"><small>Compliance score</small><span className="pill" style={{ background: z.c + '22', color: z.c }}>{z.t}</span></div>
+      <div className="body">
+        <svg viewBox="0 0 84 84" width="78" height="78" aria-hidden="true">
+          <circle cx="42" cy="42" r={r} className="trk" />
+          <circle cx="42" cy="42" r={r} className="val" strokeDasharray={`${(c * Math.min(1, shown / 100)).toFixed(1)} ${c.toFixed(1)}`} transform="rotate(-90 42 42)" />
+          <text x="42" y="48" textAnchor="middle">{Math.round(shown)}%</text>
+        </svg>
+        <div className="txt">
+          <b className="num">{num(a.paid)}</b>
+          <span>of {num(a.workers)} workers paid this month</span>
+        </div>
+      </div>
+      {a.employers > 0 && (
+        <div className="co">
+          <div className="row"><span>Companies paid</span><b className="num">{num(a.employersPaid)} of {num(a.employers)} · {pct(coRate)}</b></div>
+          <div className="cobar"><span style={{ width: pct(coRate, 1) }} /></div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TownList({ towns, all }) {
   if (towns.length < 2) return null
-  const max = Math.max(...towns.map((t) => t.workers))
+  const list = [...towns].sort((a, b) => b.workers - a.workers).slice(0, all ? 8 : towns.length)
+  const max = Math.max(...list.map((t) => t.workers))
   return (
     <div className="smap-towns">
-      <div className="gv-sub" style={{ margin: '16px 0 8px' }}>Where the workers are</div>
-      {[...towns].sort((a, b) => b.workers - a.workers).map((t) => (
+      <div className="gv-sub" style={{ margin: '16px 0 8px' }}>{all ? 'Towns with the most workers' : 'Where the workers are'}</div>
+      {list.map((t) => (
         <div key={t.name} className="row">
           <span className="nm">{t.name}</span>
           <span className="bar"><span style={{ width: (t.workers / max) * 100 + '%' }} /></span>

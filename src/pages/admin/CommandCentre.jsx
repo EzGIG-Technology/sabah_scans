@@ -184,8 +184,8 @@ export default function CommandCentre() {
         action={<div className="chips">{[['all', 'All'], ['high', 'High arrears'], ['low', 'Low arrears']].map(([v, l]) => <button key={v} className="chip" aria-pressed={mapFilter === v} onClick={() => setMapFilter(v)}>{l}</button>)}</div>}>
         <SabahMap districts={districts} selected={sel} onSelect={setSel} filter={mapFilter} renderPanel={(d) => (
           <div className="stack" style={{ gap: 14 }}>
-            <DistrictDetail d={d} />
-            <button className="btn sm outline" onClick={() => go(`${BASE}/workers?district=${encodeURIComponent(d.name)}`)}><Users /> Open worker records</button>
+            <DistrictDetail d={d} bare />
+            <button className="btn sm outline" onClick={() => go(d.id === 'all' ? `${BASE}/workers` : `${BASE}/workers?district=${encodeURIComponent(d.name)}`)}><Users /> Open worker records</button>
           </div>
         )} />
       </Card>

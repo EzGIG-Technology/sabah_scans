@@ -1,0 +1,57 @@
+/* =====================================================================
+   SCANS · stronger glass (loaded last, after brand.css)
+   More colour in the backdrop so the frosted surfaces read as glass,
+   and frosted cards, top bar, controls, map panel and overlays across
+   every dashboard. The navy sidebar and blue hero cards stay solid.
+   ===================================================================== */
+:root {
+  --glass: rgba(255, 255, 255, .5);
+  --glassEdge: rgba(255, 255, 255, .82);
+  --glassBlur: blur(24px) saturate(185%);
+  --glassShadow: 0 1px 0 rgba(255, 255, 255, .95) inset, 0 12px 32px rgba(11, 37, 69, .1), 0 2px 6px rgba(11, 37, 69, .04);
+}
+
+/* Backdrop: brighter orbs behind the glass */
+.ambient i:nth-child(1) { background: radial-gradient(circle, rgba(77, 154, 211, .55), rgba(77, 154, 211, 0) 68%); }
+.ambient i:nth-child(2) { background: radial-gradient(circle, rgba(29, 102, 184, .36), rgba(29, 102, 184, 0) 68%); }
+.ambient i:nth-child(3) { background: radial-gradient(circle, rgba(0, 200, 170, .22), rgba(0, 200, 170, 0) 68%); }
+.ambient i:nth-child(4) { background: radial-gradient(circle, rgba(123, 77, 227, .16), rgba(123, 77, 227, 0) 68%); }
+
+/* Cards: frosted white with a soft top-left sheen and a bright edge */
+:is(.shell, .solo) .card:not(.hero):not(.navy):not(.tint) {
+  background-color: var(--glass);
+  background-image:
+    radial-gradient(520px circle at var(--mx, -999px) var(--my, -999px), rgba(255, 255, 255, .6), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, .16) 60%);
+  border: 1px solid var(--glassEdge);
+  box-shadow: var(--glassShadow);
+  backdrop-filter: var(--glassBlur); -webkit-backdrop-filter: var(--glassBlur);
+}
+:is(.shell, .solo) .card.tint { background: rgba(255, 255, 255, .34); border: 1px solid rgba(255, 255, 255, .7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+
+/* Top bar */
+.shell .topbar { background: rgba(255, 255, 255, .55); border: 1px solid rgba(255, 255, 255, .85); box-shadow: var(--glassShadow); backdrop-filter: var(--glassBlur); -webkit-backdrop-filter: var(--glassBlur); }
+.shell .topbar .search, .shell .topbar .iconbtn { background: rgba(255, 255, 255, .55); border: 1px solid rgba(255, 255, 255, .85); }
+.shell .popover { background: rgba(255, 255, 255, .84); border: 1px solid rgba(255, 255, 255, .9); backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); }
+
+/* Controls */
+.shell .seg { background: rgba(255, 255, 255, .42); border: 1px solid rgba(255, 255, 255, .75); }
+.shell .chip:not([aria-pressed='true']) { background: rgba(255, 255, 255, .55); border-color: rgba(255, 255, 255, .9); }
+.shell .gv-kv-card { background: rgba(255, 255, 255, .5); border: 1px solid rgba(255, 255, 255, .8); }
+
+/* Workforce map: frosted panel, legend, live chip and area picker */
+.shell .map-wrap { background: rgba(255, 255, 255, .28); border: 1px solid rgba(255, 255, 255, .7); }
+.shell .smap .panel { background: rgba(255, 255, 255, .5); border-left: 1px solid rgba(255, 255, 255, .8); backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%); }
+.shell .smap .map-legend, .shell .smap-live {
+  background: rgba(255, 255, 255, .62); border: 1px solid rgba(255, 255, 255, .88);
+  box-shadow: 0 10px 26px rgba(11, 37, 69, .12), inset 0 1px 0 rgba(255, 255, 255, .95);
+  backdrop-filter: blur(14px) saturate(170%); -webkit-backdrop-filter: blur(14px) saturate(170%);
+}
+.shell .smap-picker-btn { background: rgba(255, 255, 255, .66); border-color: rgba(255, 255, 255, .92); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95); }
+.shell .smap-score { background: linear-gradient(135deg, color-mix(in srgb, var(--tone) 16%, rgba(255, 255, 255, .55)), rgba(255, 255, 255, .45)); border-color: rgba(255, 255, 255, .85); }
+
+/* Small screens, old browsers */
+@media (max-width: 960px) { :root { --glassBlur: blur(14px) saturate(170%); } }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :is(.shell, .solo) .card:not(.hero):not(.navy), .shell .topbar, .shell .smap .panel, .shell .smap .map-legend, .shell .smap-live { background-color: rgba(255, 255, 255, .95); }
+}

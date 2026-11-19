@@ -12,6 +12,7 @@ import Ambient from './components/motion.jsx'
 // Glass and motion layer loads last so it sits over every portal's own styles.
 import './styles/glass.css'
 import './styles/brand.css'
+import './styles/glass-plus.css'
 
 function NotFound() {
   return (
