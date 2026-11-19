@@ -41,21 +41,38 @@ export const districts = [
   return { ...d, paid, overdue: d.workers - paid, collected: paid * RATE }
 })
 
+// One set of contribution statuses for every portal. Owing = every unpaid month, the current one included.
+//   Paid               nothing owing
+//   Due this month     only the current month owing (RM100)
+//   1–2 months overdue 1 or 2 earlier months owing as well (RM200–300)
+//   3+ months overdue  3 or more earlier months owing as well (RM400 or more)
+export const STATUSES = ['Paid', 'Due this month', '1–2 months overdue', '3+ months overdue']
+export const statusFor = (owingMonths) => (owingMonths <= 0 ? STATUSES[0] : owingMonths === 1 ? STATUSES[1] : owingMonths <= 3 ? STATUSES[2] : STATUSES[3])
+
 export const paidThisMonth = districts.reduce((s, d) => s + d.paid, 0)
-export const overdueThisMonth = REGISTERED - paidThisMonth
-export const overdue1 = Math.round(overdueThisMonth * 0.625)
-export const overdue3 = overdueThisMonth - overdue1
+export const overdueThisMonth = REGISTERED - paidThisMonth // not yet paid for the current month
+export const dueThisMonth = Math.round(overdueThisMonth * 0.3)
+export const overdue1 = Math.round(overdueThisMonth * 0.4) // 1–2 months overdue
+export const overdue3 = overdueThisMonth - dueThisMonth - overdue1 // 3+ months overdue
 export const collectedThisMonth = paidThisMonth * RATE
 export const complianceRate = paidThisMonth / REGISTERED
 
-// Monthly gross collection since launch (sample ramp towards the proposal's 60% Year 1 rate)
+// Daily settlements into the FWECF account for the demo month (1 to 17 June). They include arrears
+// cleared and months paid in advance, so the month's total is more than June contributions alone.
+export const dailyCollection = [612400, 958300, 1104200, 1322800, 1486100, 248600, 189400, 233900, 201700, 188300, 176200, 214800, 96400, 88100, 251300, 302700, 412300]
+  .map((v, i) => ({ label: String(i + 1), value: v }))
+export const settledThisMonth = dailyCollection.reduce((s, d) => s + d.value, 0)
+
+// Reconciled settlements into the FWECF account each month since launch (sample ramp towards the
+// proposal's 60% Year 1 rate). The 70:30 split and the operator invoice use these settlements,
+// never the month's contributions (Brief v0.2 fig. 1: operator 30% is calculated after reconciliation).
 export const monthly = [
   { m: 'Jan', v: 5214800 },
   { m: 'Feb', v: 6102300 },
   { m: 'Mar', v: 6744900 },
   { m: 'Apr', v: 7188200 },
   { m: 'May', v: 7560400 },
-  { m: 'Jun', v: collectedThisMonth },
+  { m: 'Jun', v: settledThisMonth },
 ]
 export const ytd = monthly.reduce((s, x) => s + x.v, 0)
 export const stateYtd = ytd * STATE_SHARE
@@ -70,6 +87,7 @@ export const channels = [
   { name: 'Boost, GrabPay, ShopeePay', share: 0.05 },
 ]
 
+// Sample data: the proposal has no nationality breakdown. Label it as sample wherever it is shown.
 export const nationalities = [
   { name: 'Indonesia', share: 0.61 },
   { name: 'Philippines', share: 0.29 },
@@ -96,7 +114,7 @@ export const demoWorker = {
   role: 'Harvester',
   paidThrough: 'May 2027',
   due: { month: 'June 2027', amount: 100, dueDate: '5 Jun 2027' },
-  arrears: 0,
+  arrears: 100, // owing, current month included
 }
 
 export const workerPayments = [
@@ -108,14 +126,14 @@ export const workerPayments = [
 export const notices = [
   { id: 'n1', from: 'Kerajaan Negeri Sabah', date: '28 May 2027', title: 'June contribution is due by 5 June', body: 'Pay RM100 by 5 June through the app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit. You will get a reminder.', kind: 'Payment' },
   { id: 'n2', from: 'Jabatan Tenaga Kerja Sabah', date: '19 May 2027', title: 'Your rights on rest days', body: 'Workers are entitled to one rest day each week. If you are asked to work on your rest day you must be paid for it. Use Help to report a problem.', kind: 'Rights' },
-  { id: 'n3', from: 'Kerajaan Negeri Sabah', date: '6 May 2027', title: 'Flood warning: Lahad Datu and Kinabatangan', body: 'Heavy rain is expected until Friday. Stay away from rivers. Follow your supervisor and the Civil Defence (APM) instructions.', kind: 'Safety' },
+  { id: 'n3', from: 'Kerajaan Negeri Sabah', date: '6 May 2027', title: 'Flood warning: Lahad Datu and Sandakan', body: 'Heavy rain is expected until Friday. Stay away from rivers. Follow your supervisor and the Civil Defence (APM) instructions.', kind: 'Safety' },
   { id: 'n4', from: 'Kerajaan Negeri Sabah', date: '3 May 2027', title: 'Payment received for May', body: 'We received RM100 for May 2027. Receipt RCP-2705-118204.', kind: 'Receipt' },
 ]
 
 export const offers = [
   { id: 'o1', merchant: '7-Eleven Sabah', title: 'RM3 off a RM30 prepaid reload', terms: 'One use a month. Any 7-Eleven in Sabah.', ends: '30 Jun 2027', redemptions: 4120, status: 'Live' },
   { id: 'o2', merchant: 'CelcomDigi', title: '10GB extra data on the RM35 plan', terms: 'New and existing prepaid lines.', ends: '31 Jul 2027', redemptions: 2287, status: 'Live' },
-  { id: 'o3', merchant: 'Pasaraya Servay', title: '5% off rice and cooking oil', terms: 'Tawau, Sandakan and Lahad Datu branches.', ends: '15 Jul 2027', redemptions: 1904, status: 'Live' },
+  { id: 'o3', merchant: 'Pasaraya Servay', title: '5% off rice', terms: 'Tawau, Sandakan and Lahad Datu branches.', ends: '15 Jul 2027', redemptions: 1904, status: 'Live' },
   { id: 'o4', merchant: 'Klinik Mesra Borneo', title: 'RM20 general consultation', terms: 'Show your SCANS card. Weekdays only.', ends: '31 Aug 2027', redemptions: 611, status: 'Live' },
   { id: 'o5', merchant: '7-Eleven Sabah', title: 'Free 600ml water with any meal set', terms: 'Selected outlets in Kota Kinabalu.', ends: '20 Aug 2027', redemptions: 0, status: 'Waiting for approval' },
 ]
@@ -138,7 +156,7 @@ const first = ['Agus', 'Rina', 'Joel', 'Sitti', 'Ramon', 'Dewi', 'Imran', 'Ana',
 const last = ['Salim', 'Wulandari', 'Dela Cruz', 'Nurhaliza', 'Bautista', 'Lestari', 'Hossain', 'Reyes', 'Santoso', 'Mendoza', 'Ahmad', 'Villanueva']
 const nat = ['Indonesia', 'Indonesia', 'Philippines', 'Indonesia', 'Philippines', 'Indonesia', 'Bangladesh', 'Philippines', 'Indonesia', 'Philippines', 'India', 'Philippines']
 const roles = ['Harvester', 'Fruit collector', 'Tractor driver', 'Weeding', 'Harvester', 'Nursery', 'Mill operator', 'Weeding', 'Harvester', 'Fruit collector', 'Mechanic', 'Harvester']
-const statuses = ['Paid', 'Paid', 'Due', 'Paid', '1 month overdue', 'Paid', 'Paid', '3+ months overdue', 'Paid', 'Due', 'Paid', 'Paid']
+const statuses = ['Paid', 'Paid', 'Due this month', 'Paid', '1–2 months overdue', 'Paid', 'Paid', '3+ months overdue', 'Paid', 'Due this month', 'Paid', 'Paid']
 const expiry = ['14 Mar 2028', '2 Aug 2027', '30 Jul 2027', '11 Jan 2028', '19 Jun 2027', '5 Feb 2028', '28 Oct 2027', '9 Jul 2027', '17 Dec 2027', '3 Sep 2027', '22 Apr 2028', '1 Nov 2027']
 export const employerWorkers = first.map((f, i) => ({
   id: i === 0 ? 'SCN26W0047218' : 'SCN26W00' + (47219 + i * 37),
@@ -147,11 +165,12 @@ export const employerWorkers = first.map((f, i) => ({
   role: roles[i],
   status: statuses[i],
   permitExpiry: expiry[i],
-  arrears: statuses[i] === '1 month overdue' ? 100 : statuses[i] === '3+ months overdue' ? 300 : 0,
+  arrears: { 'Due this month': 100, '1–2 months overdue': 200, '3+ months overdue': 400 }[statuses[i]] || 0,
   appActive: i % 5 !== 3,
 }))
 
 export const complaints = [
+  { id: 'CMP-2706-0095', topic: 'Wages paid late', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'JTK Sabah', opened: '2 Jun 2027', status: 'With agency' },
   { id: 'CMP-2706-0091', topic: 'Wages paid late', district: 'Sandakan', lang: 'Bahasa Indonesia', agency: 'JTK Sabah', opened: '2 Jun 2027', status: 'With agency' },
   { id: 'CMP-2706-0088', topic: 'Payment taken twice', district: 'Tawau', lang: 'Filipino', agency: 'SCANS support', opened: '1 Jun 2027', status: 'Resolved' },
   { id: 'CMP-2705-0412', topic: 'Passport kept by employer', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'JTK Sabah', opened: '28 May 2027', status: 'With agency' },
@@ -161,7 +180,7 @@ export const complaints = [
 
 export const announcements = [
   { id: 'a1', title: 'June contribution is due by 5 June', audience: 'All workers', langs: 6, sent: '28 May 2027', reached: 0.92, status: 'Sent' },
-  { id: 'a2', title: 'Flood warning: Lahad Datu and Kinabatangan', audience: 'Lahad Datu, Sandakan', langs: 6, sent: '6 May 2027', reached: 0.88, status: 'Sent' },
+  { id: 'a2', title: 'Flood warning: Lahad Datu and Sandakan', audience: 'Lahad Datu, Sandakan', langs: 6, sent: '6 May 2027', reached: 0.88, status: 'Sent' },
   { id: 'a3', title: 'Hari Raya Aidiladha office hours', audience: 'All workers and employers', langs: 6, sent: '—', reached: 0, status: 'Waiting for State approval' },
 ]
 
@@ -176,8 +195,13 @@ export const approvals = [
 export const auditLog = [
   { at: '17 Jun 2027 09:42', who: 'Nurul Ain (State, JKN)', action: 'Exported monthly collection report', target: 'May 2027' },
   { at: '17 Jun 2027 09:31', who: 'Jeffrey Gimbang (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0047477' },
+  { at: '17 Jun 2027 09:26', who: 'Siti Aminah Yusof (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0047551' },
+  { at: '17 Jun 2027 09:18', who: 'Nur Syafiqah Abdullah (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0047736' },
   { at: '17 Jun 2027 09:15', who: 'Faizal Rahman (Microtek)', action: 'Viewed worker record', target: 'SCN26W0047218' },
+  { at: '17 Jun 2027 09:05', who: 'Mohd Hafiz Rahim (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0047847' },
+  { at: '17 Jun 2027 08:58', who: 'Rosnah Majalin (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0048439' },
   { at: '17 Jun 2027 08:52', who: 'Mohd Hafiz Rahim (JIM Sabah)', action: 'Signed in with two steps', target: 'Immigration dashboard' },
+  { at: '17 Jun 2027 08:47', who: 'Hamdan Sapri (JIM Sabah)', action: 'Looked up contribution status', target: 'SCN26W0047958' },
   { at: '16 Jun 2027 17:03', who: 'System', action: 'Daily reconciliation completed, 0 breaks', target: '16 Jun 2027' },
   { at: '16 Jun 2027 15:40', who: 'Nur Syafiqah Abdullah (JIM Sabah)', action: 'Exported permits ending soon', target: '11 sample records · within 60 days, Sandakan' },
   { at: '16 Jun 2027 14:22', who: 'Lim Wei Ling (Microtek)', action: 'Approved merchant offer', target: 'Pasaraya Servay · 5% off rice' },
@@ -228,20 +252,18 @@ const pick = (r, xs) => xs[Math.floor(r() * xs.length)]
 export const collectionToday = 412300
 export const collectionMonth = collectedThisMonth
 
-// Paid / 1 month owing / 3+ months owing across all registered workers
+// Paid / due this month / 1–2 months overdue / 3+ months overdue across all registered workers (adds up to REGISTERED)
 export const paymentMetrics = [
   { label: 'Paid', value: paidThisMonth, color: 'var(--okFill)' },
-  { label: '1 month overdue', value: overdue1, color: 'var(--warnFill)' },
+  { label: 'Due this month', value: dueThisMonth, color: 'var(--blue)' },
+  { label: '1–2 months overdue', value: overdue1, color: 'var(--warnFill)' },
   { label: '3+ months overdue', value: overdue3, color: 'var(--badFill)' },
 ]
 
-// Daily collection for the demo month (1 to 17 June)
-export const dailyCollection = [612400, 958300, 1104200, 1322800, 1486100, 248600, 189400, 233900, 201700, 188300, 176200, 214800, 96400, 88100, 251300, 302700, 412300]
-  .map((v, i) => ({ label: String(i + 1), value: v }))
 // Last 7 days of the daily figures. June settlements also include arrears cleared and months paid in advance.
 export const collectionWeek = dailyCollection.slice(-7).reduce((s, d) => s + d.value, 0)
 
-// Monthly collection split into State and operator share
+// Monthly settlements split into State and operator share
 export const monthlySplit = monthly.map((m) => ({ label: m.m, values: [Math.round(m.v * STATE_SHARE), Math.round(m.v * (1 - STATE_SHARE))] }))
 
 // Sabah-wide workers per nationality (shares above applied to the registered total)
@@ -288,8 +310,10 @@ function makeWorkers() {
     for (const [n, s] of NAT_SHARE) { acc += s; if (roll <= acc) { nat = n; break } }
     const emp = i < 12 ? employers[0] : pick(r, employers)
     const st = r()
-    const status = st < 0.6 ? 'Paid' : st < 0.72 ? 'Due' : st < 0.88 ? '1 month overdue' : '3+ months overdue'
-    const arrears = status === '1 month overdue' ? 100 : status === '3+ months overdue' ? 300 + Math.floor(r() * 4) * 100 : 0
+    // Months owing, the current month included. Same random draws as before so the sample stays the same.
+    const owing = st < 0.6 ? 0 : st < 0.72 ? 1 : st < 0.88 ? 2 + (i % 2) : 4 + Math.floor(r() * 2)
+    const status = statusFor(owing)
+    const arrears = owing * RATE
     let yr = 2027 + Math.floor(r() * 2)
     const mo = Math.floor(r() * 12)
     if (yr === 2027 && mo < 6) yr = 2028 // every permit in the sample is still valid on the demo date
@@ -314,7 +338,7 @@ function makeWorkers() {
       role: pick(r, SITE_ROLE[emp.sector] || ['General worker']),
       status,
       arrears,
-      paidThrough: status === 'Paid' ? 'Jun 2027' : status === 'Due' ? 'May 2027' : status === '1 month overdue' ? 'Apr 2027' : 'Feb 2027',
+      paidThrough: `${MONTHS[5 - owing]} 2027`,
       appActive: r() > 0.12,
       consent: r() > 0.15,
       language: nat === 'Indonesia' ? 'Bahasa Indonesia' : nat === 'Philippines' ? 'Filipino' : nat === 'Bangladesh' ? 'Bengali' : nat === 'Others' ? 'Nepali' : 'English',
@@ -327,7 +351,7 @@ function makeWorkers() {
     ...out[0], id: demoWorker.scansId, name: demoWorker.name, gender: 'Male', dob: '12 Aug 1991', nationality: 'Indonesia',
     passport: demoWorker.passport, plks: demoWorker.plks, permitExpiry: demoWorker.permitExpiry, permitDays: daysFromDemo(2028, 2, 14),
     employer: demoWorker.employer, employerId: demoWorker.employerId, district: demoWorker.district, sector: 'Plantation',
-    role: demoWorker.role, status: 'Due', arrears: 0, paidThrough: 'May 2027', appActive: true, consent: true,
+    role: demoWorker.role, status: 'Due this month', arrears: demoWorker.arrears, paidThrough: 'May 2027', appActive: true, consent: true,
     language: demoWorker.language, phone: demoWorker.phone, arrived: '3 Feb 2022',
   }
   return out
@@ -340,7 +364,7 @@ export function paymentsFor(w) {
   if (w.id === demoWorker.scansId) return workerPayments
   const r = rng(parseInt(w.id.slice(-5), 10))
   const methods = ['Touch ’n Go eWallet', 'Cash at 7-Eleven', 'DuitNow QR', 'Employer bulk payment', 'FPX online banking']
-  const startIdx = { 'Jun 2027': 5, 'May 2027': 4, 'Apr 2027': 3, 'Feb 2027': 1 }[w.paidThrough] ?? 4
+  const startIdx = MONTHS.indexOf(w.paidThrough.slice(0, 3))
   const rows = []
   for (let m = startIdx; m >= 0 && rows.length < 6; m--) {
     const method = pick(r, methods)
@@ -418,7 +442,7 @@ export const merchantPeakHours = [
   ['3pm', 150], ['4pm', 170], ['5pm', 240], ['6pm', 420], ['7pm', 610], ['8pm', 650], ['9pm', 540], ['10pm', 300], ['11pm', 140],
 ].map(([label, value]) => ({ label, value }))
 export const merchantRedeemers = [
-  { label: 'Indonesia', value: 0.58 }, { label: 'Philippines', value: 0.31 }, { label: 'Bangladesh', value: 0.05 }, { label: 'India', value: 0.04 }, { label: 'Others', value: 0.02 },
+  { label: 'Indonesia', value: 0.58 }, { label: 'Philippines', value: 0.31 }, { label: 'India', value: 0.05 }, { label: 'Bangladesh', value: 0.04 }, { label: 'Others', value: 0.02 },
 ]
 export const recentRedemptions = [
   { id: 'RDM-881204', worker: 'SCN26W•••7218', offer: 'RM3 off a RM30 prepaid reload', outlet: '7-Eleven Fajar Centre', at: '17 Jun 2027 19:42', status: 'Confirmed' },
@@ -469,13 +493,13 @@ export const adminRoles = [
 /* ---------- Global announcements ---------- */
 export const globalAnnouncements = [
   { id: 'GA-0048', title: 'June 2027 contribution is due by 5 June', sub: 'System-generated reminder', audience: 'Workers', channels: ['App', 'SMS', 'WhatsApp'], recipients: 130391, date: '28 May 2027', status: 'Sent', reached: 0.92 },
-  { id: 'GA-0047', title: 'Scheduled maintenance, 20 June 01:00 to 03:00', sub: 'Platform update', audience: 'All', channels: ['App', 'Email'], recipients: 135212, date: '20 Jun 2027', status: 'Scheduled', reached: 0 },
+  { id: 'GA-0047', title: 'Scheduled maintenance, 20 June 01:00 to 03:00', sub: 'Platform update', audience: 'Workers and employers', channels: ['App', 'Email'], recipients: 135212, date: '20 Jun 2027', status: 'Scheduled', reached: 0 },
   { id: 'GA-0046', title: 'New offer: RM5 off a GrabCar ride', sub: 'Merchant offer', audience: 'Workers', channels: ['App', 'Push'], recipients: 89730, date: '15 Jun 2027', status: 'Sent', reached: 0.81 },
   { id: 'GA-0045', title: 'Permit renewals: check your expiry date', sub: 'Information only, no action on contributions', audience: 'Employers', channels: ['Email', 'App'], recipients: 4821, date: '12 Jun 2027', status: 'Sent', reached: 0.97 },
-  { id: 'GA-0044', title: 'Hari Raya Aidiladha office hours', sub: 'Festive notice', audience: 'All', channels: ['App', 'SMS', 'Email'], recipients: 135212, date: '14 Jun 2027', status: 'Waiting for State approval', reached: 0 },
-  { id: 'GA-0039', title: 'JIM counter hours over Hari Raya Aidiladha', sub: 'Notice from JIM Sabah', origin: 'JIM', audience: 'All', channels: ['App', 'SMS'], recipients: 135212, date: '14 Jun 2027', status: 'Sent', reached: 0.9, message: 'JIM offices in Sabah close on 17 June for Hari Raya Aidiladha and open again on 18 June at 8:00.' },
-  { id: 'GA-0043', title: 'Flood warning: Lahad Datu and Kinabatangan', sub: 'Safety notice from the State', audience: 'Workers', channels: ['App', 'SMS', 'WhatsApp'], recipients: 41400, date: '6 May 2027', status: 'Sent', reached: 0.88 },
-  { id: 'GA-0042', title: 'Pay 12 months at once', sub: 'Feature announcement', audience: 'All', channels: ['App'], recipients: 135212, date: '—', status: 'Draft', reached: 0 },
+  { id: 'GA-0044', title: 'Hari Raya Aidiladha office hours', sub: 'Festive notice', audience: 'Workers and employers', channels: ['App', 'SMS', 'Email'], recipients: 135212, date: '14 Jun 2027', status: 'Waiting for State approval', reached: 0 },
+  { id: 'GA-0039', title: 'JIM counter hours over Hari Raya Aidiladha', sub: 'Notice from JIM Sabah', origin: 'JIM', audience: 'Workers and employers', channels: ['App', 'SMS'], recipients: 135212, date: '14 Jun 2027', status: 'Sent', reached: 0.9, message: 'JIM offices in Sabah close on 17 June for Hari Raya Aidiladha and open again on 18 June at 8:00.' },
+  { id: 'GA-0043', title: 'Flood warning: Lahad Datu and Sandakan', sub: 'Safety notice from the State', audience: 'Workers', channels: ['App', 'SMS', 'WhatsApp'], recipients: 41400, date: '6 May 2027', status: 'Sent', reached: 0.88 },
+  { id: 'GA-0042', title: 'Pay 12 months at once', sub: 'Feature announcement', audience: 'Workers and employers', channels: ['App'], recipients: 135212, date: '—', status: 'Draft', reached: 0 },
   { id: 'GA-0041', title: 'Employer portal: new monthly statements', sub: 'Feature announcement', audience: 'Employers', channels: ['Email'], recipients: 4821, date: '2 May 2027', status: 'Sent', reached: 0.99 },
 ]
 

@@ -45,7 +45,6 @@ export function account(paidIdx) {
 export const PLAN_DEFS = [
   { id: 'm', months: 1, key: 'planM' },
   { id: 'q', months: 3, key: 'planQ' },
-  { id: 'h', months: 6, key: 'planH' },
   { id: 'y', months: 12, key: 'planY' },
 ]
 export const planFor = (id) => PLAN_DEFS.find((p) => p.id === id) || PLAN_DEFS[0]

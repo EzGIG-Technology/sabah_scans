@@ -21,7 +21,7 @@ export const companyCompliance = [
   { label: 'Some workers owing', value: 1061, color: 'var(--warnFill)' },
   { label: 'Under half paid', value: 482, color: 'var(--badFill)' },
 ]
-export const companiesActive = 3204 // employers who signed in or paid in June
+export const companiesActive = 3204 // employers who paid for at least one worker in June (not the same as the 4,192 portal-active employers)
 export const appUsers = 89730 // workers signed up to the SCANS app (same as the push audience in announcements)
 
 // Permits ending within 90 days, scaled from the 160-record sample to all registered workers.

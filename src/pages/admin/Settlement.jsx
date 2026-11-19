@@ -71,10 +71,10 @@ export default function Settlement() {
             { key: 'status', label: 'Status', render: (s) => <Status>{s.status}</Status> },
           ]} />
         </Card>
-        <Card flush title="Operator share invoices" sub="30% of collection, paid by the State from the FWECF account">
+        <Card flush title="Operator share invoices" sub="30% of reconciled settlements, paid by the State from the FWECF account">
           <Table rows={[...operatorInvoices].reverse()} columns={[
             { key: 'month', label: 'Month' },
-            { key: 'gross', label: 'Collected', align: 'r', render: (i) => rm(i.gross) },
+            { key: 'gross', label: 'Settled', align: 'r', render: (i) => rm(i.gross) },
             { key: 'operator', label: 'Operator share', align: 'r', render: (i) => rm(i.operator) },
             { key: 'status', label: 'Status', render: (i) => <Status tone={i.status === 'Accruing' ? 'info' : 'ok'}>{i.status}</Status> },
           ]} />

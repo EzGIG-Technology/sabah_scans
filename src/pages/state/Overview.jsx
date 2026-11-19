@@ -28,7 +28,7 @@ const RANGES = [
   { value: 'today', label: 'Today', range: '17 Jun 2027', total: collectionToday, note: 'Payments to 15:00' },
   { value: '7d', label: 'Last 7 days', range: '11 Jun to 17 Jun 2027', total: week, note: 'Credited to the FWECF account, including arrears cleared' },
   { value: '30d', label: 'Last 30 days', range: '18 May to 17 Jun 2027', total: month30, note: 'Credited to the FWECF account, including arrears cleared' },
-  { value: 'ytd', label: 'This year', range: '1 Jan to 17 Jun 2027', total: ytd, note: `Contributions for January to June. State share ${rmM(stateYtd)}` },
+  { value: 'ytd', label: 'This year', range: '1 Jan to 17 Jun 2027', total: ytd, note: `Settled into the FWECF account, January to June. State share ${rmM(stateYtd)}` },
 ]
 
 /* ---------- Monthly / weekly / daily collection with change ---------- */
@@ -91,10 +91,10 @@ export default function Overview() {
       <WorkforceMap />
 
       <div className="grid g-main">
-        <Card title="Collected each month" sub="2027, split between the State (70%) and the operator (30%)">
+        <Card title="Settled each month" sub="2027, reconciled settlements split between the State (70%) and the operator (30%)">
           <BarChart data={monthlySplit} series={['State share (70%)', 'Operator (30%)']} colors={['#1D66B8', '#4D9AD3']} height={250} format={axisRm} />
         </Card>
-        <Card title="Where the money goes" sub="January to June 2027">
+        <Card title="Where the money goes" sub="Settled January to June 2027, after reconciliation">
           <SplitBar parts={[
             { label: 'Kerajaan Negeri Sabah', share: STATE_SHARE, text: rm(stateYtd), color: '#1D66B8' },
             { label: 'Operator, Microtek', share: 1 - STATE_SHARE, text: rm(operatorYtd), color: '#4D9AD3' },
@@ -106,7 +106,7 @@ export default function Overview() {
         <Card title="By sector" sub="Registered workers, proposal s.3.1">
           <HBarChart data={sectors.map((s) => ({ label: s.name, value: s.workers }))} />
         </Card>
-        <Card title="Nationality" sub="Registered workers">
+        <Card title="Nationality" sub="Registered workers. Sample data: the proposal has no nationality split">
           <Donut data={nationalityCounts} center={num(REGISTERED)} centerSub="workers" size={170} />
         </Card>
       </div>

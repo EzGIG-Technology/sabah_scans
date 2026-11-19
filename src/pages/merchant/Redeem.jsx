@@ -113,7 +113,7 @@ export default function Redeem() {
               </div>
               <dl className="kv">
                 <div><dt>SCANS ID</dt><dd className="mx-mask">{hit.worker}</dd></div>
-                <div><dt>Contribution status</dt><dd><Status tone="ok">Up to date</Status></dd></div>
+                <div><dt>Contribution status</dt><dd><Status tone="ok">Paid</Status></dd></div>
               </dl>
               <label className="field">
                 <span>Confirming at</span>
@@ -155,7 +155,7 @@ export default function Redeem() {
                 <div><dt>Offer</dt><dd>{done.offer.title}</dd></div>
                 <div><dt>SCANS ID</dt><dd className="mx-mask">{done.worker}</dd></div>
                 <div><dt>Outlet</dt><dd>{done.outlet}</dd></div>
-                <div><dt>Contribution status</dt><dd>Up to date</dd></div>
+                <div><dt>Contribution status</dt><dd>Paid</dd></div>
               </dl>
               <div className="mx-enter-actions">
                 <button className="btn primary lg" onClick={reset}><ScanLine /> Confirm another code</button>

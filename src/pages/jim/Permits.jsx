@@ -60,8 +60,8 @@ export default function Permits() {
               { key: 'plks', label: 'PLKS', render: (w) => <span className="mono-id small jim-nowrap">{w.plks}</span> },
               { key: 'ends', label: 'Permit ends', render: (w) => <span className="num jim-nowrap">{w.permitExpiry}</span> },
               { key: 'left', label: 'Days left', align: 'r', render: (w) => <Pill tone={w.permitDays <= 30 ? 'bad' : w.permitDays <= 60 ? 'warn' : 'info'}>{w.permitDays} days</Pill> },
-              { key: 'employer', label: 'Employer', render: (w) => w.employer.replace(/ (Sdn Bhd|Bhd)$/, '') },
-              { key: 'office', label: 'JIM office', render: (w) => OFFICE_FOR[w.district] },
+              { key: 'employer', label: 'Employer', render: (w) => <div><span>{w.employer.replace(/ (Sdn Bhd|Bhd)$/, '')}</span><small className="muted" style={{ display: 'block' }}>{w.district}</small></div> },
+              { key: 'office', label: 'JIM office', render: (w) => OFFICE_FOR[w.district] + (OFFICE_FOR[w.district] !== w.district ? ` (serves ${w.district})` : '') },
             ]} />
           </div>
       </Card>

@@ -31,7 +31,7 @@ const STEPS = [
   { icon: Smartphone, t: 'The worker pays', d: 'In the app, with cash at any 7-Eleven, or through the employer with the worker’s consent.', more: 'Touch ’n Go, DuitNow QR, Boost, GrabPay, ShopeePay, FPX, cards and 7-Eleven cash. Every payment gets a receipt in the app and by SMS.' },
   { icon: CreditCard, t: 'A licensed acquirer takes it', d: 'The payment goes through a licensed payment acquirer, never through SCANS.', more: 'SCANS records the payment and the acquirer reference. It never holds or moves the money itself.' },
   { icon: Landmark, t: 'Into the FWECF account', d: 'The acquirer settles into the FWECF account held by Jabatan Kewangan Negeri Sabah.', more: 'Settlement runs every night. The State’s finance team reconciles the account against every receipt the next morning.' },
-  { icon: PieChart, t: 'Split 70 to 30', d: '70% stays with the State. 30% pays Microtek to build and run SCANS.', more: `Of every ${rm(RATE)}, ${rm(RATE * STATE_SHARE)} stays with Kerajaan Negeri Sabah. Under the Private Finance Initiative the State carries no build or running cost.` },
+  { icon: PieChart, t: 'Split 70 to 30', d: '70% stays with the State. 30% pays Microtek to build and run SCANS.', more: `Of every ${rm(RATE)}, ${rm(RATE * STATE_SHARE)} stays with Kerajaan Negeri Sabah. Under the Private Finance Initiative the State carries no build or running cost, subject to the PFI contract terms. Who pays the payment gateway fees (MDR) is not agreed yet.` },
   { icon: ReceiptText, t: 'Receipt and status everywhere', d: 'The worker, the employer and the State see the same record the same day.', more: 'One record, many views: the worker app, the employer portal and the State dashboard all read the same payment.' },
 ]
 
@@ -48,7 +48,7 @@ const FAQS = [
   ['Can an employer take it from wages?', 'Only with a written deduction permit from Jabatan Tenaga Kerja Sabah under section 113(4) of the Labour Ordinance. Without that permit on file, the employer portal does not allow payment through payroll.'],
   ['How does someone pay without a bank account?', 'In cash at any 7-Eleven in Sabah with a counter code from the app, or with Touch ’n Go, DuitNow QR, Boost, GrabPay or ShopeePay. Every payment gives a receipt in the app and by SMS.'],
   ['Which languages does the app use?', 'Bahasa Melayu, English, Bahasa Indonesia, Filipino, Bengali and Nepali. Official notices from the State arrive in the language the worker chooses.'],
-  ['Where does the money go?', 'Into an FWECF account held by Jabatan Kewangan Negeri Sabah. 70% stays with the State. 30% pays the operator to build and run the platform, so the State carries no build or running cost.'],
+  ['Where does the money go?', 'Into an FWECF account held by Jabatan Kewangan Negeri Sabah. 70% stays with the State. 30% pays the operator to build and run the platform, so the State carries no build or running cost, subject to the PFI contract terms. Who pays the payment gateway fees (MDR) is not agreed yet.'],
   ['Who can see a worker’s information?', 'Only people whose job needs it, and every view is logged for the State’s auditors. Employers see contribution status only. Shops never see worker records.'],
   ['Is SCANS an immigration check?', 'No. Signing up to SCANS is not an immigration check and the app does not decide anyone’s status. The SCANS card shows contribution status only and is not an immigration document.'],
 ]
@@ -84,7 +84,7 @@ export default function Landing() {
               <div className="lp-stat"><b className="num">{num(REGISTERED)}</b><span>registered foreign workers in Sabah, 31 December 2025</span></div>
               <div className="lp-stat"><b className="num">RM{RATE}</b><span>a month, or RM300 a quarter, or RM1,200 a year</span></div>
               <div className="lp-stat"><b className="num">{STATE_SHARE * 100}%</b><span>of every ringgit stays with the State</span></div>
-              <div className="lp-stat"><b className="num">RM0</b><span>build or running cost to the State</span></div>
+              <div className="lp-stat"><b className="num">RM0</b><span>build or running cost to the State, subject to the PFI contract terms</span></div>
             </div>
           </div>
         </div>

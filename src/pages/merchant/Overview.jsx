@@ -51,7 +51,7 @@ export default function Overview() {
           <HBarChart data={perf} />
           <p className="small muted" style={{ marginTop: 14 }}>{num(june)} redemptions across {live.length} live offers. Counts include only codes your staff confirmed at the counter.</p>
         </Card>
-        <Card title="Redeemers by nationality" sub="Share of everyone who used one of your perks this year">
+        <Card title="Redeemers by nationality" sub="Share of everyone who used one of your perks this year. Sample data">
           <Donut data={merchantRedeemers} center={pct(merchantRedeemers[0].value)} centerSub={merchantRedeemers[0].label} size={168} />
           <div className="mx-privacy-line"><EyeOff size={15} aria-hidden="true" />Totals only. Groups under 50 people are joined into Others.</div>
         </Card>

@@ -225,8 +225,8 @@ export function Notice() {
 const TOPICS = ['Payment problem', 'My details are wrong', 'Wages or working hours', 'My passport is being kept', 'Housing', 'Something else']
 const AGENCY = { 'Payment problem': 'SCANS support', 'My details are wrong': 'SCANS support', 'Something else': 'SCANS support' }
 const EARLIER = [
-  { id: 'CMP-2605-0412', topic: 'Payment taken twice', note: 'Refunded RM100 on 9 May 2027', status: 'Resolved' },
-  { id: 'CMP-2604-0218', topic: 'Cannot see April receipt', note: 'Answered on 22 Apr 2027', status: 'Resolved' },
+  { id: 'CMP-2705-0415', topic: 'Payment taken twice', note: 'Refunded RM100 on 9 May 2027', status: 'Resolved' },
+  { id: 'CMP-2704-0218', topic: 'Cannot see April receipt', note: 'Answered on 22 Apr 2027', status: 'Resolved' },
 ]
 
 export function Help() {
@@ -241,7 +241,7 @@ export function Help() {
   const submit = (e) => {
     e.preventDefault()
     if (offline) { toast('Saved. We send it when you are back online.'); return }
-    setSent({ id: 'CMP-2706-0094', topic, agency, anon })
+    setSent({ id: 'CMP-2706-0118', topic, agency, anon })
     toast('Complaint sent')
   }
   return (
@@ -287,7 +287,7 @@ export function Help() {
         <div className="wk-sec-h"><h2>Your earlier requests</h2></div>
         <div className="wk-list">
           {sent && <div className="wk-li tall"><span className="tx"><b>{sent.topic}</b><small className="num">{sent.id} · sent today · {sent.agency}</small></span><Status>New</Status></div>}
-          <div className="wk-li tall"><span className="tx"><b>Wages paid late</b><small className="num">CMP-2706-0091 · 2 Jun 2027 · JTK Sabah</small></span><Status>With agency</Status></div>
+          <div className="wk-li tall"><span className="tx"><b>Wages paid late</b><small className="num">CMP-2706-0095 · 2 Jun 2027 · JTK Sabah</small></span><Status>With agency</Status></div>
           {EARLIER.map((x) => (
             <div key={x.id} className="wk-li tall"><span className="tx"><b>{x.topic}</b><small className="num">{x.id} · {x.note}</small></span><Status>{x.status}</Status></div>
           ))}
@@ -298,8 +298,8 @@ export function Help() {
 }
 
 /* ---------- Me: profile with the SCANS card (Sabah GO profile pattern) ---------- */
-const PLAN_NAMES = { m: 'Monthly', q: '3 months', h: '6 months', y: 'Annually' }
-const PLAN_PRICE = { m: 'RM100', q: 'RM300', h: 'RM600', y: 'RM1,200' }
+const PLAN_NAMES = { m: 'Monthly', q: '3 months', y: 'Annually' }
+const PLAN_PRICE = { m: 'RM100', q: 'RM300', y: 'RM1,200' }
 const readLS = (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } }
 const writeLS = (k, v) => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
 

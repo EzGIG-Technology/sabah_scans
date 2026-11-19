@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Download, Users, ShieldCheck, Eye, CheckCircle2, Clock, AlertTriangle, GitCompareArrows, ScanLine } from 'lucide-react'
 import { PageHead, Card, Kpi, Status, Pill, Callout, Empty, SearchInput, Select, Table, Avatar, useToast } from '../../components/ui.jsx'
-import { REGISTERED, workers, findWorker, districts, overdue1, overdue3, paidThisMonth, num, pct } from '../../data/demo.js'
+import { REGISTERED, workers, findWorker, districts, dueThisMonth, overdue1, overdue3, paidThisMonth, num, pct } from '../../data/demo.js'
 import { permitText } from '../shared/data.js'
 import { logEvent, useStore, currentActor } from '../shared/store.js'
 import { BASE, contrib, CONTRIB_LEVELS, useJim } from './data.js'
@@ -45,8 +45,8 @@ export function JimWorkerList() {
       <div className="grid g-4 keep2">
         <Kpi icon={Users} label="Registered on SCANS" value={num(REGISTERED)} />
         <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(paidThisMonth)} note={pct(paidThisMonth / REGISTERED) + ' of registered'} />
-        <Kpi icon={Clock} tone="warn" label="1 month owing" value={num(overdue1)} note="Reminders only" />
-        <Kpi icon={AlertTriangle} tone="bad" label="3+ months owing" value={num(overdue3)} note="Reminders only" />
+        <Kpi icon={Clock} tone="warn" label="Not yet paid for June" value={num(REGISTERED - paidThisMonth)} note={`${num(dueThisMonth)} due this month · ${num(overdue1)} 1–2 months overdue`} />
+        <Kpi icon={AlertTriangle} tone="bad" label="3+ months overdue" value={num(overdue3)} note="Reminders only" />
       </div>
       <Card title="Worker records" sub={any ? `${num(rows.length)} of ${num(workers.length)} sample records match` : 'Choose a row to open the record.'}
         action={any ? <button className="link" onClick={clear}>Clear filters</button> : null}>

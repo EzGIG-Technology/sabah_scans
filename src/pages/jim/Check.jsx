@@ -23,8 +23,8 @@ const by = (value) => {
   return t.startsWith('scn') ? 'SCANS ID' : t.startsWith('plks') ? 'PLKS number' : 'passport'
 }
 
-const owing3 = workers.find((w) => w.arrears > 100)
-const owing1 = workers.find((w) => w.arrears === 100)
+const owing3 = workers.find((w) => w.status === '3+ months overdue')
+const owing1 = workers.find((w) => w.status === '1–2 months overdue')
 const SAMPLES = [
   { label: `SCANS ID · ${demoWorker.name}`, value: demoWorker.scansId },
   { label: `Passport · ${owing3.name}`, value: owing3.passport },
@@ -32,9 +32,10 @@ const SAMPLES = [
   { label: 'Not on SCANS', value: 'C 0000001' },
 ]
 const BANNER = {
-  'Up to date': { icon: CheckCircle2, text: (w) => `Paid up to ${w.paidThrough}` },
-  '1 month owing': { icon: Clock, text: (w) => `Paid up to ${w.paidThrough}. Reminders go out in the worker’s language.` },
-  '3+ months owing': { icon: AlertTriangle, text: (w) => `Paid up to ${w.paidThrough}. Reminders go out in the worker’s language.` },
+  Paid: { icon: CheckCircle2, text: (w) => `Paid up to ${w.paidThrough}` },
+  'Due this month': { icon: Clock, text: (w) => `Paid up to ${w.paidThrough}. June was due on 5 June.` },
+  '1–2 months overdue': { icon: Clock, text: (w) => `Paid up to ${w.paidThrough}. Reminders go out in the worker’s language.` },
+  '3+ months overdue': { icon: AlertTriangle, text: (w) => `Paid up to ${w.paidThrough}. Reminders go out in the worker’s language.` },
 }
 
 export default function Check() {

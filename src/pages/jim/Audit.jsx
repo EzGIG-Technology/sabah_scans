@@ -5,7 +5,7 @@ import { ScrollText, Eye, Download, PencilLine, ShieldCheck } from 'lucide-react
 import { PageHead, Card, Kpi, Callout, Pill, SearchInput, Select, Table, Empty, useToast } from '../../components/ui.jsx'
 import { num } from '../../data/demo.js'
 import { useStore, logEvent } from '../shared/store.js'
-import { ACTOR } from './data.js'
+import { ACTOR, CHECKS_TODAY, OFFICES } from './data.js'
 
 const KIND_TONE = { View: 'info', Export: 'purple', Change: 'warn', 'Sign-in': 'grey', System: 'grey' }
 
@@ -13,6 +13,9 @@ export default function Audit() {
   const toast = useToast()
   const audit = useStore((s) => s.audit)
   const jim = audit.filter((a) => a.who.includes('(JIM'))
+  // Status checks: the day's total from every office, plus any made in this session. The latest are listed below.
+  const isCheck = (a) => a.action === 'Looked up contribution status'
+  const checksToday = CHECKS_TODAY + jim.filter((a) => isCheck(a) && a.t).length
   const [q, setQ] = useState('')
   const [kind, setKind] = useState('All')
   const [who, setWho] = useState('All')
@@ -33,8 +36,8 @@ export default function Audit() {
       </PageHead>
       <Callout icon={ShieldCheck}>Append-only. The same events are visible to Microtek and to the State’s auditors, and cannot be edited or deleted.</Callout>
       <div className="grid g-4 keep2">
-        <Kpi icon={ScrollText} label="JIM events" value={num(jim.length)} note="This session and seed data" />
-        <Kpi icon={Eye} label="Lookups and views" value={num(jim.filter((a) => a.kind === 'View').length)} />
+        <Kpi icon={ScrollText} label="Status checks today" value={num(checksToday)} note={`By officers at ${OFFICES.length} JIM offices. The latest are listed below.`} />
+        <Kpi icon={Eye} label="Record views" value={num(jim.filter((a) => a.kind === 'View' && !isCheck(a)).length)} />
         <Kpi icon={Download} tone="purple" label="Exports" value={num(jim.filter((a) => a.kind === 'Export').length)} />
         <Kpi icon={PencilLine} tone="warn" label="Answers and notices" value={num(jim.filter((a) => a.kind === 'Change').length)} />
       </div>

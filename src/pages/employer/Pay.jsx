@@ -10,7 +10,6 @@ const STEPS = ['Select workers', 'Choose period', 'Checkout', 'Done']
 const PERIODS = [
   { m: 1, label: '1 month', note: 'The next unpaid month for each worker' },
   { m: 3, label: '3 months', note: 'Same as RM300 a quarter' },
-  { m: 6, label: '6 months', note: 'Half a year in one payment' },
   { m: 12, label: '12 months', note: 'Same as RM1,200 a year' },
 ]
 const clock = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') }
@@ -124,7 +123,7 @@ export default function Pay() {
             <div className="toolbar" style={{ marginBottom: 12 }}>
               <SearchInput value={q} onChange={setQ} placeholder="Search name or SCANS ID" />
               <Seg label="Show" value={view} onChange={setView} items={[{ value: 'owing', label: 'Owing' }, { value: 'all', label: 'All workers' }]} />
-              <button className="btn outline sm" onClick={() => pick((w) => w.bucket === 'risk')}><span className="emp-dot bad" aria-hidden="true" />Owing 3+ months</button>
+              <button className="btn outline sm" onClick={() => pick((w) => w.bucket === 'risk')}><span className="emp-dot bad" aria-hidden="true" />3+ months overdue</button>
               <button className="btn outline sm" onClick={() => pick((w) => w.bucket === 'risk' || w.bucket === 'late')}><span className="emp-dot warn" aria-hidden="true" /><span className="emp-dot bad" aria-hidden="true" style={{ marginLeft: -8 }} />Owing earlier months</button>
               <button className="btn outline sm" onClick={() => pick((w) => w.bucket !== 'paid')}>Everyone who owes</button>
               {sel.size > 0 && <button className="btn ghost sm" onClick={() => setSel(new Set())}>Clear</button>}

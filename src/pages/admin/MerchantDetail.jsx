@@ -132,7 +132,7 @@ export default function MerchantDetail() {
                   {A.offers.length ? <HBarChart data={A.offers} /> : <Empty title="No offer uses in this period" />}
                 </div>
                 <div>
-                  <div className="gv-sub">Who used perks, by nationality</div>
+                  <div className="gv-sub">Who used perks, by nationality (sample data)</div>
                   <Donut data={A.nat} center={num(A.workersUsed)} centerSub="workers" size={160} format={(v) => num(v)} />
                   <p className="small muted" style={{ marginTop: 10 }}>Totals only. Merchants never see who the workers are.</p>
                 </div>

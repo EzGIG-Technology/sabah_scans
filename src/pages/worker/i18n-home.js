@@ -18,7 +18,7 @@ export const home = {
     scansInfo: 'SCANS info', readMore: 'Read more',
     infoText: 'Jabatan Tenaga Kerja Sabah: you are entitled to one rest day each week. If you are asked to work on it, you must be paid for it.',
     amountDue: 'Amount due', forM: 'for {m}', payFreq: 'Payment frequency',
-    planM: 'Monthly', planQ: '3 months', planH: '6 months', planY: 'Annually',
+    planM: 'Monthly', planQ: '3 months', planY: 'Annually',
   },
   ms: {
     statusOk: 'Tiada tunggakan', statusDue: 'Perlu dibayar', statusOver: 'Tertunggak',
@@ -34,7 +34,7 @@ export const home = {
     scansInfo: 'Info SCANS', readMore: 'Baca lagi',
     infoText: 'Jabatan Tenaga Kerja Sabah: anda berhak mendapat satu hari rehat setiap minggu. Jika anda diminta bekerja pada hari itu, anda mesti dibayar.',
     amountDue: 'Jumlah perlu dibayar', forM: 'untuk {m}', payFreq: 'Kekerapan bayaran',
-    planM: 'Bulanan', planQ: '3 bulan', planH: '6 bulan', planY: 'Tahunan',
+    planM: 'Bulanan', planQ: '3 bulan', planY: 'Tahunan',
   },
   id: {
     statusOk: 'Lunas', statusDue: 'Harus dibayar', statusOver: 'Terlambat',
@@ -50,7 +50,7 @@ export const home = {
     scansInfo: 'Info SCANS', readMore: 'Baca selengkapnya',
     infoText: 'Jabatan Tenaga Kerja Sabah: Anda berhak atas satu hari libur setiap minggu. Jika diminta bekerja pada hari itu, Anda harus dibayar.',
     amountDue: 'Jumlah tagihan', forM: 'untuk {m}', payFreq: 'Frekuensi pembayaran',
-    planM: 'Bulanan', planQ: '3 bulan', planH: '6 bulan', planY: 'Tahunan',
+    planM: 'Bulanan', planQ: '3 bulan', planY: 'Tahunan',
   },
   fil: {
     statusOk: 'Bayad na', statusDue: 'Dapat bayaran', statusOver: 'Huli na',
@@ -66,7 +66,7 @@ export const home = {
     scansInfo: 'SCANS info', readMore: 'Magbasa pa',
     infoText: 'Jabatan Tenaga Kerja Sabah: may karapatan ka sa isang araw ng pahinga bawat linggo. Kung pinagtrabaho ka sa araw na iyon, dapat kang bayaran.',
     amountDue: 'Halagang babayaran', forM: 'para sa {m}', payFreq: 'Dalas ng pagbabayad',
-    planM: 'Buwanan', planQ: '3 buwan', planH: '6 na buwan', planY: 'Taunan',
+    planM: 'Buwanan', planQ: '3 buwan', planY: 'Taunan',
   },
   bn: {
     statusOk: 'হালনাগাদ', statusDue: 'পরিশোধ বাকি', statusOver: 'বকেয়া',
@@ -82,7 +82,7 @@ export const home = {
     scansInfo: 'SCANS তথ্য', readMore: 'আরও পড়ুন',
     infoText: 'Jabatan Tenaga Kerja Sabah: প্রতি সপ্তাহে একদিন ছুটি পাওয়া আপনার অধিকার। সেদিন কাজ করতে বলা হলে তার জন্য আপনাকে মজুরি দিতে হবে।',
     amountDue: 'প্রদেয় পরিমাণ', forM: '{m} মাসের জন্য', payFreq: 'পরিশোধের সময়কাল',
-    planM: 'মাসিক', planQ: '3 মাস', planH: '6 মাস', planY: 'বার্ষিক',
+    planM: 'মাসিক', planQ: '3 মাস', planY: 'বার্ষিক',
   },
   ne: {
     statusOk: 'अद्यावधिक', statusDue: 'भुक्तानी बाँकी', statusOver: 'म्याद नाघेको',
@@ -98,6 +98,6 @@ export const home = {
     scansInfo: 'SCANS जानकारी', readMore: 'थप पढ्नुहोस्',
     infoText: 'Jabatan Tenaga Kerja Sabah: तपाईंलाई हरेक हप्ता एक दिन बिदाको अधिकार छ। त्यो दिन काम गर्न लगाइए त्यसको ज्याला तपाईंलाई दिनुपर्छ।',
     amountDue: 'तिर्नुपर्ने रकम', forM: '{m} को लागि', payFreq: 'भुक्तानी अवधि',
-    planM: 'मासिक', planQ: '3 महिना', planH: '6 महिना', planY: 'वार्षिक',
+    planM: 'मासिक', planQ: '3 महिना', planY: 'वार्षिक',
   },
 }

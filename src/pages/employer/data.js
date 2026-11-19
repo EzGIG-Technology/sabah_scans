@@ -3,7 +3,7 @@
 // paid for June 2027 (41 of 412) plus the sample of paid workers from demo.js,
 // so the counts on every employer screen reconcile with employerSelf (412 / 371).
 import { useSyncExternalStore } from 'react'
-import { workers, employerSelf, employerBatches, paymentsFor, fpxBanks, RATE } from '../../data/demo.js'
+import { workers, employerSelf, employerBatches, paymentsFor, fpxBanks, RATE, statusFor } from '../../data/demo.js'
 
 export const COMPANY = {
   ...employerSelf,
@@ -93,14 +93,15 @@ const base = [
   })),
 ]
 
-/* Status from the number of unpaid months (June included). */
+/* Status from the number of unpaid months (June included). Same labels as every other portal (statusFor in demo.js). */
 export function statusOf(paidIdx) {
   const owing = Math.max(0, CUR - paidIdx)
   const earlier = Math.max(0, owing - 1)
-  if (owing === 0) return { label: 'Paid', tone: 'ok', owing, earlier, bucket: 'paid' }
-  if (earlier === 0) return { label: 'Due', tone: 'info', owing, earlier, bucket: 'due' }
-  if (earlier < 3) return { label: earlier === 1 ? '1 month overdue' : '2 months overdue', tone: 'warn', owing, earlier, bucket: 'late' }
-  return { label: '3+ months overdue', tone: 'bad', owing, earlier, bucket: 'risk' }
+  const label = statusFor(owing)
+  if (owing === 0) return { label, tone: 'ok', owing, earlier, bucket: 'paid' }
+  if (earlier === 0) return { label, tone: 'info', owing, earlier, bucket: 'due' }
+  if (earlier < 3) return { label, tone: 'warn', owing, earlier, bucket: 'late' }
+  return { label, tone: 'bad', owing, earlier, bucket: 'risk' }
 }
 
 /* ---------- Session store: payments, auto-pay, permit and invites made in this visit ---------- */

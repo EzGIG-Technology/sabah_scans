@@ -6,7 +6,7 @@ import {
   Building2, Smartphone, CalendarClock, Headset, Gauge,
 } from 'lucide-react'
 import { PageHead, Card, Kpi, Seg, BarChart, Donut, MeterRows, Sparkline, SabahMap, DistrictDetail, Status, useLiveFeed, useLivePayments } from '../../components/ui.jsx'
-import { REGISTERED, monthly, collectionToday, collectionMonth, paidThisMonth, paymentMetrics, recentTxns, makeTxn, districts, employerTotals, rm, num, pct } from '../../data/demo.js'
+import { REGISTERED, STATE_SHARE, monthly, collectionToday, collectionMonth, settledThisMonth, paidThisMonth, paymentMetrics, recentTxns, makeTxn, districts, employerTotals, rm, num, pct } from '../../data/demo.js'
 import { hourlyToday, last7, last30, week, month30, paymentSuccess, uptime30, channelData, systems } from '../shared/data.js'
 import { BASE, short, shortAxis, ms, companyCompliance, companiesActive, appUsers, permitsEndingSoon, paymentMethods } from './data.js'
 import { useQueue, useAdmin } from './store.js'
@@ -38,7 +38,7 @@ export default function CommandCentre() {
     today: { label: 'Today, by hour to 15:00', data: hourlyToday, total: todayNow, sub: 'today' },
     '7d': { label: 'Last 7 days', data: last7, total: week, sub: '7 days' },
     '30d': { label: 'Last 30 days, 18 May to 17 June', data: last30, total: month30, sub: '30 days' },
-    month: { label: 'Each month in 2027', data: monthly.map((m) => ({ label: m.m, value: m.v })), total: monthNow, sub: 'June' },
+    month: { label: 'Settled into the FWECF account each month in 2027', data: monthly.map((m) => ({ label: m.m, value: m.v })), total: settledThisMonth, sub: 'June' },
   }[period]
   const methods = paymentMethods(per.total)
   const byType = q.waiting.reduce((m, i) => ({ ...m, [i.type]: (m[i.type] || 0) + 1 }), {})
@@ -51,15 +51,16 @@ export default function CommandCentre() {
       </PageHead>
 
       <div className="grid g-4 keep2 gv-kpis">
-        <Kpi hero icon={Wallet} label="Collected this month" value={rm(monthNow)} note={`${num(paidNow)} workers paid for June`}>
-          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>State 70% <b>{rm(Math.round(monthNow * 0.7))}</b></span><span>Operator 30% <b>{rm(monthNow - Math.round(monthNow * 0.7))}</b></span></div>
+        <Kpi hero icon={Wallet} label="Contributions for June" value={rm(monthNow)} note={`${num(paidNow)} workers paid for June`}>
+          <div className="gv-hero-split" style={{ marginTop: 14 }}><span>Settled in June <b>{rm(settledThisMonth)}</b></span></div>
+          <div className="gv-hero-split"><span>State 70% <b>{rm(Math.round(settledThisMonth * STATE_SHARE))}</b></span><span>Operator 30% <b>{rm(settledThisMonth - Math.round(settledThisMonth * STATE_SHARE))}</b></span></div>
           <div className="gv-hero-spark"><Sparkline values={monthly.map((m) => m.v)} /></div>
-          <div className="gv-hero-split"><span>January to June 2027</span></div>
+          <div className="gv-hero-split"><span>Settled January to June 2027</span></div>
         </Kpi>
         <Kpi icon={CalendarDays} label="Today" value={rm(todayNow)} note={`${num(todayNow / 100)} payments so far · ${rm(week)} in 7 days`} />
         <Kpi icon={CreditCard} tone="ok" label="Payment success" value={pct(paymentSuccess, 1)} note="Approved of all attempts today" />
-        <Kpi icon={Building2} label="Employers registered" value={num(employerTotals.count)} note={`${num(companiesActive)} active in June`} />
-        <Kpi icon={Users} label="Workers registered" value={num(REGISTERED)} note="31 Dec 2025, from SWIMS and eNORES" />
+        <Kpi icon={Building2} label="Employers registered" value={num(employerTotals.count)} note={`${num(companiesActive)} paid for at least one worker in June`} />
+        <Kpi icon={Users} label="Workers registered" value={num(REGISTERED)} note="31 Dec 2025, Parliament reply. SWIMS holds 122,228 records" />
         <Kpi icon={UserCheck} tone="purple" label="Workers paying" value={pct(paidNow / REGISTERED, 2)} note={`${num(paidNow)} of ${num(REGISTERED)}`} />
         <Kpi icon={Smartphone} tone="ok" label="Using the SCANS app" value={num(appUsers)} note={`${pct(appUsers / REGISTERED)} of registered workers`} />
       </div>

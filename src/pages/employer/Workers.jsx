@@ -9,9 +9,9 @@ import { COMPANY, useRoster, summarise, useEmp, historyFor, monthLabel, CUR } fr
 const TABS = ['All', 'Not paid', 'Permit ends soon']
 const BUCKETS = [
   { value: 'paid', label: 'Paid for June' },
-  { value: 'due', label: 'June not paid yet' },
-  { value: 'late', label: 'Owing 1 to 2 months' },
-  { value: 'risk', label: 'Owing 3+ months' },
+  { value: 'due', label: 'Due this month' },
+  { value: 'late', label: '1–2 months overdue' },
+  { value: 'risk', label: '3+ months overdue' },
 ]
 const PERMIT = [{ value: '30', label: 'Permit ends within 30 days' }, { value: '90', label: 'Permit ends within 90 days' }]
 const NO_FILTER = { buckets: [], permit: '', nat: [], consent: '', app: '' }
@@ -102,9 +102,9 @@ export function WorkersList() {
   const removeChip = (c) => setF({ ...f, [c.k]: Array.isArray(f[c.k]) ? f[c.k].filter((x) => x !== c.v) : '' })
   const tiles = [
     { b: 'paid', label: 'Paid for June', v: s.paid, note: `${pct(s.rate, 1)} of ${num(s.total)}`, tone: 'ok', Icon: CheckCircle2, click: false },
-    { b: 'due', label: 'June not paid yet', v: s.due, note: 'No earlier months owing', tone: '', Icon: Clock, click: true },
-    { b: 'late', label: 'Owing 1 to 2 months', v: s.late, note: 'Caution', tone: 'warn', Icon: AlertTriangle, click: true },
-    { b: 'risk', label: 'Owing 3+ months', v: s.risk, note: 'Critical', tone: 'bad', Icon: AlertTriangle, click: true },
+    { b: 'due', label: 'Due this month', v: s.due, note: 'No earlier months owing', tone: '', Icon: Clock, click: true },
+    { b: 'late', label: '1–2 months overdue', v: s.late, note: 'Caution', tone: 'warn', Icon: AlertTriangle, click: true },
+    { b: 'risk', label: '3+ months overdue', v: s.risk, note: 'Critical', tone: 'bad', Icon: AlertTriangle, click: true },
     { b: 'app', label: 'Not using the app', v: s.total - COMPANY.appUsers, note: `${num(COMPANY.appUsers)} workers use it`, tone: 'grey', Icon: Smartphone, click: false },
   ]
   return (

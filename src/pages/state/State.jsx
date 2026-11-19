@@ -15,7 +15,8 @@ import {
   REGISTERED, STATE_SHARE, districts, sectors, monthly, monthlySplit, ytd, stateYtd, operatorYtd, paidThisMonth, collectedThisMonth,
   complianceRate, paymentMetrics, nationalityCounts, rm, num, pct,
 } from '../../data/demo.js'
-import { channelData, settlements, settledJune, arrearsAndAdvance, complaintsAll, AGENCIES } from '../shared/data.js'
+import { channelData, settlements, settledJune, arrearsAndAdvance, complaintsAll, AGENCIES, breaksOn } from '../shared/data.js'
+import { useAdmin } from '../admin/store.js'
 import { useStore, logEvent, setActor, updateNotice, addNotice } from '../shared/store.js'
 import { WorkerList, WorkerProfile } from '../shared/Workers.jsx'
 import { EmployerList, EmployerProfile } from '../shared/Employers.jsx'
@@ -116,7 +117,6 @@ function Districts() {
             { key: 'rate', label: 'Paid share', render: (d) => <div className="row" style={{ gap: 8, minWidth: 130 }}><div className="bar grow" style={{ minWidth: 50 }}><span style={{ width: pct(d.rate) }} /></div><span className="num small">{pct(d.rate)}</span></div> },
             { key: 'overdue', label: 'Not yet paid', align: 'r', render: (d) => num(d.overdue) },
             { key: 'collected', label: 'Collected', align: 'r', render: (d) => rm(d.collected) },
-            { key: 'state', label: 'State share', align: 'r', render: (d) => rm(d.collected * STATE_SHARE) },
           ]} footer={
             <tfoot><tr>
               <td data-label="District"><b>Sabah</b></td>
@@ -125,7 +125,6 @@ function Districts() {
               {fcell('Paid share', pct(complianceRate), '')}
               {fcell('Not yet paid', num(owing))}
               {fcell('Collected', rm(collectedThisMonth))}
-              {fcell('State share', rm(collectedThisMonth * STATE_SHARE))}
             </tr></tfoot>
           } />
         </div>
@@ -145,9 +144,14 @@ function Finance() {
   const [month, setMonth] = useState('June 2027')
   const [day, setDay] = useState(null)
   const reconciled = settlements.filter((s) => s.status !== 'Pending').length
-  const breaks = settlements.reduce((s, x) => s + x.breaks, 0)
+  // Same break log as the operator's Settlement page, so resolving a break there shows here too.
+  const breakLog = useAdmin((s) => s.breaks)
+  const openBreaks = breakLog.filter((b) => b.status === 'Open').length
+  const resolvedBreaks = breakLog.length - openBreaks
+  const dayBreaks = (s) => breaksOn(breakLog, s.date)
   const totals = settlements.reduce((t, s) => ({ gross: t.gross + s.gross, receipts: t.receipts + s.receipts, state: t.state + s.state, operator: t.operator + s.operator, credited: t.credited + s.credited }), { gross: 0, receipts: 0, state: 0, operator: 0, credited: 0 })
   const d = settlements.find((s) => s.id === day)
+  const db = d ? dayBreaks(d) : null
   const download = (what, fmt) => { logEvent('Downloaded report', `${what} · ${month} · ${fmt}`); toast(`${what}, ${month} (${fmt}) downloaded. The download is in the audit log.`) }
   const fcell = (label, v) => <td data-label={label} className="r"><b className="num">{v}</b></td>
   return (
@@ -160,10 +164,10 @@ function Finance() {
         <Kpi hero icon={Landmark} label="Settled in June" value={rm(settledJune)} note={`${num(totals.receipts)} receipts, 1 to 17 June`} />
         <Kpi icon={PiggyBank} tone="ok" label="State share (70%)" value={rm(totals.state)} note="Stays in the FWECF account" />
         <Kpi icon={Wallet} tone="purple" label="Operator share (30%)" value={rm(totals.operator)} note="Paid to Microtek monthly" />
-        <Kpi icon={Scale} tone={breaks ? 'warn' : 'ok'} label="Days reconciled" value={`${reconciled} of ${settlements.length}`} note={`${breaks} breaks found and resolved. Today settles at 23:00.`} />
+        <Kpi icon={Scale} tone={openBreaks ? 'warn' : 'ok'} label="Days reconciled" value={`${reconciled} of ${settlements.length}`} note={`${resolvedBreaks} breaks found and resolved${openBreaks ? `, ${openBreaks} open` : ''}. Today settles at 23:00.`} />
       </div>
       <Callout icon={CalendarCheck}>
-        June settlements of {rm(settledJune)} = June contributions of {rm(collectedThisMonth)} (the figure on the overview) + {rm(arrearsAndAdvance)} of arrears cleared and months paid in advance.
+        June settlements of {rm(settledJune)} = June contributions of {rm(collectedThisMonth)} (the figure on the overview) + {rm(arrearsAndAdvance)} of arrears cleared and months paid in advance. The 70:30 split and the operator’s invoice are worked out on settlements, after reconciliation.
       </Callout>
       <div className="grid g-main">
         <Card title="Daily settlement" sub="Credited to the FWECF account each night, June 2027">
@@ -178,7 +182,7 @@ function Finance() {
               </button>
             ))}
           </div>
-          <div className="gv-sub" style={{ marginTop: 18 }}>Since January</div>
+          <div className="gv-sub" style={{ marginTop: 18 }}>Settled since January</div>
           <SplitBar parts={[
             { label: 'State', share: STATE_SHARE, text: rmM(stateYtd), color: '#1D66B8' },
             { label: 'Operator', share: 1 - STATE_SHARE, text: rmM(operatorYtd), color: '#4D9AD3' },
@@ -194,7 +198,7 @@ function Finance() {
           { key: 'operator', label: 'Operator 30%', align: 'r', render: (s) => rm(s.operator) },
           { key: 'credited', label: 'Credited', align: 'r', render: (s) => (s.credited ? rm(s.credited) : 'Tonight') },
           { key: 'status', label: 'Reconciliation', render: (s) => <Status tone={s.status === 'Pending' ? 'warn' : 'ok'}>{s.status === 'Resolved' ? 'Reconciled' : s.status}</Status> },
-          { key: 'breaks', label: 'Breaks', align: 'r', render: (s) => (s.breaks ? <Pill tone="warn">{s.breaks} resolved</Pill> : '0') },
+          { key: 'breaks', label: 'Breaks', align: 'r', render: (s) => { const b = dayBreaks(s); return b.all ? <span className="row" style={{ gap: 4, justifyContent: 'flex-end' }}>{b.open > 0 && <Pill tone="bad">{b.open} open</Pill>}{b.resolved > 0 && <Pill tone="warn">{b.resolved} resolved</Pill>}</span> : '0' } },
         ]} footer={
           <tfoot><tr>
             <td data-label="Date"><b>June to date</b></td>
@@ -203,13 +207,13 @@ function Finance() {
             {fcell('State 70%', rm(totals.state))}
             {fcell('Operator 30%', rm(totals.operator))}
             {fcell('Credited', rm(totals.credited))}
-            <td data-label="Reconciliation" /><td data-label="Breaks" className="r"><b>{breaks}</b></td>
+            <td data-label="Reconciliation" /><td data-label="Breaks" className="r"><b>{breakLog.length}</b></td>
           </tr></tfoot>
         } />
       </Card>
       {d && (
         <Drawer title={`Settlement, ${d.date}`} sub={d.id} onClose={() => setDay(null)} footer={<><button className="btn outline" onClick={() => download(`Settlement file ${d.date}`, 'CSV')}><Download /> Settlement file</button><button className="btn primary" onClick={() => setDay(null)}>Close</button></>}>
-          <div className="row"><Status tone={d.status === 'Pending' ? 'warn' : 'ok'}>{d.status === 'Resolved' ? 'Reconciled' : d.status}</Status>{d.breaks > 0 && <Pill tone="warn">{d.breaks} breaks resolved</Pill>}</div>
+          <div className="row"><Status tone={d.status === 'Pending' ? 'warn' : 'ok'}>{d.status === 'Resolved' ? 'Reconciled' : d.status}</Status>{db.open > 0 && <Pill tone="bad">{db.open} open</Pill>}{db.resolved > 0 && <Pill tone="warn">{db.resolved} resolved</Pill>}</div>
           <dl className="kv">
             <div><dt>SCANS receipts</dt><dd className="num">{num(d.receipts)}</dd></div>
             <div><dt>Gross collected</dt><dd className="num">{rm(d.gross)}</dd></div>
@@ -221,9 +225,10 @@ function Finance() {
           <div className="gv-sub">Matching</div>
           <MeterRows items={[
             { label: 'Matched to a receipt', share: d.credited ? 1 : 0, text: d.credited ? num(d.receipts) : 'Not yet', color: 'var(--okFill)' },
-            { label: 'Breaks', share: d.breaks / Math.max(1, d.receipts), text: d.breaks ? `${d.breaks}, resolved` : 'None', color: 'var(--warnFill)' },
+            { label: 'Breaks', share: db.all / Math.max(1, d.receipts), text: db.all ? [db.open && `${db.open} open`, db.resolved && `${db.resolved} resolved`].filter(Boolean).join(', ') : 'None', color: 'var(--warnFill)' },
           ]} />
-          {d.breaks > 0 && <Callout tone="warn">Breaks on this day were matched after the acquirer resent payment callbacks. No money was missing.</Callout>}
+          {db.open > 0 && <Callout tone="warn">{db.open} {db.open === 1 ? 'break is' : 'breaks are'} still open on this day. Microtek tracks each one until it is resolved.</Callout>}
+          {db.open === 0 && db.resolved > 0 && <Callout tone="warn">Breaks on this day were matched after the acquirer resent payment callbacks. No money was missing.</Callout>}
         </Drawer>
       )}
     </>

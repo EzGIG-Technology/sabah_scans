@@ -26,6 +26,10 @@ export default function Reports() {
   })).reverse()
   const byOffer = offers.filter((o) => o.redemptions > 0).sort((a, b) => b.redemptions - a.redemptions)
   const donut = [...byOffer.slice(0, 5).map((o) => ({ label: o.title, value: o.redemptions })), { label: 'Other offers', value: byOffer.slice(5).reduce((s, o) => s + o.redemptions, 0) }].filter((d) => d.value > 0)
+  // Whole-number shares that add up to 100%: the rounding difference goes to the last slice ("Other offers").
+  const donutTotal = donut.reduce((s, d) => s + d.value, 0)
+  const shares = donut.map((d) => Math.round((d.value / donutTotal) * 100))
+  if (shares.length) shares[shares.length - 1] = 100 - shares.slice(0, -1).reduce((s, x) => s + x, 0)
 
   const download = (s) => toast(`Statement for ${s.month} downloaded (${fmt})`)
 
@@ -41,7 +45,7 @@ export default function Reports() {
           <p className="small muted" style={{ marginTop: 8 }}>June is up to 17 June. {num(monthly.reduce((s, m) => s + m.value, 0))} redemptions since you joined on {MERCHANT.joined}.</p>
         </Card>
         <Card title="By offer" sub="Share of all redemptions since you joined">
-          <Donut data={donut} center={num(offers.reduce((s, o) => s + o.redemptions, 0))} centerSub="redemptions" size={160} format={(v, t) => Math.round((v / t) * 100) + '%'} />
+          <Donut data={donut} center={num(offers.reduce((s, o) => s + o.redemptions, 0))} centerSub="redemptions" size={160} format={(v, t, i) => shares[i] + '%'} />
         </Card>
       </div>
 

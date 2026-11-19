@@ -3,20 +3,19 @@
 // JIM sees contribution status only. Permit data comes in from JIM read-only and is shown for
 // information; nothing JIM confirms here changes a worker's permit or immigration status.
 import { useSyncExternalStore } from 'react'
-import { REGISTERED, districts, workers, employers } from '../../data/demo.js'
+import { REGISTERED, districts, workers, employers, STATUSES } from '../../data/demo.js'
 
 export const BASE = '/jim'
 export const ACTOR = 'Mohd Hafiz Rahim (JIM Sabah)'
 export const SWIMS_RECORDS = 122228 // proposal s.3.1
 
 /* ---------- Contribution status, as JIM sees it ----------
-   Three plain levels taken from the arrears on the record. Information only. */
+   The same four statuses as every other portal (STATUSES in demo.js). Information only. */
+const CONTRIB_TONE = { Paid: 'ok', 'Due this month': 'info', '1–2 months overdue': 'warn', '3+ months overdue': 'bad' }
 export function contrib(w) {
-  if (!w.arrears) return { label: 'Up to date', tone: 'ok' }
-  if (w.arrears <= 100) return { label: '1 month owing', tone: 'warn' }
-  return { label: '3+ months owing', tone: 'bad' }
+  return { label: w.status, tone: CONTRIB_TONE[w.status] || 'grey' }
 }
-export const CONTRIB_LEVELS = ['Up to date', '1 month owing', '3+ months owing']
+export const CONTRIB_LEVELS = STATUSES
 
 /* ---------- Matching SCANS records to JIM permit records, by district ----------
    matched + waiting for JIM + not yet in JIM data = registered workers in each district. */
@@ -64,7 +63,7 @@ export const OFFICERS = [
   { name: 'Siti Aminah Yusof', jimId: 'JIM-SBH-04876', office: 'Lahad Datu', role: 'Immigration officer', twoStep: true, last: 'Today 07:58', status: 'Linked' },
   { name: 'Rosnah Majalin', jimId: 'JIM-SBH-02764', office: 'Keningau', role: 'Immigration officer', twoStep: true, last: 'Yesterday', status: 'Linked' },
   { name: 'Azman Lajim', jimId: 'JIM-SBH-03311', office: 'Kudat', role: 'Immigration officer', twoStep: true, last: '2 days ago', status: 'Linked' },
-  { name: 'Hamdan Sapri', jimId: 'JIM-SBH-05402', office: 'Semporna', role: 'Immigration officer', twoStep: false, last: '—', status: 'Waiting for link' },
+  { name: 'Hamdan Sapri', jimId: 'JIM-SBH-05402', office: 'Semporna', role: 'Immigration officer', twoStep: true, last: 'Today 08:47', status: 'Linked' },
 ]
 
 /* ---------- Record mismatches waiting for JIM ----------

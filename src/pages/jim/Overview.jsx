@@ -28,7 +28,10 @@ export default function Overview() {
   const feed = useLiveFeed(SEED, makeCheck, paused ? 1e9 : 4000, 5)
   const [, tick] = useState(0)
   useEffect(() => { const id = setInterval(() => tick((n) => n + 1), 5000); return () => clearInterval(id) }, [])
-  const decided = useJim((s) => s.matches.filter((m) => m.status !== 'Waiting').length)
+  const matches = useJim((s) => s.matches)
+  const decided = matches.filter((m) => m.status !== 'Waiting').length
+  // Records already decided come off their district too, so the districts add up to the total.
+  const waitingIn = (d) => d.waiting - matches.filter((m) => m.status !== 'Waiting' && m.district === d.name).length
   const lastRun = useJim((s) => s.runs[0])
   const made = Math.max(0, ...feed.map((f) => f.n))
   const checksNow = CHECKS_TODAY + made
@@ -61,7 +64,7 @@ export default function Overview() {
       <div className="grid g-main">
         <Card title="Waiting for JIM, by district" sub="Records where SCANS and JIM permit data disagree, with the share of each district matched"
           action={<Link className="btn sm outline" to={`${BASE}/records`}><GitCompareArrows /> Record matching</Link>}>
-          <MeterRows items={[...matchByDistrict].sort((a, b) => b.waiting - a.waiting).map((d) => ({
+          <MeterRows items={matchByDistrict.map((d) => ({ ...d, waiting: waitingIn(d) })).sort((a, b) => b.waiting - a.waiting).map((d) => ({
             label: d.name, share: d.waiting / maxWaiting,
             text: `${num(d.waiting)} waiting · ${pct(d.matched / d.workers, 1)} matched`,
             color: d.waiting / d.workers > 0.0095 ? 'var(--warnFill)' : undefined,

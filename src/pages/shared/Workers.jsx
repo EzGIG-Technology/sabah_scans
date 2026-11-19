@@ -7,14 +7,13 @@ import {
   PageHead, Card, Kpi, Status, Pill, Callout, Empty, Tabs, SearchInput, Select, Field, Table, Drawer, Modal, SabahMap, Avatar, useToast,
 } from '../../components/ui.jsx'
 import {
-  REGISTERED, workers, findWorker, paymentsFor, districts, sectors, paidThisMonth, overdue1, overdue3, rm, num, pct,
+  REGISTERED, workers, findWorker, paymentsFor, districts, sectors, paidThisMonth, dueThisMonth, overdue1, overdue3, STATUSES, rm, num, pct,
 } from '../../data/demo.js'
 import { districtByName, siteFor, permitText } from './data.js'
 import { logEvent, useStore, addApproval, currentActor } from './store.js'
 import './shared.css'
 
 const NATS = ['Indonesia', 'Philippines', 'India', 'Bangladesh', 'Others']
-const STATUSES = ['Paid', 'Due', '1 month overdue', '3+ months overdue']
 const shortEmp = (s) => s.replace(/ (Sdn Bhd|Bhd)$/, '')
 
 export function WorkerList({ base, readOnly }) {
@@ -57,7 +56,7 @@ export function WorkerList({ base, readOnly }) {
     { key: 'district', label: 'District' },
     { key: 'status', label: 'June 2027', render: (w) => <Status>{w.status}</Status> },
     { key: 'app', label: 'SCANS app', render: (w) => (w.appActive ? <Pill tone="info">Signed up</Pill> : <Pill tone="grey">Not yet</Pill>) },
-    { key: 'arrears', label: 'Arrears', align: 'r', render: (w) => <span className="num" style={{ fontWeight: w.arrears ? 600 : 400 }}>{rm(w.arrears)}</span> },
+    { key: 'arrears', label: 'Owing', align: 'r', render: (w) => <span className="num" style={{ fontWeight: w.arrears ? 600 : 400 }}>{rm(w.arrears)}</span> },
     { key: 'permit', label: 'Permit ends', render: (w) => <span className="num">{w.permitExpiry}<small className="muted" style={{ display: 'block', fontSize: 12 }}>{permitText(w)}</small></span> },
   ]
 
@@ -70,7 +69,7 @@ export function WorkerList({ base, readOnly }) {
       <div className="grid g-4 keep2">
         <Kpi icon={Users} label="Registered" value={num(REGISTERED)} note="Workers on SCANS" />
         <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(paidThisMonth)} note={pct(paidThisMonth / REGISTERED) + ' of registered'} />
-        <Kpi icon={Clock} tone="warn" label="1 month overdue" value={num(overdue1)} note="Reminders go out weekly" />
+        <Kpi icon={Clock} tone="warn" label="Not yet paid for June" value={num(REGISTERED - paidThisMonth)} note={`${num(dueThisMonth)} due this month · ${num(overdue1)} 1–2 months overdue`} />
         <Kpi icon={AlertTriangle} tone="bad" label="3+ months overdue" value={num(overdue3)} note="Never leads to permit action" />
       </div>
       <Card title="Worker records" sub={anyFilter ? `${num(rows.length)} of ${num(workers.length)} sample records match` : `Sample of ${num(workers.length)} records. Choose a row to open the profile.`}
@@ -151,7 +150,7 @@ export function WorkerProfile({ base, readOnly }) {
             <div className="id">{w.id}</div>
             <Pill tone="grey">{w.nationality}</Pill>
             <div className="gv-arrears">
-              <div><b className="num">{rm(w.arrears)}</b><small>Current arrears</small></div>
+              <div><b className="num">{rm(w.arrears)}</b><small>Owing, June included</small></div>
               <Status>{w.status}</Status>
             </div>
             <div className="gv-permit">
@@ -191,7 +190,7 @@ export function WorkerProfile({ base, readOnly }) {
               <div className="stack">
                 <div className="gv-mini">
                   <div><span>Paid up to</span><b>{w.paidThrough}</b></div>
-                  <div><span>Current arrears</span><b className="num">{rm(w.arrears)}</b></div>
+                  <div><span>Owing, June included</span><b className="num">{rm(w.arrears)}</b></div>
                   <div><span>Monthly contribution</span><b className="num">{rm(100)}</b></div>
                   <div><span>Usual method</span><b style={{ fontSize: 14 }}>{usual ? usual[0] : '—'}</b></div>
                   <div><span>Paid since January</span><b className="num">{rm(pays.reduce((s, p) => s + p.amount, 0))}</b></div>
@@ -285,7 +284,7 @@ function ReminderModal({ w, onClose, onSent }) {
         <div className="chips">{['App', 'SMS', 'WhatsApp'].map((c) => <button key={c} className="chip" aria-pressed={ch.includes(c)} onClick={() => toggle(c)}>{c}</button>)}</div>
         <div className="gv-lang">
           <b>Message (English shown)</b>
-          <p>Your contribution for June 2027 is RM{w.arrears > 100 ? w.arrears : 100}. Pay in the SCANS app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit.</p>
+          <p>{w.arrears > 100 ? `You owe RM${w.arrears}, June 2027 included.` : 'Your contribution for June 2027 is RM100.'} Pay in the SCANS app, at any 7-Eleven, or ask your employer. Paying late does not affect your permit.</p>
         </div>
         <p className="small muted">The worker gets this in {w.language}. The reminder is written to the audit log.</p>
       </div>

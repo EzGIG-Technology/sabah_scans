@@ -65,6 +65,7 @@ export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', 
   useEffect(() => { setOpen(false); setBell(false) }, [loc.pathname])
   useEffect(() => { window.scrollTo(0, 0) }, [loc.pathname])
   const clock = useClock()
+  const isFrozen = useFrozen()
   return (
     <div className="shell">
       <aside className={'side' + (open ? ' open' : '')} aria-label="Main navigation">
@@ -109,8 +110,11 @@ export function AppShell({ nav: navIn, portal: portalIn, org, user, title = '', 
           </div>
           <span className="spacer" />
           {topExtra}
-          <div className="live"><span className="dot" aria-hidden="true" /><span><b style={{ color: 'var(--ink)', fontWeight: 600 }}>{DEMO_DATE}</b><br />Live · {clock} MYT</span></div>
-          <span className="sample">Sample data</span>
+          <button type="button" className={'live' + (isFrozen ? ' frozen' : '')} aria-pressed={isFrozen} onClick={() => setFrozen(!isFrozen)}
+            title={isFrozen ? 'Figures are held at their base values for recording. Choose to go live again.' : 'Choose to freeze every live figure for recording.'}>
+            <span className="dot" aria-hidden="true" /><span><b style={{ color: 'var(--ink)', fontWeight: 600 }}>{DEMO_DATE}</b><br />{isFrozen ? 'Frozen for recording' : `Live · ${clock} MYT`}</span>
+          </button>
+          <span className="sample" title="Illustration after full rollout: all seven sectors and all 130,391 registered workers. The pilot covers plantation and agriculture only.">Sample data · after full rollout (illustration)</span>
           <label className="search">
             <Search size={17} aria-hidden="true" />
             <span className="vh">Search</span>
@@ -246,8 +250,33 @@ export function AnimatedValue({ value, duration = 1100 }) {
 let liveCount = 0
 let liveTimer = null
 const liveSubs = new Set()
+
+/* Freeze for recording: holds every live counter and feed at its base value, so the same
+   figure shows in every scene. Turn it on with ?freeze=1 (remembered in this browser, ?freeze=0
+   turns it off) or with the Live button in the top bar. */
+const readFreeze = () => {
+  try {
+    const q = new URLSearchParams(window.location.search).get('freeze')
+    if (q != null) localStorage.setItem('scans-freeze', q === '0' ? '0' : '1')
+    return localStorage.getItem('scans-freeze') === '1'
+  } catch { return false }
+}
+let frozen = typeof window !== 'undefined' && readFreeze()
+const freezeSubs = new Set()
+export function setFrozen(v) {
+  frozen = v
+  try { localStorage.setItem('scans-freeze', v ? '1' : '0') } catch { /* private mode */ }
+  if (v) { clearInterval(liveTimer); liveTimer = null; liveCount = 0; liveSubs.forEach((f) => f(0)) } else if (liveSubs.size) liveStart()
+  freezeSubs.forEach((f) => f(v))
+}
+export function useFrozen() {
+  const [v, setV] = useState(frozen)
+  useEffect(() => { freezeSubs.add(setV); setV(frozen); return () => { freezeSubs.delete(setV) } }, [])
+  return v
+}
+
 function liveStart() {
-  if (liveTimer || reduceMotion()) return
+  if (liveTimer || reduceMotion() || frozen) return
   liveTimer = setInterval(() => {
     liveCount += 1 + Math.floor(Math.random() * 3)
     liveSubs.forEach((f) => f(liveCount))
@@ -255,11 +284,12 @@ function liveStart() {
 }
 export function useLivePayments() {
   const [n, setN] = useState(liveCount)
+  const isFrozen = useFrozen()
   useEffect(() => {
     liveSubs.add(setN); liveStart()
     return () => { liveSubs.delete(setN); if (!liveSubs.size) { clearInterval(liveTimer); liveTimer = null } }
   }, [])
-  return n
+  return isFrozen ? 0 : n
 }
 
 export function Kpi({ icon: Icon, label, value, note, delta, down, tone, hero, children }) {
@@ -279,8 +309,8 @@ export function Kpi({ icon: Icon, label, value, note, delta, down, tone, hero, c
 const tones = {
   Paid: 'ok', 'All paid': 'ok', Live: 'ok', Active: 'ok', Connected: 'ok', Resolved: 'ok', Sent: 'ok', Compliant: 'ok', Approved: 'ok',
   Settled: 'ok', Reconciled: 'ok', Open: 'warn', Returned: 'warn', Verified: 'ok', Valid: 'ok', Confirmed: 'ok', 'Good standing': 'ok', Delivered: 'ok', Ready: 'ok', Online: 'ok', Enabled: 'ok', Given: 'ok',
-  Due: 'info', New: 'info', 'Read only': 'info', 'With agency': 'info', Scheduled: 'info', 'In review': 'info', Processing: 'info', Invited: 'info',
-  'Partly paid': 'warn', '1 month overdue': 'warn', Caution: 'warn', Pending: 'warn', 'Waiting for approval': 'warn', 'Waiting for State approval': 'warn',
+  Due: 'info', 'Due this month': 'info', New: 'info', 'Read only': 'info', 'With agency': 'info', Scheduled: 'info', 'In review': 'info', Processing: 'info', Invited: 'info',
+  'Partly paid': 'warn', '1–2 months overdue': 'warn', Caution: 'warn', Pending: 'warn', 'Waiting for approval': 'warn', 'Waiting for State approval': 'warn',
   Paused: 'warn', Degraded: 'warn', 'Expiring soon': 'warn', 'Needs info': 'warn', 'Not given': 'warn', Draft: 'grey', Inactive: 'grey', Expired: 'grey', Closed: 'grey', Disabled: 'grey',
   '3+ months overdue': 'bad', Critical: 'bad', Behind: 'bad', Failed: 'bad', Rejected: 'bad', Suspended: 'bad', Down: 'bad',
 }
@@ -642,7 +672,7 @@ export function Donut({ data, center, centerSub, size = 180, format = (v, t) => 
   const [hover, setHover] = useState(null)
   return (
     <div className="donut-wrap">
-      <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={data.map((d) => `${d.label} ${format(d.value, total)}`).join(', ')} style={{ flex: 'none' }}>
+      <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={data.map((d, i) => `${d.label} ${format(d.value, total, i)}`).join(', ')} style={{ flex: 'none' }}>
         <circle cx="50" cy="50" r={r} fill="none" stroke="var(--line2)" strokeWidth="12" />
         {data.map((d, i) => {
           const len = (d.value / total) * c
@@ -654,13 +684,13 @@ export function Donut({ data, center, centerSub, size = 180, format = (v, t) => 
           off += len
           return el
         })}
-        <text x="50" y="49" textAnchor="middle" style={{ fontSize: 11, fontWeight: 700, fill: 'var(--ink)', fontFamily: 'var(--font)' }}>{hover != null ? format(data[hover].value, total) : center}</text>
+        <text x="50" y="49" textAnchor="middle" style={{ fontSize: 11, fontWeight: 700, fill: 'var(--ink)', fontFamily: 'var(--font)' }}>{hover != null ? format(data[hover].value, total, hover) : center}</text>
         <text x="50" y="60" textAnchor="middle" style={{ fontSize: 5.5, fill: 'var(--ink3)', fontFamily: 'var(--font)' }}>{hover != null ? data[hover].label.slice(0, 22) : centerSub}</text>
       </svg>
       <div className="legend-list">
         {data.map((d, i) => (
           <div key={d.label} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
-            <i style={{ background: d.color || PAL[i % PAL.length] }} /><span>{d.label}</span><b className="num">{format(d.value, total)}</b>
+            <i style={{ background: d.color || PAL[i % PAL.length] }} /><span>{d.label}</span><b className="num">{format(d.value, total, i)}</b>
           </div>
         ))}
       </div>
@@ -668,7 +698,7 @@ export function Donut({ data, center, centerSub, size = 180, format = (v, t) => 
   )
 }
 
-/* Labelled progress rows, e.g. paid / 1 month overdue / 3+ months overdue */
+/* Labelled progress rows, e.g. paid / due this month / 1–2 months overdue / 3+ months overdue */
 export function MeterRows({ items, big }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: big ? 14 : 10 }}>
@@ -701,8 +731,8 @@ export function SplitBar({ parts }) {
 
 /* =====================================================================
    Sabah map: simplified coastline with one bubble per district.
-   Bubble size = registered workers; colour = share not yet paid
-   (green under 35%, orange 35 to 45%, red over 45%).
+   Bubble size = registered workers; label and colour = share not yet paid
+   (PRD thresholds: green under 15%, orange 15 to 40%, red over 40%).
    ===================================================================== */
 const SABAH = [
   [115.55, 4.95], [115.62, 5.25], [115.78, 5.5], [115.92, 5.75], [116.07, 5.98], [116.2, 6.2], [116.38, 6.48], [116.58, 6.74],
@@ -718,7 +748,7 @@ const COORD = {
 const proj = ([lon, lat]) => [(lon - 115.3) * 100, (7.25 - lat) * 100]
 export function zoneTone(rate) {
   const owing = 1 - rate
-  return owing < 0.35 ? { c: '#17B26A', t: 'Low arrears' } : owing <= 0.45 ? { c: '#FF8A1F', t: 'Watch' } : { c: '#F0436A', t: 'High arrears' }
+  return owing < 0.15 ? { c: '#17B26A', t: 'Low arrears' } : owing <= 0.4 ? { c: '#FF8A1F', t: 'Watch' } : { c: '#F0436A', t: 'High arrears' }
 }
 export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 'all' }) {
   const path = SABAH.map((p, i) => (i ? 'L' : 'M') + proj(p).join(',')).join(' ') + 'Z'
@@ -745,21 +775,22 @@ export function SabahMap({ districts, selected, onSelect, renderPanel, filter = 
             const z = zoneTone(d.rate)
             const on = d.id === selected
             return (
-              <g key={d.id} className="bubble" role="button" tabIndex={0} aria-pressed={on} aria-label={`${d.name}: ${num(d.workers)} workers, ${pct(d.rate)} paid`}
+              <g key={d.id} className="bubble" role="button" tabIndex={0} aria-pressed={on} aria-label={`${d.name}: ${num(d.workers)} workers, ${pct(1 - d.rate)} not yet paid`}
                 onClick={() => onSelect(on ? null : d.id)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(on ? null : d.id)}>
                 <circle cx={x} cy={y} r={rad + 6} fill={z.c} opacity=".16" />
                 <circle cx={x} cy={y} r={rad} fill={z.c} opacity=".9" stroke={on ? 'var(--navy)' : '#fff'} strokeWidth={on ? 3 : 2} />
-                <text x={x} y={y + 3.5} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: '#fff', fontFamily: 'var(--font)' }}>{pct(d.rate)}</text>
+                <text x={x} y={y + 3.5} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: '#fff', fontFamily: 'var(--font)' }}>{pct(1 - d.rate)}</text>
                 <text x={x} y={y + rad + 13} textAnchor="middle" style={{ fontSize: 10, fontWeight: 600, fill: 'var(--ink)', fontFamily: 'var(--font)' }}>{d.name}</text>
               </g>
             )
           })}
+          {!shown.length && <text x="200" y="165" textAnchor="middle" style={{ fontSize: 12, fill: 'var(--ink2)', fontFamily: 'var(--font)' }}>No district matches this filter</text>}
         </svg>
         <div className="map-legend">
           <b style={{ fontSize: 12 }}>Share not yet paid</b>
-          <span><i style={{ background: '#17B26A' }} />Under 35%</span>
-          <span><i style={{ background: '#FF8A1F' }} />35% to 45%</span>
-          <span><i style={{ background: '#F0436A' }} />Over 45%</span>
+          <span><i style={{ background: '#17B26A' }} />Under 15%</span>
+          <span><i style={{ background: '#FF8A1F' }} />15% to 40%</span>
+          <span><i style={{ background: '#F0436A' }} />Over 40%</span>
         </div>
       </div>
       <div className="panel">
@@ -788,7 +819,6 @@ export function DistrictDetail({ d }) {
         <div><dt>Paid this month</dt><dd className="num">{num(d.paid)} ({pct(d.rate)})</dd></div>
         <div><dt>Not yet paid</dt><dd className="num">{num(d.overdue)}</dd></div>
         <div><dt>Collected this month</dt><dd className="num">{rm(d.collected)}</dd></div>
-        <div><dt>State share (70%)</dt><dd className="num">{rm(d.collected * 0.7)}</dd></div>
       </dl>
       <div className="bar"><span style={{ width: pct(d.rate) }} /></div>
     </div>
@@ -799,10 +829,12 @@ export function DistrictDetail({ d }) {
 export function useLiveFeed(seed, make, every = 4000, keep = 8) {
   const [items, setItems] = useState(seed)
   const n = useRef(0)
+  const isFrozen = useFrozen()
   useEffect(() => {
+    if (isFrozen) { n.current = 0; setItems(seed); return undefined }
     const id = setInterval(() => { n.current += 1; setItems((xs) => [make(n.current), ...xs].slice(0, keep)) }, every)
     return () => clearInterval(id)
-  }, [make, every, keep])
+  }, [make, every, keep, isFrozen]) // eslint-disable-line react-hooks/exhaustive-deps
   return items
 }
 

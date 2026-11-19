@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Smartphone, MessageSquare, MessageCircle, Mail, BellRing, Languages, CalendarClock, Send } from 'lucide-react'
 import { Drawer, Field, Callout, Seg, Tabs, Pill, Status } from '../../components/ui.jsx'
-import { REGISTERED, districts, sectors, overdue1, overdue3, num, pct } from '../../data/demo.js'
+import { REGISTERED, districts, sectors, dueThisMonth, overdue1, overdue3, num, pct } from '../../data/demo.js'
 import { LANGS, TEMPLATES, AUDIENCE_SIZE } from './data.js'
 import './shared.css'
 
@@ -22,7 +22,7 @@ export function ChannelIcons({ list }) {
   )
 }
 
-const AUD_TONE = { Workers: 'info', Employers: 'warn', Merchants: 'purple', All: 'grey' }
+const AUD_TONE = { Workers: 'info', Employers: 'warn', Merchants: 'purple', 'Workers and employers': 'grey' }
 export function AudiencePill({ a }) {
   const base = a.split(' · ')[0]
   return <Pill tone={AUD_TONE[base] || 'info'}>{a}</Pill>
@@ -37,7 +37,7 @@ export function NoticeComposer({ mode, onClose, onSubmit }) {
   const [aud, setAud] = useState('all')
   const [district, setDistrict] = useState(districts[0].name)
   const [sector, setSector] = useState(sectors[0].name)
-  const [arrears, setArrears] = useState('1 month overdue')
+  const [arrears, setArrears] = useState('1–2 months overdue')
   const [ch, setCh] = useState(['App', 'SMS', 'WhatsApp'])
   const [lang, setLang] = useState('ms')
   const [when, setWhen] = useState('now')
@@ -59,7 +59,7 @@ export function NoticeComposer({ mode, onClose, onSubmit }) {
     all: REGISTERED,
     district: (districts.find((d) => d.name === district) || {}).workers,
     sector: (sectors.find((s) => s.name === sector) || {}).workers,
-    arrears: arrears === '1 month overdue' ? overdue1 : overdue3,
+    arrears: { 'Due this month': dueThisMonth, '1–2 months overdue': overdue1 }[arrears] ?? overdue3,
     employers: AUDIENCE_SIZE.employers,
     merchants: AUDIENCE_SIZE.merchants,
   }[aud]
@@ -113,7 +113,7 @@ export function NoticeComposer({ mode, onClose, onSubmit }) {
       </div>
       {aud === 'district' && <Field label="District"><select className="select" value={district} onChange={(e) => setDistrict(e.target.value)}>{districts.map((d) => <option key={d.id}>{d.name}</option>)}</select></Field>}
       {aud === 'sector' && <Field label="Sector"><select className="select" value={sector} onChange={(e) => setSector(e.target.value)}>{sectors.map((s) => <option key={s.name}>{s.name}</option>)}</select></Field>}
-      {aud === 'arrears' && <Field label="Arrears" hint="A reminder only. Arrears never lead to permit action."><select className="select" value={arrears} onChange={(e) => setArrears(e.target.value)}><option>1 month overdue</option><option>3+ months overdue</option></select></Field>}
+      {aud === 'arrears' && <Field label="Arrears" hint="A reminder only. Arrears never lead to permit action."><select className="select" value={arrears} onChange={(e) => setArrears(e.target.value)}><option>Due this month</option><option>1–2 months overdue</option><option>3+ months overdue</option></select></Field>}
       <div className="gv-kv-card row between"><span className="ink2">Reaches</span><b className="num">{num(reach)} {toWorkers ? 'workers' : aud}</b></div>
       <div className="field">
         <span>Channels</span>

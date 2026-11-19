@@ -20,7 +20,7 @@ export function buildPlan(id, acct, lang = 'en') {
     stillOwed: Math.max(0, acct.owed - d.months),
   }
 }
-const ENGLISH_NAME = { m: 'Monthly', q: '3 months', h: '6 months', y: 'Annually' }
+const ENGLISH_NAME = { m: 'Monthly', q: '3 months', y: 'Annually' }
 // Smallest period that clears what is owed, or the worker's usual one if longer.
 const coverPlan = (owed, saved) => {
   const s = planFor(saved)

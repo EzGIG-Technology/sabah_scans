@@ -228,7 +228,7 @@ export default function Register() {
             <div className="emp-benefits">
               {[
                 [Database, 'Records from SSM and eNORES', 'Your company and your foreign workers are filled in for you. Nothing to type twice.'],
-                [CheckCircle2, 'Contribution status for every worker', 'Paid, not paid yet or owing. Never wages, complaints or immigration details.'],
+                [CheckCircle2, 'Contribution status for every worker', 'Paid, due this month or overdue. Never wages, complaints or immigration details.'],
                 [ShieldCheck, 'Pay safely with FPX', 'Batch payments and monthly auto-pay go straight to the State’s FWECF account.'],
               ].map(([Icon, t, d]) => (
                 <Card key={t}><span className="emp-ic"><Icon size={20} /></span><b>{t}</b><p>{d}</p></Card>

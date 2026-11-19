@@ -41,13 +41,13 @@ function Contribution({ roster, s }) {
       <div className="grid g-5 emp-kpi5">
         <Kpi icon={Users} label="Workers on SCANS" value={num(s.total)} note="From eNORES" />
         <Kpi icon={CheckCircle2} tone="ok" label="Paid for June" value={num(s.paid)} note={pct(s.rate, 1)} />
-        <Kpi icon={Clock} label="June not paid yet" value={num(s.due)} note="No earlier months owing" />
-        <Kpi icon={AlertTriangle} tone="warn" label="Owing 1 to 2 months" value={num(s.late)} note="Before June" />
-        <Kpi icon={AlertTriangle} tone="bad" label="Owing 3+ months" value={num(s.risk)} note={`${rm(s.owing)} owing in total`} />
+        <Kpi icon={Clock} label="Due this month" value={num(s.due)} note="No earlier months owing" />
+        <Kpi icon={AlertTriangle} tone="warn" label="1–2 months overdue" value={num(s.late)} note="Earlier months owing as well as June" />
+        <Kpi icon={AlertTriangle} tone="bad" label="3+ months overdue" value={num(s.risk)} note={`${rm(s.owing)} owing in total`} />
       </div>
       <div className="grid g-main">
         <Card title="Contribution status, last 6 months" sub={`All ${num(s.total)} workers at the end of each month, June to date`}>
-          <BarChart height={280} series={['Paid', 'Month not paid yet', 'Owing 1 to 2 months', 'Owing 3+ months']} colors={[C.paid, C.due, C.late, C.risk]}
+          <BarChart height={280} series={['Paid', 'Due this month', '1–2 months overdue', '3+ months overdue']} colors={[C.paid, C.due, C.late, C.risk]}
             data={trend.map((t) => ({ label: t.label, values: [t.paid, t.due, t.late, t.risk] }))} format={(v) => num(Math.round(v))} />
         </Card>
         <Card title="Who owes, by job" sub={`The ${num(owing.length)} workers not paid for June`}>
@@ -97,15 +97,15 @@ function WorkersTab({ roster, s, st }) {
             {nat.map((n) => (
               <div key={n.label}>
                 <div className="row between small" style={{ marginBottom: 6 }}><b>{n.label}</b><span className="muted num">{n.n} {n.n === 1 ? 'worker' : 'workers'}</span></div>
-                <div className="emp-stack" role="img" aria-label={`${n.label}: ${n.paid} paid, ${n.due} June not paid yet, ${n.late} owing 1 to 2 months, ${n.risk} owing 3 or more months`}>
+                <div className="emp-stack" role="img" aria-label={`${n.label}: ${n.paid} paid, ${n.due} due this month, ${n.late} 1–2 months overdue, ${n.risk} 3+ months overdue`}>
                   {['paid', 'due', 'late', 'risk'].map((k) => n[k] > 0 && <span key={k} style={{ width: (n[k] / n.n) * 100 + '%', background: C[k] }} />)}
                 </div>
               </div>
             ))}
           </div>
           <div className="legend" style={{ marginTop: 14 }}>
-            <span><i style={{ background: C.paid }} />Paid</span><span><i style={{ background: C.due }} />June not paid yet</span>
-            <span><i style={{ background: C.late }} />Owing 1 to 2 months</span><span><i style={{ background: C.risk }} />Owing 3+ months</span>
+            <span><i style={{ background: C.paid }} />Paid</span><span><i style={{ background: C.due }} />Due this month</span>
+            <span><i style={{ background: C.late }} />1–2 months overdue</span><span><i style={{ background: C.risk }} />3+ months overdue</span>
           </div>
         </Card>
         <Card title="Who paid for June" sub={`${num(s.paid)} workers paid`}>
@@ -188,7 +188,7 @@ function AppUse({ s }) {
 
 /* ---------- Download a report (Figma report cards + recent exports) ---------- */
 const REPORTS = [
-  { key: 'status', icon: CheckCircle2, title: 'Contribution status report', note: 'Paid, not paid yet and amounts owing for every worker' },
+  { key: 'status', icon: CheckCircle2, title: 'Contribution status report', note: 'Status and amount owing for every worker' },
   { key: 'payments', icon: Wallet, title: 'Payment history report', note: 'Every contribution paid, by the worker or by the company, with receipt numbers' },
   { key: 'app', icon: Smartphone, title: 'App use report', note: 'Workers using the SCANS app and perks used' },
 ]

@@ -92,7 +92,7 @@ export function EmployerList({ base, canRegister = false }) {
         )}
       </Card>
       <div className="grid g-4 keep2">
-        <Kpi icon={Building2} tone="ok" label="Active employers" value={num(EMP_KPI.active)} delta="+3.2%" note="since May" />
+        <Kpi icon={Building2} tone="ok" label="Active on the portal" value={num(EMP_KPI.active)} delta="+3.2%" note="Signed in within 90 days, up since May" />
         <Kpi icon={CalendarClock} tone="warn" label="Pending renewal" value={num(EMP_KPI.renewal)} note="Registration due within 60 days" />
         <Kpi icon={MonitorOff} tone="purple" label="Inactive portal" value={num(EMP_KPI.inactive)} note="No sign-in for 90 days" />
         <Kpi icon={ShieldAlert} tone="bad" label="Non-compliance" value={num(EMP_KPI.nonCompliant)} note="Under 50% of workers paid" />

@@ -35,9 +35,9 @@ function Score({ s }) {
         </div>
         <div className="side-list">
           <div><span>Workers compliant</span><b className="num" style={{ color: 'var(--ok)' }}>{num(s.paid)} of {num(s.total)}</b></div>
-          <div><span>June not paid yet</span><b className="num" style={{ color: 'var(--blue)' }}>{num(s.due)}</b></div>
-          <div><span>Owing 1 to 2 earlier months</span><b className="num" style={{ color: 'var(--warn)' }}>{num(s.late)}</b></div>
-          <div><span>Owing 3 months or more</span><b className="num" style={{ color: 'var(--bad)' }}>{num(s.risk)}</b></div>
+          <div><span>Due this month</span><b className="num" style={{ color: 'var(--blue)' }}>{num(s.due)}</b></div>
+          <div><span>1–2 months overdue</span><b className="num" style={{ color: 'var(--warn)' }}>{num(s.late)}</b></div>
+          <div><span>3+ months overdue</span><b className="num" style={{ color: 'var(--bad)' }}>{num(s.risk)}</b></div>
           <Link to="/employer/workers" className="row" style={{ gap: 4, fontWeight: 600, fontSize: 13, textDecoration: 'none', marginTop: 8 }}>See every worker <ChevronRight size={15} /></Link>
         </div>
       </div>
@@ -108,9 +108,9 @@ export default function Overview() {
         <Card title="Worker payment metrics" sub={`All ${num(s.total)} workers, June 2027`}>
           <MeterRows big items={[
             { label: 'Paid for June', text: `${num(s.paid)} workers`, share: s.paid / s.total, color: 'linear-gradient(90deg,#0E9F6E,#17B26A)' },
-            { label: 'June not paid yet', text: `${num(s.due)} workers`, share: s.due / s.total, color: 'var(--gradBtn)' },
-            { label: 'Owing 1 to 2 earlier months', text: `${num(s.late)} workers`, share: s.late / s.total, color: 'linear-gradient(90deg,#FF8A1F,#FFB020)' },
-            { label: 'Owing 3 months or more', text: `${num(s.risk)} workers`, share: s.risk / s.total, color: 'linear-gradient(90deg,#D42253,#F0436A)' },
+            { label: 'Due this month', text: `${num(s.due)} workers`, share: s.due / s.total, color: 'var(--gradBtn)' },
+            { label: '1–2 months overdue', text: `${num(s.late)} workers`, share: s.late / s.total, color: 'linear-gradient(90deg,#FF8A1F,#FFB020)' },
+            { label: '3+ months overdue', text: `${num(s.risk)} workers`, share: s.risk / s.total, color: 'linear-gradient(90deg,#D42253,#F0436A)' },
           ]} />
         </Card>
         <Card title="Perks used by your workers" sub="Offers confirmed by partner shops each month"

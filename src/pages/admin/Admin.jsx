@@ -50,7 +50,7 @@ export default function AdminApp() {
   const nav = [
     { group: 'Monitor', items: [
       { to: BASE, label: 'Command centre', icon: LayoutDashboard, end: true },
-      { to: BASE + '/approvals', label: 'Approvals', icon: ClipboardCheck, count: q.waiting.length || null },
+      { to: BASE + '/approvals', label: 'Approvals', icon: ClipboardCheck, count: q.waiting.length + q.stateWaiting || null },
       { to: BASE + '/support', label: 'Support queue', icon: Headset, count: openTickets || null },
     ] },
     { group: 'Records', items: [

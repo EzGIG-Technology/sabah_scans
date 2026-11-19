@@ -10,7 +10,7 @@ import {
   PageHead, Card, Kpi, Status, Pill, Callout, Empty, Seg, Tabs, SearchInput, Field, Switch, Table, Modal, Mono, useToast,
 } from '../../components/ui.jsx'
 import { merchants, num } from '../../data/demo.js'
-import { applicationDocs } from '../shared/data.js'
+import { applicationDocs, offerCounts } from '../shared/data.js'
 import { useStore, logEvent, updateOffer, updateApplication } from '../shared/store.js'
 import { BASE, ROLE_APPLIED, APP_EXTRA, OFFER_EXTRA, merchantCategories } from './data.js'
 import { useAdmin, setMerchantStatus } from './store.js'
@@ -64,6 +64,7 @@ function Directory() {
   const go = useNavigate()
   const toast = useToast()
   const st = useMerchantState()
+  const subs = useStore((s) => s.offerSubs)
   const [view, setView] = useState('grid')
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState({ cats: [], statuses: [] })
@@ -123,7 +124,7 @@ function Directory() {
                 {s.reason && <span className="small" style={{ color: 'var(--bad)' }}>Suspended: {s.reason}</span>}
                 <dl className="figs">
                   <div><dt>Confirmed uses</dt><dd>{num(m.redemptions)}</dd></div>
-                  <div><dt>Offers</dt><dd>{m.offers}</dd></div>
+                  <div><dt>Offers</dt><dd>{offerCounts(m, subs).text}</dd></div>
                 </dl>
                 <div className="foot">
                   <button className="btn sm ghost" onClick={() => go(`${BASE}/merchants/${m.id}?tab=offers`)}><PencilLine /> Offers</button>
@@ -140,7 +141,7 @@ function Directory() {
           { key: 'category', label: 'Category' },
           { key: 'role', label: 'Role', render: (m) => ROLE_APPLIED[m.id] },
           { key: 'outlets', label: 'Outlets', align: 'r', render: (m) => num(m.outlets) },
-          { key: 'offers', label: 'Offers', align: 'r' },
+          { key: 'offers', label: 'Offers', align: 'r', render: (m) => offerCounts(m, subs).text },
           { key: 'redemptions', label: 'Confirmed uses', align: 'r', render: (m) => num(m.redemptions) },
           { key: 'status', label: 'Status', render: (m) => <Status>{st(m).status}</Status> },
         ]} />

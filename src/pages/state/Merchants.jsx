@@ -7,8 +7,8 @@ import { useMemo, useState } from 'react'
 import { Store, Tags, Receipt, Download, ShieldCheck, Filter } from 'lucide-react'
 import { PageHead, Card, Kpi, Status, Empty, SearchInput, Select, Table, Drawer, Mono, LineChart, Callout, Modal, PAL, useToast } from '../../components/ui.jsx'
 import { merchants, num, pct } from '../../data/demo.js'
-import { merchantDetail } from '../shared/data.js'
-import { logEvent } from '../shared/store.js'
+import { merchantDetail, offerCounts } from '../shared/data.js'
+import { logEvent, useStore } from '../shared/store.js'
 
 const details = merchants.map(merchantDetail)
 const active = details.filter((m) => m.status === 'Active')
@@ -31,6 +31,7 @@ const USE_BANDS = [{ value: 'All', label: 'Any number of uses' }, { value: '5000
 const inBand = (m, b) => b === 'All' || (b === '5000' ? m.redemptions > 5000 : b === '1000' ? m.redemptions >= 1000 && m.redemptions <= 5000 : m.redemptions < 1000)
 
 export default function Merchants() {
+  const subs = useStore((s) => s.offerSubs)
   const toast = useToast()
   const [q, setQ] = useState('')
   const [cats, setCats] = useState([])
@@ -77,7 +78,7 @@ export default function Merchants() {
               { key: 'name', label: 'Merchant', render: (x) => <div className="who"><Mono name={x.name} color={x.color} /><div style={{ minWidth: 0 }}><b>{x.name}</b><small>{x.company}</small></div></div> },
               { key: 'category', label: 'Category' },
               { key: 'outlets', label: 'Outlets', align: 'r', render: (x) => num(x.outlets) },
-              { key: 'offers', label: 'Live offers', align: 'r', render: (x) => num(x.live.filter((o) => o.status === 'Live').length) },
+              { key: 'offers', label: 'Offers', align: 'r', render: (x) => offerCounts(x, subs).text },
               { key: 'redemptions', label: 'Perks used', align: 'r', render: (x) => num(x.redemptions) },
               { key: 'joined', label: 'Joined' },
               { key: 'status', label: 'Status', render: (x) => <Status>{x.status}</Status> },

@@ -3,7 +3,7 @@
 import {
   REGISTERED, RATE, STATE_SHARE, districts, employers, employerUsers, employerBatches, workers, merchants, merchantOffers,
   merchantOutlets, merchantRedemptionsMonthly, offers, offerSubmissions, integrations, complaints, dailyCollection,
-  collectionToday, collectedThisMonth, channels, demoWorker,
+  collectionToday, collectedThisMonth, settledThisMonth, channels, demoWorker,
 } from '../../data/demo.js'
 
 export const districtByName = Object.fromEntries(districts.map((d) => [d.name, d]))
@@ -24,7 +24,7 @@ export const last30 = [
   ...dailyCollection,
 ].slice(-30)
 export const month30 = last30.reduce((s, d) => s + d.value, 0)
-export const settledJune = dailyCollection.reduce((s, d) => s + d.value, 0)
+export const settledJune = settledThisMonth
 // June settlements include arrears cleared and advance payments, on top of June contributions
 export const arrearsAndAdvance = settledJune - collectedThisMonth
 
@@ -35,31 +35,39 @@ export const uptime30 = 0.9997
 export const CH_COLORS = ['#1D66B8', '#4D9AD3', '#13407A', '#14B8A6', '#7B4DE3', '#FF8A1F']
 export const channelData = channels.map((c, i) => ({ label: c.name, value: c.share, color: CH_COLORS[i] }))
 
+/* ---------- Reconciliation breaks: one log for the State and the operator ---------- */
+// 3 resolved (4 and 11 June) and 2 open from today's run (17 June). Both portals count from this list.
+export const reconciliationBreaks = [
+  { id: 'RB-2706-007', date: '17 Jun 2027', kind: 'Credit with no receipt', ref: 'ACQ-88412093', amount: 100, note: 'Acquirer credit received, no SCANS receipt yet. Usually a late callback.', status: 'Open' },
+  { id: 'RB-2706-006', date: '17 Jun 2027', kind: 'Duplicate payment', ref: 'TXN44271903', amount: 100, note: 'Worker paid twice for June by DuitNow QR. Refund or carry forward to July.', status: 'Open' },
+  { id: 'RB-2706-005', date: '11 Jun 2027', kind: 'Amount mismatch', ref: 'BAT-2706-00431', amount: 300, note: 'Employer batch total differs from acquirer credit by RM300.', status: 'Resolved' },
+  { id: 'RB-2706-004', date: '4 Jun 2027', kind: 'Credit with no receipt', ref: 'ACQ-88203317', amount: 200, note: 'Matched after acquirer resent callbacks.', status: 'Resolved' },
+  { id: 'RB-2706-003', date: '4 Jun 2027', kind: 'Late settlement', ref: 'STL-270604', amount: 0, note: 'Settlement arrived 02:10 instead of 23:00. No money missing.', status: 'Resolved' },
+]
+// Breaks on each settlement day, counted from a break list (pass the live list so resolving one updates every page).
+export const breaksOn = (list, date) => {
+  const day = list.filter((b) => b.date === date)
+  return { all: day.length, open: day.filter((b) => b.status === 'Open').length, resolved: day.filter((b) => b.status !== 'Open').length }
+}
+
 /* ---------- Daily settlement into the FWECF account ---------- */
-const BREAK_DAYS = { 4: 2, 11: 1 }
 export const settlements = dailyCollection.map((d, i) => {
   const day = i + 1
+  const date = `${day} Jun 2027`
   const pending = day === 17
+  const b = breaksOn(reconciliationBreaks, date)
   return {
     id: 'STL-2706' + String(day).padStart(2, '0'),
-    date: `${day} Jun 2027`,
+    date,
     gross: d.value,
     receipts: Math.round(d.value / RATE),
     state: Math.round(d.value * STATE_SHARE),
     operator: d.value - Math.round(d.value * STATE_SHARE),
     credited: pending ? 0 : d.value,
-    breaks: BREAK_DAYS[day] || 0,
-    status: pending ? 'Pending' : BREAK_DAYS[day] ? 'Resolved' : 'Reconciled',
+    breaks: b.all,
+    status: pending ? 'Pending' : b.all ? 'Resolved' : 'Reconciled',
   }
 })
-
-export const reconciliationBreaks = [
-  { id: 'RB-2706-007', date: '17 Jun 2027', kind: 'Credit with no receipt', ref: 'ACQ-88412093', amount: 100, note: 'Acquirer credit received, no SCANS receipt yet. Usually a late callback.', status: 'Open' },
-  { id: 'RB-2706-006', date: '16 Jun 2027', kind: 'Duplicate payment', ref: 'TXN44271903', amount: 100, note: 'Worker paid twice for June by DuitNow QR. Refund or carry forward to July.', status: 'Open' },
-  { id: 'RB-2706-005', date: '11 Jun 2027', kind: 'Amount mismatch', ref: 'BAT-2706-00431', amount: 300, note: 'Employer batch total differs from acquirer credit by RM300.', status: 'Resolved' },
-  { id: 'RB-2706-004', date: '4 Jun 2027', kind: 'Credit with no receipt', ref: 'ACQ-88203317', amount: 200, note: 'Matched after acquirer resent callbacks.', status: 'Resolved' },
-  { id: 'RB-2706-003', date: '4 Jun 2027', kind: 'Late settlement', ref: 'STL-270604', amount: 0, note: 'Settlement arrived 02:10 instead of 23:00. No money missing.', status: 'Resolved' },
-]
 
 /* ---------- Connected systems ---------- */
 const SYS_EXTRA = {
@@ -144,6 +152,17 @@ export function merchantDetail(m) {
   return { ...m, live, monthly, outletList }
 }
 
+// Live and waiting offers for one merchant, the same on the State and Microtek pages.
+// Pass the session's offer submissions so an approval in the console shows straight away.
+export function offerCounts(m, subs = offerSubmissions) {
+  const d = merchantDetail(m)
+  const mine = subs.filter((o) => o.merchant === m.name)
+  const wasPending = new Set(offerSubmissions.filter((o) => o.merchant === m.name && o.status === 'Pending').map((o) => o.id))
+  const live = d.live.filter((o) => o.status === 'Live').length + mine.filter((o) => o.status === 'Approved' && wasPending.has(o.id)).length
+  const waiting = mine.filter((o) => o.status === 'Pending').length
+  return { live, waiting, text: waiting ? `${live} live, ${waiting} waiting` : `${live} live` }
+}
+
 export const applicationDocs = {
   'MA-2706-014': [['SSM company certificate', true], ['List of outlets with addresses', true], ['Bank account for settlement', true], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', false]],
   'MA-2706-011': [['SSM business registration', true], ['List of outlets with addresses', true], ['Bank account for settlement', false], ['Signed partner agreement', true], ['PDPA undertaking (no worker data)', false]],
@@ -160,6 +179,8 @@ const MORE_COMPLAINTS = [
   { id: 'CMP-2705-0298', topic: 'Unsafe transport to site', district: 'Keningau', lang: 'Nepali', agency: 'JTK Sabah', opened: '17 May 2027', status: 'With agency' },
   { id: 'CMP-2705-0276', topic: 'Perk not honoured at shop', district: 'Tawau', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '15 May 2027', status: 'Resolved' },
   { id: 'CMP-2705-0251', topic: 'Medical leave refused', district: 'Semporna', lang: 'Filipino', agency: 'JTK Sabah', opened: '12 May 2027', status: 'New' },
+  { id: 'CMP-2705-0415', topic: 'Payment taken twice', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '7 May 2027', status: 'Resolved' },
+  { id: 'CMP-2704-0218', topic: 'Cannot see April receipt', district: 'Lahad Datu', lang: 'Bahasa Indonesia', agency: 'SCANS support', opened: '20 Apr 2027', status: 'Resolved' },
 ]
 const BODY = {
   'Wages paid late': ['Gaji bulan Mei belum dibayar sampai sekarang. Mandor bilang tunggu bulan depan.', 'May wages have still not been paid. The supervisor says to wait until next month.'],
